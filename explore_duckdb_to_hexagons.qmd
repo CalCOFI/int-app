@@ -62,7 +62,9 @@ datatable(d_sp_n)
 
 ## Map anchovy observations by hexagon
 
-```{r}
+```{r fig-hex_sp}
+#| fig-cap: "Map of Northern anchovy larval counts by hexagon (H3 resolution 3)."
+
 sp_common <- "Northern anchovy"
 hex_res   <- 3  # 1:10
 
@@ -111,6 +113,9 @@ Note that you might need to sometimes restart your R session (under Session menu
 
 ## Next steps
 
+Here are some potential next steps that come to mind -- please feel free to come up with your own:
+
 - [ ] Convert the above code into a data retrieval function that accepts `species_common` (or `species_scientific`) and `hex_res` as arguments.
 - [ ] Write another helper function to map the hexagons.
 - [ ] Make a Shiny app with map output from selected drop-downs of species and hexagon resolution.
+- [ ] Expand filtering function to include `depth`, `season`, etc., a la the [oceano](https://shiny.calcofi.io/oceano) and [taxa](https://shiny.calcofi.io/taxa-dev) apps
