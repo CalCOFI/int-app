@@ -1,2 +1,3 @@
 # ivy
-sandbox for env data storytelling intern Ivy
+
+Sandbox for CalCOFI environmental data storytelling with intern Ivy.
