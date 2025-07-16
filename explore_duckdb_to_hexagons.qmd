@@ -1,0 +1,116 @@
+---
+title: "Explore using the remote CalCOFI duckdb to generate hexagonal summaries"
+editor_options: 
+  chunk_output_type: console
+---
+
+## Load R packages, connect to remote duckdb database
+
+Load R packages. Note that the `librarian` package is used to manage package dependencies, and it will install any missing packages automatically.
+
+We can't directly load a remote duckdb database, so we will attach it to a local duckdb connection. The remote database is hosted on [CalCOFI's file server](https://file.calcofi.io/).
+
+```{r setup}
+if (!requireNamespace("librarian", quietly = TRUE)) {
+  install.packages("librarian")
+}
+librarian::shelf(
+  DBI, dplyr, DT, duckdb, glue, h3jsr, here, leaflet.extras, mapview, sf, 
+  tibble, tidyr,
+  quiet = T)
+mapviewOptions(
+  basemaps       = "Esri.OceanBasemap",
+  vector.palette = \(n) hcl.colors(n, palette = "Spectral"))
+
+url_dk <- "https://file.calcofi.io/calcofi.duckdb"
+tmp_dk <- here("data/tmp.duckdb")
+
+con <- dbConnect(duckdb(), dbdir = tmp_dk)
+res <- dbExecute(con, glue("ATTACH IF NOT EXISTS '{url_dk}' AS calcofi; USE calcofi"))
+```
+
+Note that since the `ATTACH` statement above uses a URL, duckdb implicitly installs and loads the [`httpfs`](https://duckdb.org/docs/stable/core_extensions/httpfs/overview.html) extension, which allows duckdb to read from remote files over HTTP(S).
+
+## Explore db structure
+
+Use a couple [`DBI`](https://dbi.r-dbi.org/) functions to explore the database structure and list tables and fields in a table.
+
+```{r con_dbi}
+dbListTables(con)
+dbListFields(con, "site")
+```
+
+
+![Schema for CalCOFI database tables showing one-to-many  relationships.](./figures/calcofi-noaa-db_schema.png){#fig-schema}
+
+## Explore `larva` observations by `species`
+
+```{r}
+d_sp_n <- tbl(con, "species") |> 
+  left_join(
+    tbl(con, "larva"),
+    by = "sp_id") |>
+  group_by(sp_id, scientific_name, common_name) |>
+  summarize(
+    n = n(),
+    .groups = "drop") |> 
+  arrange(desc(n)) |>
+  collect()
+
+datatable(d_sp_n)
+```
+
+## Map anchovy observations by hexagon
+
+```{r}
+sp_common <- "Northern anchovy"
+hex_res   <- 3  # 1:10
+
+hex_fld <- glue("hex_h3_res{hex_res}")
+
+hex_sp <- tbl(con, "species") |> 
+  filter(common_name == !!sp_common) |>
+  left_join(
+    tbl(con, "larva"),
+    by = "sp_id") |>
+  left_join(
+    tbl(con, "net"),
+    by = "net_uuid") |>
+  left_join(
+    tbl(con, "tow"),
+    by = "tow_uuid") |>
+  left_join(
+    tbl(con, "site"),
+    by = "site_uuid") |>
+  rename(
+    hex_int = .data[[hex_fld]]) |>
+  group_by(hex_int) |>
+  summarize(
+    value = sum(tally),
+    .groups = "drop") |> 
+  mutate(
+    hex_id = sql("HEX(hex_int)")) |> 
+  select(hexid = hex_id, value) |> 
+  collect() |> 
+  mutate(
+    geom = cell_to_polygon(hexid)) |> 
+  st_as_sf()
+
+mapView(hex_sp, zcol = "value", layer.name = sp_common) |> 
+  removeMapJunk(c("layersControl", "homeButton")) |> 
+  addFullscreenControl()
+```
+
+## Close db connection
+
+```{r cleanup_con_dk}
+dbDisconnect(con, shutdown = T); duckdb_shutdown(duckdb()); rm(con)
+```
+
+Note that you might need to sometimes restart your R session (under Session menu in RStudio) to connect to the local duckdb.
+
+## Next steps
+
+- [ ] Convert the above code into a data retrieval function that accepts `species_common` (or `species_scientific`) and `hex_res` as arguments.
+- [ ] Write another helper function to map the hexagons.
+- [ ] Make a Shiny app with map output from selected drop-downs of species and hexagon resolution.

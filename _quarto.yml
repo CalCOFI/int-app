@@ -1,0 +1,20 @@
+project:
+  output-dir: _output
+# bibliography: calcofi.bib
+date: now
+date-format: iso
+format:
+  html:
+    toc: true              # md to exclude: {.unnumbered .unlisted}
+    toc-depth: 3
+    toc-expand: 2
+    number-sections: true  # md to exclude: {.unnumbered}
+    code-fold: true
+    code-tools: true
+    embed-resources: false
+execute:
+  warning: false
+editor: source
+editor_options:
+  chunk_output_type: console
+search: false
