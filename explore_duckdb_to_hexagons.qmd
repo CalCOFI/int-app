@@ -12,6 +12,10 @@ We can't directly load a remote duckdb database, so we will attach it to a local
 
 We will use the duckdb community [h3 extension](https://duckdb.org/community_extensions/extensions/h3.html) to generate the hexagon polygons.
 
+To see how the resolutions of hexagons vary, see:
+
+- [Tables of Cell Statistics Across Resolutions | H3](https://h3geo.org/docs/core-library/restable/#edge-lengths)
+
 ```{r setup}
 if (!requireNamespace("librarian", quietly = TRUE)) {
   install.packages("librarian")
