@@ -47,8 +47,6 @@ server <- function(input, output, session) {
       })
 
       # time series
-      sp_ts <- conv_ts(sp_data, input$sel_ts_res)
-
       ts <- make_ts(sp_data, input$sel_ts_res) |>
         select(time, avg, lwr, upr) |>
         collect() |>
