@@ -10,12 +10,18 @@ Load R packages. Note that the `librarian` package is used to manage package dep
 
 We can't directly load a remote duckdb database, so we will attach it to a local duckdb connection. The remote database is hosted on [CalCOFI's file server](https://file.calcofi.io/).
 
+We will use the duckdb community [h3 extension](https://duckdb.org/community_extensions/extensions/h3.html) to generate the hexagon polygons.
+
+To see how the resolutions of hexagons vary, see:
+
+- [Tables of Cell Statistics Across Resolutions | H3](https://h3geo.org/docs/core-library/restable/#edge-lengths)
+
 ```{r setup}
 if (!requireNamespace("librarian", quietly = TRUE)) {
   install.packages("librarian")
 }
 librarian::shelf(
-  DBI, dplyr, DT, duckdb, glue, h3jsr, here, leaflet.extras, mapview, sf, 
+  DBI, dplyr, DT, duckdb, glue, here, leaflet.extras, mapview, sf, 
   tibble, tidyr,
   quiet = T)
 mapviewOptions(
@@ -26,6 +32,7 @@ url_dk <- "https://file.calcofi.io/calcofi.duckdb"
 tmp_dk <- here("data/tmp.duckdb")
 
 con <- dbConnect(duckdb(), dbdir = tmp_dk)
+res <- dbExecute(con, "INSTALL h3 FROM community; LOAD h3;")
 res <- dbExecute(con, glue("ATTACH IF NOT EXISTS '{url_dk}' AS calcofi; USE calcofi"))
 ```
 
@@ -66,7 +73,7 @@ datatable(d_sp_n)
 #| fig-cap: "Map of Northern anchovy larval counts by hexagon (H3 resolution 3)."
 
 sp_common <- "Northern anchovy"
-hex_res   <- 3  # 1:10
+hex_res   <- 4  # 1:10
 
 hex_fld <- glue("hex_h3_res{hex_res}")
 
@@ -91,12 +98,14 @@ hex_sp <- tbl(con, "species") |>
     value = sum(tally),
     .groups = "drop") |> 
   mutate(
-    hex_id = sql("HEX(hex_int)")) |> 
-  select(hexid = hex_id, value) |> 
-  collect() |> 
+    hex_id  = sql("HEX(hex_int)")) |> 
   mutate(
-    geom = cell_to_polygon(hexid)) |> 
-  st_as_sf()
+    hex_wkt = sql("h3_cell_to_boundary_wkt(hex_id)")) |> 
+  select(hexid = hex_id, value, hex_wkt) |> 
+  collect() |> 
+  st_as_sf(
+    wkt = "hex_wkt", 
+    crs = 4326)
 
 mapView(hex_sp, zcol = "value", layer.name = sp_common) |> 
   removeMapJunk(c("layersControl", "homeButton")) |> 
