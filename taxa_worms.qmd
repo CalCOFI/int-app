@@ -4,60 +4,241 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Connect to species database
+## Overview
 
-- Uses duckdb database of DarwinCore datasets from major taxonomic authorities, per [spp_gbif_iucn_worms.qmd](https://github.com/MarineSensitivity/workflows/blob/079486158ca303075a8a48e3ede6c415c1420a0e/spp_gbif_iucn_worms.qmd)
+Goal: Get the full taxonomic hierarchy for all observed taxa in the larval
+and egg counts from the NOAA CalCOFI database from the World Register of Marine 
+Species (WoRMS; [marinespecies.org](https://www.marinespecies.org)).
 
-```{r}
+```{r setup}
 librarian::shelf(
   DBI, dplyr, DT, duckdb, fs, glue, here, stringr,
   quiet = T)
 
-spp_db  <- glue("~/My Drive/projects/msens/data/derived/spp.duckdb")
+url_cc <- "https://file.calcofi.io/calcofi.duckdb"
+cc_db  <- here("data/tmp.duckdb")
+spp_db <- glue("~/My Drive/projects/msens/data/derived/spp.duckdb")
 
-con_spp <- dbConnect(duckdb(dbdir = spp_db, read_only = T))
+is_ben_laptop <- Sys.info()[["nodename"]] == "Bens-MacBook-Air.local"
 
-# dbListTables(con_spp)
-# [1] "gbif"             "gbif_vernacular"  "iucn_redlist"    
+con_cc <- dbConnect(duckdb(), dbdir = cc_db)
+res <- dbExecute(con_cc, glue("ATTACH IF NOT EXISTS '{url_cc}' AS calcofi; USE calcofi"))
+
+# helper functions ----
+
+id2url <- function(id, type = "worms") {
+  # add urls for WoRMS and ITIS, show datatable with links
+  if (type == "worms") {
+    glue("<a href='https://www.marinespecies.org/aphia.php?p=taxdetails&id={id}'
+        _target='_blank'>{id}</a>")
+  } else if (type == "itis") {
+    glue("<a href='https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={id}'
+        _target='_blank'>{id}</a>")
+  } else {
+    stop("Unknown type. Use 'worms' or 'itis'.")
+  }
+}
+```
+
+## Fetch CalCOFI species
+
+```{r d_species}
+# dbListTables(con_cc)
+# [1] "cruise"   "egg"      "grid"     "larva"    "net"      "ship"    
+# [7] "site"     "site_seg" "species"  "tow"      "tow_type"
+
+d_species <- tbl(con_cc, "calcofi.species") |> 
+  select(
+    sp_id,
+    scientific_name,
+    common_name,
+    itis_id_old  = itis_tsn,
+    worms_id_old = aphia_id) |> 
+  collect()
+
+# https://www.marinespecies.org/aphia.php?p=taxdetails&id=293496
+# https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=168736
+
+d_species |> 
+  mutate(
+    worms_old_url = id2url(worms_id_old, "worms"),
+    itis_old_url  = id2url(itis_id_old,  "itis")) |> 
+  select(sp_id, common_name, scientific_name, worms_id_old = worms_old_url, itis_id_old = itis_old_url) |> 
+  datatable(escape = F, rownames = F)
+```
+
+## Use pre-processed WoRMS database
+
+The entire WoRMS database has already been downloaded from [World Register of Marine Species at ChecklistBank.org](https://www.checklistbank.org/dataset/2011/download), which seems much more extensive (2.7 GB) than the one downloadable directly 
+from [marinespecies.org/download](https://www.marinespecies.org/download/) (547.8 MB).
+
+This ChecklistBank.org WoRMS database was ingested into a duckdb database in
+the standard DarwinCore format as with other major taxonomic authorities
+(GBIF, ITIS, IUCN) with the notebook [ingest_taxon.qmd](https://github.com/MarineSensitivity/workflows/blob/9fdfdb6ee98148755c50c39e06d3b9b3469363be/ingest_taxon.qmd). This is only locally available on Ben's laptop for the moment, but can be recreated by running the `ingest_taxon.qmd` workflow.
+
+```{r con_spp}
+#| eval: !expr is_ben_laptop
+
+con_spp <- dbConnect(duckdb(dbdir = spp_db, read_only = F))
+```
+
+```{r con_spp_tables}
+#| eval: false
+
+dbListTables(con_spp)
+# [1] "gbif"             "gbif_vernacular"  "iucn_redlist"
 # [4] "iucn_vernacular"  "worms"            "worms_vernacular"
 
-# dbListFields(con_spp, "worms")
-#  [1] "taxonID"                  "scientificNameID"        
-#  [3] "acceptedNameUsageID"      "parentNameUsageID"       
-#  [5] "namePublishedInID"        "scientificName"          
-#  [7] "acceptedNameUsage"        "parentNameUsage"         
-#  [9] "namePublishedIn"          "namePublishedInYear"     
-# [11] "kingdom"                  "phylum"                  
-# [13] "class"                    "order"                   
-# [15] "family"                   "genus"                   
-# [17] "subgenus"                 "specificEpithet"         
-# [19] "infraspecificEpithet"     "taxonRank"               
-# [21] "scientificNameAuthorship" "nomenclaturalCode"       
-# [23] "taxonomicStatus"          "nomenclaturalStatus"     
-# [25] "modified"                 "bibliographicCitation"   
-# [27] "references"               "license"                 
-# [29] "rightsHolder"             "datasetName"             
+dbListFields(con_spp, "worms")
+#  [1] "taxonID"                  "scientificNameID"
+#  [3] "acceptedNameUsageID"      "parentNameUsageID"
+#  [5] "namePublishedInID"        "scientificName"
+#  [7] "acceptedNameUsage"        "parentNameUsage"
+#  [9] "namePublishedIn"          "namePublishedInYear"
+# [11] "kingdom"                  "phylum"
+# [13] "class"                    "order"
+# [15] "family"                   "genus"
+# [17] "subgenus"                 "specificEpithet"
+# [19] "infraspecificEpithet"     "taxonRank"
+# [21] "scientificNameAuthorship" "nomenclaturalCode"
+# [23] "taxonomicStatus"          "nomenclaturalStatus"
+# [25] "modified"                 "bibliographicCitation"
+# [27] "references"               "license"
+# [29] "rightsHolder"             "datasetName"
 # [31] "institutionCode"          "datasetID"
 
-# dbListFields(con_spp, "worms_vernacular")
+dbListFields(con_spp, "worms_vernacular")
 # "taxonID"  "vernacularName"  "source"  "language"  "isPreferredName"
+```
 
-taxon_sci <- "Sebastes"            # taxonID: 126175
-taxon_sci <- "Sebastes atrovirens" # taxonID: 274772; parentNameUsageID: 126175
+## Update WoRMS ID
 
-taxon_id <- tbl(con_spp, "worms") |> 
-  filter(scientificName == !!taxon_sci) |> 
-  collect() |> 
-  pull(taxonID)
+```{r worms_id}
+#| eval: !expr is_ben_laptop
 
-tbl(con_spp, "worms_vernacular") |> 
+d_species <- d_species |> # 1,148 × 5
+  left_join(
+    tbl(con_spp, "worms") |>
+      filter(taxonID %in% d_species$worms_id_old) |> 
+      select(
+        taxonID,
+        worms_id               = acceptedNameUsageID,
+        worms_scientific_name  = acceptedNameUsage) |>
+      collect(),
+    by = join_by(worms_id_old == taxonID))
+
+d_worms_chgs <- d_species |> 
   filter(
-    taxonID  == !!taxon_id,
-    language == "ENG") |> 
-  arrange(isPreferredName) |> 
-  # show_query()
-  collect() |> 
-  glimpse()
+    (worms_id_old != worms_id) | 
+      (scientific_name != worms_scientific_name)) |> 
+  select(
+    sp_id, common_name, 
+    scientific_name, worms_scientific_name, 
+    worms_id_old, worms_id)
+
+if (nrow(d_worms_chgs) == 0){
+  message("No changes to WoRMS IDs or scientific_name found.")
+} else {
+  message("Found ", nrow(d_worms_chgs), " changes to WoRMS IDs.")
+  d_worms_chgs |> 
+    mutate(
+      worms_old_url = id2url(worms_id_old, "worms"),
+      worms_url     = id2url(worms_id,     "worms")) |> 
+  select(
+    sp_id, common_name, 
+    scientific_name, worms_scientific_name,
+    worms_id_old = worms_old_url, worms_id = worms_url) |> 
+    datatable(escape = F, rownames = F)
+}
+# https://www.marinespecies.org/aphia.php?p=taxdetails&id=293496
+```
+
+## Update ITIS ID
+
+```{r itis_id}
+#| eval: !expr is_ben_laptop
+
+d_species <- d_species |> # 1,148 × 5
+  left_join(
+    tbl(con_spp, "itis") |>
+      filter(taxonID %in% d_species$itis_id_old) |> 
+      select(
+        taxonID,
+        itis_id               = acceptedNameUsageID) |>
+      collect(),
+    by = join_by(itis_id_old == taxonID))
+
+d_itis_chgs <- d_species |> 
+  filter(
+    (itis_id_old != itis_id)) |> 
+  select(
+    sp_id, common_name, scientific_name,
+    itis_id_old, itis_id)
+
+if (nrow(d_itis_chgs) == 0){
+  message("No changes to ITIS IDs found.")
+} else {
+  message("Found ", nrow(d_itis_chgs), " changes to ITIS IDs.")
+  d_itis_chgs |> 
+    mutate(
+      itis_old_url = id2url(itis_id_old, "itis"),
+      itis_url     = id2url(itis_id,     "itis")) |> 
+    select(
+      sp_id, common_name, 
+      scientific_name,
+      itis_id_old = itis_old_url, itis_id = itis_url) |> 
+    datatable(escape = F, rownames = F)
+}
+```
+
+# Get WoRMS common name
+
+```{r worms_common_name}
+#| eval: !expr is_ben_laptop
+
+d_species <- d_species |> # 1,148 × 8
+  left_join(
+    tbl(con_spp, "worms_vernacular") |>
+      filter(
+        taxonID %in% d_species$worms_id,
+        language == "ENG") |> 
+      select(
+        taxonID,
+        worms_common_name = vernacularName,
+        isPreferredName) |>
+      collect(),
+    by           = join_by(worms_id == taxonID),
+    relationship = "many-to-many") |> 
+  slice_max(
+    by        = scientific_name,
+    order_by  = isPreferredName, 
+    with_ties = F) |> 
+  select(-isPreferredName)
+
+table(is.na(d_species$worms_common_name))
+```
+
+```{r itis_common_name}
+#| eval: !expr is_ben_laptop
+
+d_species <- d_species |> # 1,148 × 8
+  left_join(
+    tbl(con_spp, "itis_vernacular") |>
+      filter(
+        taxonID %in% d_species$itis_id,
+        language == "English") |> 
+      group_by(taxonID) |> 
+      summarize(
+        # get one common name per taxonID
+        itis_common_name = first(vernacularName), 
+        .groups = "drop") |>
+      collect(),
+    by = join_by(itis_id == taxonID))
+table(is.na(d_species$itis_common_name))
+```
+
+```{r eval_f}
+knitr::opts_chunk$set(eval = F)
 ```
 
 ## Get parent taxa
@@ -555,4 +736,15 @@ summarize_children_by_rank <- function(children_df) {
 # print(summary)
 
 ```
+
+## Close db connection(s)
+
+```{r cleanup_dbs}
+dbDisconnect(con_cc, shutdown = T); duckdb_shutdown(duckdb()); rm(con_cc)
+
+if (is_ben_laptop)
+  dbDisconnect(con_spp, shutdown = T); duckdb_shutdown(duckdb()); rm(con_spp)
+```
+
+Note that you might need to sometimes restart your R session (under Session menu in RStudio) to connect to the local duckdb.
 
