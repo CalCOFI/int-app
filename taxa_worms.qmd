@@ -12,7 +12,7 @@ Species (WoRMS; [marinespecies.org](https://www.marinespecies.org)).
 
 ```{r setup}
 librarian::shelf(
-  DBI, dplyr, DT, duckdb, fs, glue, here, stringr,
+  DBI, dplyr, DT, duckdb, fs, glue, here, htmltools, stringr,
   quiet = T)
 
 url_cc <- "https://file.calcofi.io/calcofi.duckdb"
@@ -38,16 +38,34 @@ id2url <- function(id, type = "worms") {
     stop("Unknown type. Use 'worms' or 'itis'.")
   }
 }
+
+showtable <- function(data, filename = "table", escape = F, rownames = F) {
+  # datatable with escape = F for links and download buttons with filenames
+  datatable(
+    data,
+    escape     = escape,
+    rownames   = rownames,
+    extensions = "Buttons", 
+    options = list(
+      dom     = "Bfrtip",
+      buttons = list( 
+        list(extend = "csv",   filename = filename),
+        list(extend = "excel", filename = filename) )))
+}
 ```
 
 ## Fetch CalCOFI species
 
-```{r d_species}
+And so @tbl-species_init.
+
+```{r tbl-species_init}
+#| tbl-cap: "CalCOFI species with original WoRMS and ITIS IDs"
+
 # dbListTables(con_cc)
 # [1] "cruise"   "egg"      "grid"     "larva"    "net"      "ship"    
 # [7] "site"     "site_seg" "species"  "tow"      "tow_type"
 
-d_species <- tbl(con_cc, "calcofi.species") |> 
+d <- tbl(con_cc, "calcofi.species") |> 
   select(
     sp_id,
     scientific_name,
@@ -59,12 +77,13 @@ d_species <- tbl(con_cc, "calcofi.species") |>
 # https://www.marinespecies.org/aphia.php?p=taxdetails&id=293496
 # https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value=168736
 
-d_species |> 
+d |> 
   mutate(
     worms_old_url = id2url(worms_id_old, "worms"),
     itis_old_url  = id2url(itis_id_old,  "itis")) |> 
   select(sp_id, common_name, scientific_name, worms_id_old = worms_old_url, itis_id_old = itis_old_url) |> 
-  datatable(escape = F, rownames = F)
+  showtable( 
+    "calcofi_species_init")
 ```
 
 ## Use pre-processed WoRMS database
@@ -113,21 +132,22 @@ dbListFields(con_spp, "worms_vernacular")
 
 ## Update WoRMS ID
 
-```{r worms_id}
+```{r tbl-worms_id}
+#| tbl-cap: "CalCOFI species changes to WoRMS IDs."
 #| eval: !expr is_ben_laptop
 
-d_species <- d_species |> # 1,148 × 5
+d <- d |> # 1,148 × 5
   left_join(
     tbl(con_spp, "worms") |>
-      filter(taxonID %in% d_species$worms_id_old) |> 
+      filter(taxonID %in% d$worms_id_old) |> 
       select(
         taxonID,
-        worms_id               = acceptedNameUsageID,
-        worms_scientific_name  = acceptedNameUsage) |>
+        worms_id              = acceptedNameUsageID,
+        worms_scientific_name = acceptedNameUsage) |>
       collect(),
     by = join_by(worms_id_old == taxonID))
 
-d_worms_chgs <- d_species |> 
+d_worms_chgs <- d |> 
   filter(
     (worms_id_old != worms_id) | 
       (scientific_name != worms_scientific_name)) |> 
@@ -148,31 +168,47 @@ if (nrow(d_worms_chgs) == 0){
     sp_id, common_name, 
     scientific_name, worms_scientific_name,
     worms_id_old = worms_old_url, worms_id = worms_url) |> 
-    datatable(escape = F, rownames = F)
+    showtable(
+      "calcofi_species_worms_chgs")
 }
-# https://www.marinespecies.org/aphia.php?p=taxdetails&id=293496
 ```
 
 ## Update ITIS ID
 
-```{r itis_id}
+```{r tbl-itis_id}
+#| tbl-cap: "CalCOFI species changes to ITIS IDs."
 #| eval: !expr is_ben_laptop
 
-d_species <- d_species |> # 1,148 × 5
+d <- d |> # 1,148 × 5
   left_join(
     tbl(con_spp, "itis") |>
-      filter(taxonID %in% d_species$itis_id_old) |> 
+      filter(taxonID %in% d$itis_id_old) |> 
       select(
         taxonID,
-        itis_id               = acceptedNameUsageID) |>
+        itis_id_new = acceptedNameUsageID) |>
       collect(),
-    by = join_by(itis_id_old == taxonID))
+    by = join_by(itis_id_old == taxonID)) |> 
+  mutate(
+    itis_id = coalesce(itis_id_new, itis_id_old)) |> 
+  select(-itis_id_new)
 
-d_itis_chgs <- d_species |> 
+d <- d |>
+  left_join(
+    tbl(con_spp, "itis") |>
+      filter(taxonID %in% d$itis_id) |> 
+      select(
+        taxonID,
+        itis_scientific_name = scientificName) |>
+      collect(),
+    by = join_by(itis_id == taxonID))
+
+d_itis_chgs <- d |> 
   filter(
-    (itis_id_old != itis_id)) |> 
+    (itis_id_old != itis_id) |
+      (scientific_name != itis_scientific_name)) |> 
   select(
-    sp_id, common_name, scientific_name,
+    sp_id, common_name,
+    scientific_name, itis_scientific_name,
     itis_id_old, itis_id)
 
 if (nrow(d_itis_chgs) == 0){
@@ -185,22 +221,26 @@ if (nrow(d_itis_chgs) == 0){
       itis_url     = id2url(itis_id,     "itis")) |> 
     select(
       sp_id, common_name, 
-      scientific_name,
+      scientific_name, itis_scientific_name,
       itis_id_old = itis_old_url, itis_id = itis_url) |> 
-    datatable(escape = F, rownames = F)
+    showtable(
+      "calcofi_species_itis_chgs")
 }
 ```
 
-# Get WoRMS common name
+## Get WoRMS common name
 
-```{r worms_common_name}
+```{r tbl-worms_common_name}
+#| tbl-cap: "CalCOFI species differences with WoRMS common names."
 #| eval: !expr is_ben_laptop
 
-d_species <- d_species |> # 1,148 × 8
+# TODO: get all common names in a seperate table and look up match across any
+
+d <- d |> # 1,148 × 8
   left_join(
     tbl(con_spp, "worms_vernacular") |>
       filter(
-        taxonID %in% d_species$worms_id,
+        taxonID %in% d$worms_id,
         language == "ENG") |> 
       select(
         taxonID,
@@ -215,17 +255,42 @@ d_species <- d_species |> # 1,148 × 8
     with_ties = F) |> 
   select(-isPreferredName)
 
-table(is.na(d_species$worms_common_name))
+d_worms_cn_chgs <- d |> 
+  filter(
+    !is.na(worms_common_name),
+      (tolower(common_name) != tolower(worms_common_name)) ) |> 
+  select(
+    sp_id, scientific_name, 
+    common_name, worms_common_name, 
+    worms_id)
+
+if (nrow(d_worms_cn_chgs) == 0){
+  message("No differences with WoRMS common name found.")
+} else {
+  message("Found ", nrow(d_worms_cn_chgs), " differences with WoRMS common name")
+  d_worms_cn_chgs |> 
+    mutate(
+      worms_url = id2url(worms_id, "worms")) |> 
+  select(
+    sp_id, scientific_name, 
+    common_name, worms_common_name, 
+    worms_id = worms_url) |> 
+    showtable(
+      "calcofi_species_worms_common_chgs")
+}
 ```
 
-```{r itis_common_name}
+## Get ITIS common name
+
+```{r tbl-itis_common_name}
+#| tbl-cap: "CalCOFI species differences with ITIS common names."
 #| eval: !expr is_ben_laptop
 
-d_species <- d_species |> # 1,148 × 8
+d <- d |> # 1,148 × 10
   left_join(
     tbl(con_spp, "itis_vernacular") |>
       filter(
-        taxonID %in% d_species$itis_id,
+        taxonID %in% d$itis_id,
         language == "English") |> 
       group_by(taxonID) |> 
       summarize(
@@ -234,7 +299,30 @@ d_species <- d_species |> # 1,148 × 8
         .groups = "drop") |>
       collect(),
     by = join_by(itis_id == taxonID))
-table(is.na(d_species$itis_common_name))
+
+d_itis_cn_chgs <- d |> 
+  filter(
+    !is.na(itis_common_name),
+      (tolower(common_name) != tolower(itis_common_name)) ) |> 
+  select(
+    sp_id, scientific_name, 
+    common_name, itis_common_name, 
+    itis_id)
+
+if (nrow(d_itis_cn_chgs) == 0){
+  message("No differences with itis common name found.")
+} else {
+  message("Found ", nrow(d_itis_cn_chgs), " differences with itis common name")
+  d_itis_cn_chgs |> 
+    mutate(
+      itis_url = id2url(itis_id, "itis")) |> 
+  select(
+    sp_id, scientific_name, 
+    common_name, itis_common_name, 
+    itis_id = itis_url) |> 
+    showtable(
+      "calcofi_species_itis_common_chgs")
+}
 ```
 
 ```{r eval_f}
