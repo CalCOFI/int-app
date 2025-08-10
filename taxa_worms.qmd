@@ -25,11 +25,14 @@ species_csv    <- here("data/species.csv")
 taxonomy_csv   <- here("data/taxonomy.csv")
 taxon_rank_csv <- here("data/taxon_rank.csv")
 
-is_server     <-  Sys.info()[["sysname"]] == "Linux"
+is_server     <- Sys.info()[["sysname"]] == "Linux"
 is_ben_laptop <- Sys.info()[["nodename"]] == "Bens-MacBook-Air.local"
 
 con_tmp <- dbConnect(duckdb(), dbdir = tmp_db)
 res <- dbExecute(con_tmp, glue("ATTACH IF NOT EXISTS '{url_cc}' AS calcofi; USE calcofi"))
+# dbListTables(con_tmp)
+# [1] "cruise"    "egg"       "grid"      "larva"     "net"       "ship"      "site"     
+# [8] "site_seg"  "species"   "taxa_rank" "taxonomy"  "tow"       "tow_type"
 
 # helper functions ----
 
@@ -98,8 +101,8 @@ d <- tbl(con_tmp, "calcofi.species") |>
     sp_id,
     scientific_name,
     common_name,
-    itis_id_old  = itis_tsn,
-    worms_id_old = aphia_id) |> 
+    itis_id_old  = itis_id,      # OLD name: itis_tsn
+    worms_id_old = worms_id) |>  # OLD name: aphia_id
   collect()
 
 # https://www.marinespecies.org/aphia.php?p=taxdetails&id=293496
@@ -601,10 +604,6 @@ The following tables are written to the `calcofi` database on the server:
 - `taxonomy`
 - `taxon_rank`
 
-```{r eval_f}
-knitr::opts_chunk$set(eval = F)
-```
-
 ```{r write_taxon_taxonomy_calcofidb}
 #| eval: !expr is_server
 
@@ -650,24 +649,24 @@ dbWriteTable(con_cc, "taxa_rank", d_taxon_rank, overwrite = T)
 
 ## Get taxonomic children
 
-```{r tbl-taxon_children_1}
-#| tbl-cap: "CalCOFI taxonomic children example for rockfishes _Sebastes_ (sp_id: 683)."
+```{r tbl-taxon_children_example}
+#| tbl-cap: "CalCOFI taxonomic children example for rockfishes _Sebastes_ (sp_id: 683; worms_id: 126175)."
+
+# TODO: ensure valid taxonID (ie == acceptedNameUsageID)
+#  like in get_taxon_parentage()
 
 # Function to get all children (descendants) of a given taxon
-get_taxon_children <- function(taxonID, authority = "worms") {
+get_taxon_children <- function(taxonID, con, authority = "worms") {
   
   query_sql <- glue("
     WITH RECURSIVE taxon_children AS (
       -- Base case: find the parent taxon
       SELECT 
         taxonID,
-        scientificNameID,
         acceptedNameUsageID,
         parentNameUsageID,
         scientificName,
-        parentNameUsage,
         taxonRank,
-        taxonomicStatus,
         0 as depth_level
       FROM taxonomy 
       WHERE taxonID = ?
@@ -677,13 +676,10 @@ get_taxon_children <- function(taxonID, authority = "worms") {
       -- Recursive case: find children taxa
       SELECT 
         t.taxonID,
-        t.scientificNameID,
         t.acceptedNameUsageID,
         t.parentNameUsageID,
         t.scientificName,
-        t.parentNameUsage,
         t.taxonRank,
-        t.taxonomicStatus,
         tc.depth_level + 1 as depth_level
       FROM taxonomy t
       INNER JOIN taxon_children tc ON t.parentNameUsageID = tc.taxonID
@@ -696,7 +692,7 @@ get_taxon_children <- function(taxonID, authority = "worms") {
     LEFT JOIN taxa_rank tr ON tc.taxonRank = tr.taxonRank
     ORDER BY tc.depth_level, COALESCE(tr.rank_order, 99), tc.scientificName")
   
-  dbGetQuery(con_cc, query_sql, params = list(scientific_name)) |> 
+  dbGetQuery(con, query_sql, params = list(taxonID)) |> 
     tibble()
 }
 
@@ -721,15 +717,23 @@ get_taxon_children <- function(taxonID, authority = "worms") {
 
 # Get all species within a genus
 # species_in_genus <- get_children_by_rank(con_spp, "Sebastes", "Species")
+
+d_tc <- get_taxon_children(126175, con_tmp)
+
+showtable(d_tc, "calcofi_taxon_children_Sebastes")
 ```
 
 ## Close db connection(s)
 
 ```{r cleanup_dbs}
-dbDisconnect(con_cc, shutdown = T); duckdb_shutdown(duckdb()); rm(con_cc)
+if (exists("con_tmp")){
+  dbDisconnect(con_tmp, shutdown = T); rm(con_tmp) }
 
-if (is_ben_laptop)
-  dbDisconnect(con_spp, shutdown = T); duckdb_shutdown(duckdb()); rm(con_spp)
+if (exists("con_cc")){
+  dbDisconnect(con_cc, shutdown = T); rm(con_cc) }
+
+if (exists("con_spp")){
+  dbDisconnect(con_spp, shutdown = T); rm(con_spp) }
 ```
 
 Note that you might need to sometimes restart your R session (under Session menu in RStudio) to connect to the local duckdb.

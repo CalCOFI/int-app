@@ -1701,7 +1701,6 @@ itis,623625,NA,Lipolagus ochotensis,Species,623321,valid,NA,"(Schmidt, 1938)",NA
 itis,162086,NA,Bathylagus pacificus,Species,162081,valid,NA,"Gilbert, 1890",NA
 itis,162081,NA,Bathylagus,Genus,162080,valid,NA,"Günther, 1878",NA
 itis,623380,NA,Bathylagoides wesethi,Species,623317,valid,NA,"(Bolin, 1938)",NA
-itis,162096,NA,Leuroglossus stilbius,Species,162095,valid,NA,"Gilbert, 1890",NA
 itis,623331,NA,Dolicholagus longirostris,Species,623311,valid,NA,"(Maul, 1948)",NA
 itis,162098,NA,Leuroglossus schmidti,Species,162095,valid,NA,"Rass, 1955",NA
 itis,162163,NA,Gonostomatidae,Family,553151,valid,NA,NA,NA
@@ -1715,7 +1714,6 @@ itis,622492,NA,Sigmops ebelingi,Species,622342,valid,NA,"(Grey, 1960)",NA
 itis,162232,NA,Danaphos oculatus,Species,162231,valid,NA,"(Garman, 1899)",NA
 itis,622691,NA,Diplophos proximus,Species,162179,valid,NA,"Parr, 1931",NA
 itis,162179,NA,Diplophos,Genus,162163,valid,NA,"Günther, 1873",NA
-itis,162181,NA,Diplophos taenia,Species,162179,valid,NA,"Günther, 1873",NA
 itis,162198,NA,Ichthyococcus,Genus,622313,valid,NA,"Bonaparte, 1840",NA
 itis,622698,NA,Ichthyococcus irregularis,Species,162198,valid,NA,"Rechnitzer and Böhlke, 1958",NA
 itis,162203,NA,Valenciennellus tripunctulatus,Species,162202,valid,NA,"(Esmark, 1871)",NA
@@ -1735,7 +1733,6 @@ itis,162219,NA,Argyropelecus hemigymnus,Species,162213,valid,NA,"Cocco, 1829",NA
 itis,162221,NA,Argyropelecus sladeni,Species,162213,valid,NA,"Regan, 1908",NA
 itis,162227,NA,Sternoptyx diaphana,Species,162226,valid,NA,"Hermann, 1781",NA
 itis,162226,NA,Sternoptyx,Genus,622315,valid,NA,"Hermann, 1781",NA
-itis,553133,NA,Osmeriformes,Order,161928,valid,NA,NA,NA
 itis,553138,NA,Stomiiformes,Order,553121,valid,NA,NA,NA
 itis,622316,NA,Astronesthinae,Subfamily,162282,valid,NA,NA,NA
 itis,622675,NA,Sternoptyx obscura,Species,162226,valid,NA,"Garman, 1899",NA
@@ -1931,7 +1928,6 @@ itis,161624,NA,Nemichthys scolopaceus,Species,161621,valid,NA,"Richardson, 1848"
 itis,635966,NA,Heteroconger digueti,Species,161395,valid,NA,"(Pellegrin, 1923)",NA
 itis,161632,NA,Cyema atrum,Species,161631,valid,NA,"Günther, 1878",NA
 itis,161630,NA,Cyematidae,Family,553147,valid,NA,NA,NA
-itis,635826,NA,Leptocephalus holti,Species,161630,valid,NA,"Schmidt, 1909",NA
 itis,161160,NA,Muraenidae,Family,553142,valid,NA,NA,NA
 itis,161157,NA,Chlopsis,Genus,553181,valid,NA,"Rafinesque, 1810",NA
 itis,161194,NA,Gymnothorax mordax,Species,161185,valid,NA,"(Ayres, 1859)",NA
@@ -1992,7 +1988,6 @@ itis,167694,NA,Epinephelus,Genus,643094,valid,NA,"Bloch, 1793",NA
 itis,551018,NA,Epinephelinae,Subfamily,167674,valid,NA,NA,NA
 itis,167841,NA,Pronotogrammus multifasciatus,Species,167839,valid,NA,"Gill, 1863",NA
 itis,167832,NA,Paralabrax clathratus,Species,167830,valid,NA,"(Girard, 1854)",NA
-itis,643089,NA,Serraninae,Subfamily,167674,valid,NA,NA,NA
 itis,167830,NA,Paralabrax,Genus,643089,valid,NA,"Girard, 1856",NA
 itis,167834,NA,Paralabrax nebulifer,Species,167830,valid,NA,"(Girard, 1854)",NA
 itis,167791,NA,Diplectrum,Genus,643089,valid,NA,"Holbrook, 1855",NA
@@ -2000,7 +1995,6 @@ itis,167849,NA,Serranus,Genus,643089,valid,NA,"Cuvier, 1816",NA
 itis,167675,NA,Anthiinae,Subfamily,167674,valid,NA,NA,NA
 itis,168578,NA,Phtheirichthys lineatus,Species,168577,valid,NA,"(Menzies, 1791)",NA
 itis,167802,NA,Hemanthias peruanus,Species,167799,valid,NA,"(Steindachner, 1875)",NA
-itis,643093,NA,Grammistini,Tribe,551018,valid,NA,NA,NA
 itis,167804,NA,Hemanthias signifer,Species,167799,valid,NA,"(Garman, 1899)",NA
 itis,168176,NA,Priacanthidae,Family,167641,valid,NA,NA,NA
 itis,168192,NA,Pristigenys serrula,Species,168188,valid,NA,"(Gilbert, 1891)",NA
@@ -2267,7 +2261,6 @@ itis,166462,NA,Syngnathus leptorhynchus,Species,166444,valid,NA,"Girard, 1854",N
 itis,166603,NA,Cosmocampus arctus,Species,166596,valid,NA,"(Jenkins and Evermann, 1889)",NA
 itis,166443,NA,Syngnathidae,Family,166438,valid,NA,NA,NA
 itis,166444,NA,Syngnathus,Genus,644844,valid,NA,"Linnaeus, 1758",NA
-itis,166457,NA,Syngnathus californiensis,Species,166444,valid,NA,"Storer, 1845",NA
 itis,551495,NA,Macroramphosus,Genus,644842,valid,NA,"Lacepède, 1803",NA
 itis,166404,NA,Aulorhynchus flavidus,Species,166403,valid,NA,"Gill, 1861",NA
 itis,171746,NA,Gobiidae,Family,171745,valid,NA,NA,NA
@@ -2464,7 +2457,6 @@ itis,164570,NA,Chaunax,Genus,164569,valid,NA,"Lowe, 1846",NA
 itis,164660,NA,Caulophryne,Genus,164658,valid,NA,"Goode and Bean, 1896",NA
 itis,649743,NA,Caulophryne pelagica,Species,164660,valid,NA,"(Brauer, 1902)",NA
 itis,622873,NA,Melanocetus johnsonii,Species,164612,valid,NA,"Günther, 1864",NA
-itis,553153,NA,Ogcocephalioidei,Suborder,164495,valid,NA,NA,NA
 itis,164625,NA,Oneirodidae,Family,622712,valid,NA,NA,NA
 itis,164653,NA,Ceratiidae,Family,622712,valid,NA,NA,NA
 itis,164661,NA,Linophrynidae,Family,622712,valid,NA,NA,NA
@@ -2728,7 +2720,6 @@ itis,82439,NA,Onychoteuthis,Genus,82436,valid,NA,"Lichtenstein, 1818",1818-01-01
 itis,82442,NA,Onychoteuthis borealijaponicus,Species,82439,valid,NA,"Okada, 1927",1927-01-01
 itis,556017,NA,Onychoteuthis compacta,Species,82439,valid,NA,"(Berry, 1913)",NA
 itis,82440,NA,Onychoteuthis banksii,Species,82439,valid,NA,"(Leach, 1817)",NA
-itis,82443,NA,Onykia,Genus,82436,valid,NA,"Lesueur, 1821",1821-01-01
 itis,82567,NA,Cycloteuthis sirventi,Species,82566,valid,NA,"Joubin, 1919",1919-01-01
 itis,82414,NA,Gonatidae,Family,82390,valid,NA,"Hoyle, 1886",1886-01-01
 itis,82429,NA,Berryteuthis,Genus,82414,valid,NA,"Naef, 1921",1921-01-01
