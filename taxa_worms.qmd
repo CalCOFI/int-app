@@ -18,16 +18,18 @@ librarian::shelf(
 options(readr.show_col_types = F)
 
 url_cc         <- "https://file.calcofi.io/calcofi.duckdb"
-cc_db          <- here("data/tmp.duckdb")
+tmp_db         <- here("data/tmp.duckdb")
+cc_db          <- glue("/share/data/swfsc.noaa.gov/calcofi.duckdb")
 spp_db         <- glue("~/My Drive/projects/msens/data/derived/spp.duckdb")
 species_csv    <- here("data/species.csv")
 taxonomy_csv   <- here("data/taxonomy.csv")
 taxon_rank_csv <- here("data/taxon_rank.csv")
 
+is_server     <-  Sys.info()[["sysname"]] == "Linux"
 is_ben_laptop <- Sys.info()[["nodename"]] == "Bens-MacBook-Air.local"
 
-con_cc <- dbConnect(duckdb(), dbdir = cc_db)
-res <- dbExecute(con_cc, glue("ATTACH IF NOT EXISTS '{url_cc}' AS calcofi; USE calcofi"))
+con_tmp <- dbConnect(duckdb(), dbdir = tmp_db)
+res <- dbExecute(con_tmp, glue("ATTACH IF NOT EXISTS '{url_cc}' AS calcofi; USE calcofi"))
 
 # helper functions ----
 
@@ -87,11 +89,11 @@ showtable <- function(data, filename = "table", escape = F, rownames = F, pageLe
 ```{r tbl-species_init}
 #| tbl-cap: "CalCOFI species with original WoRMS and ITIS IDs"
 
-# dbListTables(con_cc)
+# dbListTables(con_tmp)
 # [1] "cruise"   "egg"      "grid"     "larva"    "net"      "ship"    
 # [7] "site"     "site_seg" "species"  "tow"      "tow_type"
 
-d <- tbl(con_cc, "calcofi.species") |> 
+d <- tbl(con_tmp, "calcofi.species") |> 
   select(
     sp_id,
     scientific_name,
@@ -553,7 +555,7 @@ d_taxonomy |>
 
 ```{r tbl-taxon_rank}
 #| tbl-cap: "Taxonomic ranks in WoRMS and ITIS."
-#| eval: false
+#| eval: !expr is_ben_laptop
 
 tr_w <- tbl(con_spp, "worms") |>
   distinct(taxonRank) |>
@@ -604,6 +606,10 @@ knitr::opts_chunk$set(eval = F)
 ```
 
 ```{r write_taxon_taxonomy_calcofidb}
+#| eval: !expr is_server
+
+con_cc <- dbConnect(duckdb(), dbdir = cc_db, read_only = F)
+
 d_species    <- read_csv(species_csv)
 d_taxonomy   <- read_csv(taxonomy_csv)
 d_taxon_rank <- read_csv(taxon_rank_csv)
@@ -611,15 +617,32 @@ d_taxon_rank <- read_csv(taxon_rank_csv)
 d_species <- d_species |> 
   select(
     sp_id, scientific_name, common_name, 
-    worms_id, itis_id)
+    worms_id, itis_id) |> 
+    # Excluding fields:
     # scientific_name_worms, common_name_worms,
-    # scientific_name_itis, common_name_itis,
-    # scientific_name_old, common_name_old,
-    # worms_id_old, itis_id_old) |>
+    # scientific_name_itis,  common_name_itis,
+    # scientific_name_old,   common_name_old,
+    # worms_id_old,          itis_id_old
   mutate(
-    worms_id     = as.integer(worms_id),
-    itis_id      = as.integer(itis_id)) 
+    sp_id    = as.integer(sp_id),
+    worms_id = as.integer(worms_id),
+    itis_id  = as.integer(itis_id))
+
+d_taxonomy <- d_taxonomy |> 
+  select(
+    authority, taxonID, acceptedNameUsageID, scientificName, taxonRank, 
+    parentNameUsageID, taxonomicStatus, nomenclaturalStatus, 
+    scientificNameAuthorship, namePublishedInYear) |>
+  mutate(
+    taxonID                  = as.integer(taxonID),
+    acceptedNameUsageID      = as.integer(acceptedNameUsageID),
+    parentNameUsageID        = as.integer(parentNameUsageID))
   
+d_taxon_rank <- d_taxon_rank |> 
+  select(taxonRank, rank_order) |>
+  mutate(
+    rank_order = as.integer(rank_order))
+
 dbWriteTable(con_cc, "species",   d_species,    overwrite = T)
 dbWriteTable(con_cc, "taxonomy",  d_taxonomy,   overwrite = T)
 dbWriteTable(con_cc, "taxa_rank", d_taxon_rank, overwrite = T)
