@@ -1,0 +1,1149 @@
+sp_id,scientific_name,common_name,worms_id,itis_id,scientific_name_worms,common_name_worms,scientific_name_itis,common_name_itis,scientific_name_old,common_name_old,worms_id_old,itis_id_old
+1,Teleostei,Unidentified Teliost,293496,161105,Teleostei,NA,Teleostei,NA,Teleostei,Unidentified Teliost,293496,161105
+3,Elopidae,Tenpounders,153689,161109,Elopidae,tenpounders,Elopidae,bigeyed herrings,Elopidae,Tenpounders,153689,161109
+4,Elops affinis,Machete,275403,161112,Elops affinis,machete,Elops affinis,machete,Elops affinis,Machete,275403,161112
+5,Albulidae,Bonefishes,151805,161119,Albulidae,bonefishes,Albulidae,bananafishes,Albulidae,Bonefishes,151805,161119
+7,Albula,bonefishes,157878,161120,Albula,NA,Albula,bonefishes,Albula,NA,157878,161120
+9,Clupeiformes,anchovies,10297,161694,Clupeiformes,NA,Clupeiformes,anchovies,Clupeiformes,NA,10297,161694
+12,Etrumeus sadina,Round herring,584793,161743,Etrumeus sadina,NA,Etrumeus teres,round herring,Etrumeus teres,Round herring,584793,161743
+15,Clupeidae,Herrings,125464,161700,Clupeidae,menhadens,Clupeidae,herrings,Clupeidae,Herrings,125464,161700
+16,Opisthonema,thread herrings,158694,161747,Opisthonema,NA,Opisthonema,thread herrings,Opisthonema,NA,158694,161747
+19,Sardinops sagax,Pacific sardine (pilchard),217452,161729,Sardinops sagax,Pacific sardine,Sardinops sagax,Pacific sardine,Sardinops sagax,Pacific sardine (pilchard),217452,161729
+20,Clupea pallasii,Pacific herring,151159,551209,Clupea pallasii,Pacific herring,Clupea pallasii,Pacific herring,Clupea pallasii,Pacific herring,151159,551209
+21,Harengula thrissina,Flatiron herring,277552,161757,Harengula thrissina,flatiron herring,Harengula thrissina,flatiron herring,Harengula thrissina,Flatiron herring,277552,161757
+22,Tetronarce californica,Pacific electric ray,845703,160833,Tetronarce californica,NA,Torpedo californica,Pacific electric ray,Torpedo californica,Pacific electric ray,845703,160833
+25,Engraulidae,Anchovies,125465,553173,Engraulidae,anchovies,Engraulidae,anchovies,Engraulidae,Anchovies,125465,553173
+26,Anchoa,common anchovies,158697,161837,Anchoa,NA,Anchoa,common anchovies,Anchoa,NA,158697,161837
+27,Anchoa compressa,Deepbody anchovy,275512,161847,Anchoa compressa,deepbody anchovy,Anchoa compressa,deepbody anchovy,Anchoa compressa,Deepbody anchovy,275512,161847
+28,Engraulis ringens,anchoveta,272287,551340,Engraulis ringens,anchoveta,Engraulis ringens,Peruvian anchoveta,Engraulis ringens,NA,272287,551340
+31,Engraulis mordax,Northern anchovy,272286,161828,Engraulis mordax,northern anchovy,Engraulis mordax,northern anchovy,Engraulis mordax,Northern anchovy,272286,161828
+32,Cetengraulis,anchovetas,268692,161860,Cetengraulis,NA,Cetengraulis,anchovetas,Cetengraulis,NA,268692,161860
+33,Cetengraulis mysticetus,Anchoveta,280092,161862,Cetengraulis mysticetus,Pacific anchoveta,Cetengraulis mysticetus,anchoveta,Cetengraulis mysticetus,Anchoveta,280092,161862
+34,Chanos chanos,Milkfish,217625,162838,Chanos chanos,milkfish,Chanos chanos,milkfish,Chanos chanos,Milkfish,217625,162838
+35,Alepocephalidae,Slickheads,125507,162303,Alepocephalidae,slickheads,Alepocephalidae,slickheads,Alepocephalidae,Slickheads,125507,162303
+36,Alepocephalus,NA,125868,162308,Alepocephalus,NA,Alepocephalus,NA,Alepocephalus,NA,125868,162308
+37,Alepocephalus tenebrosus,California slickhead,272849,162316,Alepocephalus tenebrosus,California slickhead,Alepocephalus tenebrosus,NA,Alepocephalus tenebrosus,California slickhead,272849,162316
+38,Bajacalifornia burragei,Sharpchin slickhead,272857,162350,Bajacalifornia burragei,Sharpchin slickhead,Bajacalifornia burragei,NA,Bajacalifornia burragei,Sharpchin slickhead,272857,162350
+39,Bathylaco nigricans,black warrior,126688,162367,Bathylaco nigricans,black warrior,Bathylaco nigricans,black warrior,Bathylaco nigricans,NA,126688,162367
+40,Holtbyrnia latifrons,Streaklight tubeshoulder,272944,623649,Holtbyrnia latifrons,streaklight tubeshoulder,Holtbyrnia latifrons,NA,Holtbyrnia latifrons,Streaklight tubeshoulder,272944,623649
+41,Sagamichthys abei,Shining tubeshoulder,234630,162305,Sagamichthys abei,shining tubeshoulder,Sagamichthys abei,NA,Sagamichthys abei,Shining tubeshoulder,234630,162305
+42,Mirorictus taningi,Striped tubeshoulder,281579,623659,Mirorictus taningi,NA,Mirorictus taningi,NA,Mirorictus taningi,Striped tubeshoulder,281579,623659
+43,Platytroctidae,Tubeshoulders,125514,553188,Platytroctidae,tubeshoulders,Platytroctidae,NA,Platytroctidae,Tubeshoulders,125514,553188
+44,Talismania bifurcata,Threadfin slickhead,272884,182875,Talismania bifurcata,threadfin slickhead,Talismania bifurcata,NA,Talismania bifurcata,Threadfin slickhead,272884,182875
+45,Osmeridae,Smelts,125513,162028,Osmeridae,smelts,Osmeridae,smelts,Osmeridae,Smelts,125513,162028
+46,Mentodus eubranchus,NA,272950,623655,Mentodus eubranchus,NA,Mentodus eubranchus,NA,Mentodus eubranchus,NA,272950,623655
+47,Hypomesus pretiosus,surf smelt,279422,162030,Hypomesus pretiosus,surf smelt,Hypomesus pretiosus,surf smelt,Hypomesus pretiosus,NA,279422,162030
+50,Opisthoproctidae,Spookfishes,125512,162099,Opisthoproctidae,barreleyes,Opisthoproctidae,barreleyes,Opisthoproctidae,Spookfishes,125512,162099
+51,Osmeriformes,smelts,10304,162056,Osmeriformes,smelts,Argentinoidei,NA,Argentinoidei,NA,10304,162056
+52,Dolichopteryx longipes,Brownsnout spookfish,126731,162103,Dolichopteryx longipes,brownsnout spookfish,Dolichopteryx longipes,NA,Dolichopteryx longipes,Brownsnout spookfish,126731,162103
+53,Macropinna microstoma,Barreleye,281482,162101,Macropinna microstoma,barreleye,Macropinna microstoma,barreleye,Macropinna microstoma,Barreleye,281482,162101
+54,Bathylychnops exilis,Javelin spookfish,126730,162109,Bathylychnops exilis,javelin spookfish,Bathylychnops exilis,NA,Bathylychnops exilis,Javelin spookfish,126730,162109
+55,Argentinidae,Argentines,125508,162057,Argentinidae,herring smelts,Argentinidae,herring smelts,Argentinidae,Argentines,125508,162057
+56,Argentina sialis,Pacific argentine,272897,162068,Argentina sialis,Pacific argentine,Argentina sialis,Pacific argentine,Argentina sialis,Pacific argentine,272897,162068
+57,Argentina,NA,125885,162061,Argentina,NA,Argentina,NA,Argentina,NA,125885,162061
+58,Microstoma,Dusky pencilsmelt,125892,162093,Microstoma,NA,Microstoma,NA,Microstoma,Dusky pencilsmelt,125892,162093
+59,Cyclothone atraria,Black bristlemouth,274943,162165,Cyclothone atraria,Deep-water bristlemouth,Cyclothone atraria,black bristlefish,Cyclothone atraria,Black bristlemouth,274943,162165
+60,Cyclothone pallida,Tan bristlemouth,127288,162167,Cyclothone pallida,bicolored bristlemouth,Cyclothone pallida,bicolored bristlemouth,Cyclothone pallida,Tan bristlemouth,127288,162167
+61,Nansenia,NA,125893,162058,Nansenia,NA,Nansenia,NA,Nansenia,NA,125893,162058
+62,Nansenia candida,Bluethroat argentine,272926,162059,Nansenia candida,bluethroat argentine,Nansenia candida,white pencilsmelt,Nansenia candida,Bluethroat argentine,272926,162059
+63,Nansenia crassa,Stout argentine,272927,623630,Nansenia crassa,NA,Nansenia crassa,NA,Nansenia crassa,Stout argentine,272927,623630
+64,Leuroglossus stilbius,California smoothtongue,313514,182856,Leuroglossus stilbius,California smoothtongue,Leuroglossus urotranus,NA,Leuroglossus urotranus,NA,313514,182856
+65,Bathylagidae,Blacksmelts,125509,162080,Bathylagidae,deep-sea smelts,Bathylagidae,deep-sea smelts,Bathylagidae,Blacksmelts,125509,162080
+66,Pseudobathylagus milleri,Robust blacksmelt,282406,623626,Pseudobathylagus milleri,Stout blacksmelt,Pseudobathylagus milleri,NA,Pseudobathylagus milleri,Robust blacksmelt,282406,623626
+67,Bathylagoides nigrigenys,Blackchin blacksmelt,712443,623379,Bathylagoides nigrigenys,NA,Bathylagoides nigrigenys,NA,Bathylagoides nigrigenys,Blackchin blacksmelt,712443,623379
+68,Lipolagus ochotensis,Popeye blacksmelt,281374,623625,Lipolagus ochotensis,Eared blacksmelt,Lipolagus ochotensis,NA,Lipolagus ochotensis,Popeye blacksmelt,281374,623625
+69,Bathylagus pacificus,Pacific blacksmelt,272919,162086,Bathylagus pacificus,slender blacksmelt,Bathylagus pacificus,Pacific blacksmelt,Bathylagus pacificus,Pacific blacksmelt,272919,162086
+70,Bathylagus,NA,125888,162081,Bathylagus,NA,Bathylagus,NA,Bathylagus,NA,125888,162081
+71,Bathylagoides wesethi,Snubnose blacksmelt,712444,623380,Bathylagoides wesethi,NA,Bathylagoides wesethi,NA,Bathylagoides wesethi,Snubnose blacksmelt,712444,623380
+72,Leuroglossus stilbius,California smoothtongue,313514,162096,Leuroglossus stilbius,California smoothtongue,Leuroglossus stilbius,California smoothtongue,Leuroglossus stilbius,California smoothtongue,313514,162096
+73,Dolicholagus longirostris,Longsnout blacksmelt,126720,623331,Dolicholagus longirostris,Longsnout blacksmelt,Dolicholagus longirostris,NA,Dolicholagus longirostris,Longsnout blacksmelt,126720,623331
+74,Leuroglossus schmidti,Northern smoothtongue,254551,162098,Leuroglossus schmidti,northern smoothtongue,Leuroglossus schmidti,northern smoothtongue,Leuroglossus schmidti,Northern smoothtongue,254551,162098
+75,Gonostomatidae,Bristlemouths,125601,162163,Gonostomatidae,bristlemouths,Gonostomatidae,bristlemouths,Gonostomatidae,Bristlemouths,125601,162163
+76,Cyclothone,NA,126187,162164,Cyclothone,NA,Cyclothone,NA,Cyclothone,NA,126187,162164
+77,Cyclothone acclinidens,Benttooth bristlemouth,127282,162172,Cyclothone acclinidens,benttooth bristlemouth,Cyclothone acclinidens,NA,Cyclothone acclinidens,Benttooth bristlemouth,127282,162172
+78,Cyclothone signata,Showy bristlemouth,154831,162168,Cyclothone signata,showy bristlemouth,Cyclothone signata,showy bristlemouth,Cyclothone signata,Showy bristlemouth,154831,162168
+79,Cyclothone pseudopallida,Slender bristlemouth,127289,162175,Cyclothone pseudopallida,slender bristlemouth,Cyclothone pseudopallida,slender bristlemouth,Cyclothone pseudopallida,Slender bristlemouth,127289,162175
+80,Gonostoma,NA,126189,162182,Gonostoma,NA,Gonostoma,NA,Gonostoma,NA,126189,162182
+81,Gonostoma atlanticum,Atlantic fangjaw,127293,162183,Gonostoma atlanticum,Atlantic fangjaw,Gonostoma atlanticum,Atlantic fangjaw,Gonostoma atlanticum,Atlantic fangjaw,127293,162183
+82,Sigmops ebelingi,Ebeling's fangjaw,279335,622492,Sigmops ebelingi,NA,Sigmops ebelingi,NA,Sigmops ebelingi,Ebeling's fangjaw,279335,622492
+84,Danaphos oculatus,Bottlelight,280483,162232,Danaphos oculatus,bottlelight,Danaphos oculatus,bigeye lightfish,Danaphos oculatus,Bottlelight,280483,162232
+85,Diplophos taenia,Pacific portholefish,127292,622691,Diplophos taenia,Pacific portholefish,Diplophos proximus,NA,Diplophos proximus,NA,127292,622691
+86,Diplophos,NA,126188,162179,Diplophos,NA,Diplophos,NA,Diplophos,NA,126188,162179
+87,Diplophos taenia,Pacific portholefish,127292,162181,Diplophos taenia,Pacific portholefish,Diplophos taenia,NA,Diplophos taenia,NA,127292,162181
+88,Ichthyococcus,NA,126191,162198,Ichthyococcus,NA,Ichthyococcus,NA,Ichthyococcus,NA,126191,162198
+89,Ichthyococcus irregularis,Bulldog lightfish,274954,622698,Ichthyococcus irregularis,NA,Ichthyococcus irregularis,NA,Ichthyococcus irregularis,Bulldog lightfish,274954,622698
+91,Valenciennellus tripunctulatus,Constellationfish,127316,162203,Valenciennellus tripunctulatus,constellationfish,Valenciennellus tripunctulatus,NA,Valenciennellus tripunctulatus,Constellationfish,127316,162203
+92,Vinciguerria,NA,126194,162192,Vinciguerria,NA,Vinciguerria,NA,Vinciguerria,NA,126194,162192
+93,Vinciguerria lucetia,Panama lightfish,274961,182865,Vinciguerria lucetia,NA,Vinciguerria lucetia,NA,Vinciguerria lucetia,Panama lightfish,274961,182865
+94,Vinciguerria poweriae,Highseas lightfish,127304,162195,Vinciguerria poweriae,Power's deep-water bristle-mouth fish,Vinciguerria poweriae,NA,Vinciguerria poweriae,Highseas lightfish,127304,162195
+95,Woodsia nonsuchae,Bigeye lightfish,283166,162211,Woodsia nonsuchae,bigeye lightfish,Woodsia nonsuchae,NA,Woodsia nonsuchae,Bigeye lightfish,283166,162211
+96,Vinciguerria nimbaria,Oceanic lightfish,127303,162194,Vinciguerria nimbaria,oceanic lightfish,Vinciguerria nimbaria,oceanic lightfish,Vinciguerria nimbaria,Oceanic lightfish,127303,162194
+97,Yarrella blackfordi,NA,158835,622360,Yarrella blackfordi,NA,Yarrella blackfordi,NA,Yarrella blackfordi,NA,158835,622360
+98,Maurolicus muelleri,pearlsides,127312,162187,Maurolicus muelleri,pearlsides,Maurolicus muelleri,pearlside,Maurolicus muelleri,NA,127312,162187
+99,Maurolicus,NA,126197,162186,Maurolicus,NA,Maurolicus,NA,Maurolicus,NA,126197,162186
+100,Sternoptychidae,Hatchetfishes,125603,162212,Sternoptychidae,marine hatchetfishes,Sternoptychidae,deepsea hatchetfishes,Sternoptychidae,Hatchetfishes,125603,162212
+101,Argyropelecus,hatchetfishes,126196,162213,Argyropelecus,NA,Argyropelecus,hatchetfishes,Argyropelecus,NA,126196,162213
+102,Argyropelecus lychnus,Tropical hatchetfish,158836,162214,Argyropelecus lychnus,silvery hatchetfish,Argyropelecus lychnus,NA,Argyropelecus lychnus,Tropical hatchetfish,158836,162214
+103,Argyropelecus affinis,Slender hatchetfish,127307,162216,Argyropelecus affinis,Pacific hatchet fish,Argyropelecus affinis,deepsea hatchetfish,Argyropelecus affinis,Slender hatchetfish,127307,162216
+104,Argyropelecus hemigymnus,Spurred hatchetfish,127309,162219,Argyropelecus hemigymnus,Half-naked hatchetfish,Argyropelecus hemigymnus,half-naked hatchetfish,Argyropelecus hemigymnus,Spurred hatchetfish,127309,162219
+105,Argyropelecus sladeni,Lowcrest hatchetfish,158837,162221,Argyropelecus sladeni,lowcrest hachetfish,Argyropelecus sladeni,silvery hatchetfish,Argyropelecus sladeni,Lowcrest hatchetfish,158837,162221
+106,Sternoptyx diaphana,Longspine hatchetfish,127314,162227,Sternoptyx diaphana,transparent hatchetfish,Sternoptyx diaphana,diaphanous hatchetfish,Sternoptyx diaphana,Longspine hatchetfish,127314,162227
+107,Sternoptyx,Dollar hatchetfishes,126199,162226,Sternoptyx,NA,Sternoptyx,NA,Sternoptyx,Dollar hatchetfishes,126199,162226
+108,Osmeriformes,smelts,10304,553133,Osmeriformes,smelts,Osmeriformes,argentines,Osmeriformes,NA,10304,553133
+109,Stomiiformes,NA,10306,553138,Stomiiformes,NA,Stomiiformes,NA,Stomiiformes,NA,10306,553138
+110,Astronesthinae,Snaggletooths,154228,622316,Astronesthinae,NA,Astronesthinae,snaggletooths,Astronesthinae,Snaggletooths,154228,622316
+111,Sternoptyx obscura,Dusky hatchetfish,275004,622675,Sternoptyx obscura,Dark hatchetfish,Sternoptyx obscura,NA,Sternoptyx obscura,Dusky hatchetfish,275004,622675
+112,Astronesthes gibbsi,NA,275018,622505,Astronesthes gibbsi,NA,Astronesthes gibbsi,NA,Astronesthes gibbsi,NA,275018,622505
+113,Astronesthes,NA,126202,162234,Astronesthes,NA,Astronesthes,NA,Astronesthes,NA,126202,162234
+114,Sternoptyx pseudobscura,Highlight hatchetfish,127315,162228,Sternoptyx pseudobscura,highlight hatchetfish,Sternoptyx pseudobscura,NA,Sternoptyx pseudobscura,Highlight hatchetfish,127315,162228
+115,Borostomias panamensis,Panama snaggletooth,275052,162241,Borostomias panamensis,NA,Borostomias panamensis,NA,Borostomias panamensis,Panama snaggletooth,275052,162241
+120,Stomiinae,Scaly dragonfishes,154227,622317,Stomiinae,NA,Stomiinae,scaly dragonfishes,Stomiinae,Scaly dragonfishes,154227,622317
+121,Stomias atriventer,Blackbelly dragonfish,275178,162290,Stomias atriventer,NA,Stomias atriventer,NA,Stomias atriventer,Blackbelly dragonfish,275178,162290
+130,Melanostomiinae,Scaleless dragonfishes,154229,622318,Melanostomiinae,NA,Melanostomiinae,scaleless black dragonfishes,Melanostomiinae,Scaleless dragonfishes,154229,622318
+131,Bathophilus,Dragonfish,126203,162243,Bathophilus,Dragonfish,Bathophilus,NA,Bathophilus,NA,126203,162243
+132,Bathophilus filifer,Threadfin dragonfish,275045,622559,Bathophilus filifer,NA,Bathophilus filifer,NA,Bathophilus filifer,Threadfin dragonfish,275045,622559
+133,Bathophilus flemingi,Highfin dragonfish,275046,162244,Bathophilus flemingi,highfin dragonfish,Bathophilus flemingi,highfin dragonfish,Bathophilus flemingi,Highfin dragonfish,275046,162244
+134,Melanostomias valdiviae,Bluebeard dragonfish,127365,622394,Melanostomias valdiviae,NA,Melanostomias valdiviae,NA,Melanostomias valdiviae,Bluebeard dragonfish,127365,622394
+135,Opostomias mitsuii,Pitgum dragonfish,281926,622645,Opostomias mitsuii,pitgum dragonfish,Opostomias mitsuii,NA,Opostomias mitsuii,Pitgum dragonfish,281926,622645
+136,Eustomias,NA,126208,162248,Eustomias,NA,Eustomias,NA,Eustomias,NA,126208,162248
+137,Leptostomias,NA,126212,162254,Leptostomias,NA,Leptostomias,NA,Leptostomias,NA,126212,162254
+138,Stomias,scaly dragonfishes,126220,162286,Stomias,NA,Stomias,scaly dragonfishes,Stomias,NA,126220,162286
+139,Photonectes,NA,126217,162295,Photonectes,NA,Photonectes,NA,Photonectes,NA,126217,162295
+140,Photonectes margarita,Sooty dragonfish,127370,162296,Photonectes margarita,Sooty dragonfish,Photonectes margarita,NA,Photonectes margarita,Sooty dragonfish,127370,162296
+142,Tactostoma macropus,Longfin dragonfish,282922,162247,Tactostoma macropus,longfin dragonfish,Tactostoma macropus,longfin dragonfish,Tactostoma macropus,Longfin dragonfish,282922,162247
+150,Malacosteinae,Loosejaws,154693,622320,Malacosteinae,NA,Malacosteinae,loosejaws,Malacosteinae,Loosejaws,154693,622320
+151,Aristostomias scintillans,Shiny loosejaw,275007,162274,Aristostomias scintillans,shining loosejaw,Aristostomias scintillans,shiny loosejaw,Aristostomias scintillans,Shiny loosejaw,275007,162274
+154,Chauliodus,NA,126205,162278,Chauliodus,NA,Chauliodus,NA,Chauliodus,NA,126205,162278
+155,Chauliodontinae,Viperfishes,154226,622321,Chauliodontinae,NA,Chauliodontinae,viperfishes,Chauliodontinae,Viperfishes,154226,622321
+156,Chauliodus macouni,Pacific viperfish,275055,162279,Chauliodus macouni,viper fish,Chauliodus macouni,Pacific viperfish,Chauliodus macouni,Pacific viperfish,275055,162279
+157,Chauliodus sloani,Sloane's viperfish,127338,162281,Chauliodus sloani,Sloane's viperfish,Chauliodus sloani,Sloane's viperfish,Chauliodus sloani,NA,127338,162281
+158,Exocoetus,flyingfishes,125692,165506,Exocoetus,NA,Exocoetus,flyingfishes,Exocoetus,NA,125692,165506
+159,Exocoetus volitans,Tropical two-wing flyingfish,126385,165508,Exocoetus volitans,flying fish,Exocoetus volitans,tropical two-wing flyingfish,Exocoetus volitans,Tropical two-wing flyingfish,126385,165508
+160,Idiacanthinae,Blackdragons,154230,622319,Idiacanthinae,NA,Idiacanthinae,black dragonfishes,Idiacanthinae,Blackdragons,154230,622319
+161,Idiacanthus antrostomus,Pacific blackdragon,275151,162301,Idiacanthus antrostomus,Pacific blackdragon,Idiacanthus antrostomus,NA,Idiacanthus antrostomus,Pacific blackdragon,275151,162301
+162,Idiacanthus,NA,126211,162299,Idiacanthus,NA,Idiacanthus,NA,Idiacanthus,NA,126211,162299
+163,Cheilopogon xenopterus,Whitetip flyingfish,272166,645246,Cheilopogon xenopterus,whitetip flyingfish,Cheilopogon xenopterus,whitetip flyingfish,Cheilopogon xenopterus,Whitetip flyingfish,272166,645246
+164,Strongylura exilis,California needlefish,275978,165555,Strongylura exilis,California needlefish,Strongylura exilis,California needlefish,Strongylura exilis,California needlefish,275978,165555
+165,Scomberesocidae,Sauries,125454,165607,Scomberesocidae,sauries,Scomberesocidae,sauries,Scomberesocidae,Sauries,125454,165607
+166,Cololabis saira,Pacific saury,280366,165609,Cololabis saira,Pacific saury,Cololabis saira,Pacific saury,Cololabis saira,Pacific saury,280366,165609
+167,Cololabis adoceta,Pygmy saury,280365,165610,Cololabis adoceta,NA,Cololabis adocetus,NA,Cololabis adocetus,Pygmy saury,280365,165610
+168,Prognichthys tringa,Tringa flyingfish,277927,645264,Prognichthys tringa,Panamic flyingfish,Prognichthys tringa,Panamic flyingfish,Prognichthys tringa,Tringa flyingfish,277927,645264
+169,Exocoetus monocirrhus,Barbel flyingfish,217869,165509,Exocoetus monocirrhus,barbel flyingfish,Exocoetus monocirrhus,barbel flyingfish,Exocoetus monocirrhus,Barbel flyingfish,217869,165509
+170,Hemiramphidae,Halfbeaks,125453,553172,Hemiramphidae,halfbeaks,Hemiramphidae,halfbeaks,Hemiramphidae,Halfbeaks,125453,553172
+171,Atherinops affinis,Topsmelt,279812,165986,Atherinops affinis,topsmelt,Atherinops affinis,topsmelt,Atherinops affinis,Topsmelt,279812,165986
+172,Atherinella,NA,268430,630593,Atherinella,NA,Atherinella,NA,Atherinella,NA,268430,630593
+173,Atherinopsis californiensis,Jacksmelt,279813,166012,Atherinopsis californiensis,jacksmelt,Atherinopsis californiensis,jacksmelt,Atherinopsis californiensis,Jacksmelt,279813,166012
+174,Leuresthes tenuis,California grunion,281344,166014,Leuresthes tenuis,California grunion,Leuresthes tenuis,California grunion,Leuresthes tenuis,California grunion,281344,166014
+175,Belonidae,Needlefishes,125451,165546,Belonidae,needlefishes,Belonidae,needlefishes,Belonidae,Needlefishes,125451,165546
+176,Ablennes hians,Flat needlefish,159246,165548,Ablennes hians,flat needlefish,Ablennes hians,flat needlefish,Ablennes hians,Flat needlefish,159246,165548
+177,Hemiramphus saltator,Longfin halfbeak,272178,165463,Hemiramphus saltator,longfin halfbeak,Hemiramphus saltator,longfin halfbeak,Hemiramphus saltator,Longfin halfbeak,272178,165463
+178,Cheilopogon pinnatibarbatus,California flyingfish,126383,616685,Cheilopogon pinnatibarbatus,smallhead flyingfish,Cheilopogon pinnatibarbatus,great blacktailed flyingfish,Cheilopogon pinnatibarbatus,California flyingfish,126383,616685
+179,Cypselurus callopterus,Ornamented flyingfish,278730,645247,Cypselurus callopterus,beautyfin flyingfish,Cypselurus callopterus,beautyfin flyingfish,Cypselurus callopterus,Ornamented flyingfish,278730,645247
+180,Exocoetidae,Flyingfishes,125452,165431,Exocoetidae,flyingfishes,Exocoetidae,flyingfishes,Exocoetidae,Flyingfishes,125452,165431
+181,Oxyporhamphus micropterus,Shortwing flyingfish,217871,165520,Oxyporhamphus micropterus,smallwing flyingfish,Oxyporhamphus micropterus,smallwing flyingfish,Oxyporhamphus micropterus,Shortwing flyingfish,217871,165520
+182,Euleptorhamphus viridis,Ribbon halfbeak,220012,165504,Euleptorhamphus viridis,ribbon halfbeak,Euleptorhamphus viridis,ribbon halfbeak,Euleptorhamphus viridis,Ribbon halfbeak,220012,165504
+183,Cheilopogon,NA,125691,165433,Cheilopogon,NA,Cheilopogon,NA,Cheilopogon,NA,125691,165433
+184,Cheilopogon heterurus,Blotchwing flyingfish,126382,616688,Cheilopogon heterurus,Mediterranean flyingfish,Cheilopogon heterurus,Atlantic flyingfish,Cheilopogon heterurus,Blotchwing flyingfish,126382,616688
+185,Fodiator acutus,Sharpchin flyingfish,280791,165511,Fodiator acutus,sharpchin flyingfish,Fodiator acutus,sharpchin flyingfish,Fodiator acutus,Sharpchin flyingfish,280791,165511
+186,Hirundichthys,NA,125693,165515,Hirundichthys,NA,Hirundichthys,NA,Hirundichthys,NA,125693,165515
+187,Hirundichthys marginatus,Banded flyingfish,272170,645257,Hirundichthys marginatus,bladewing flyingfish,Hirundichthys marginatus,bladewing flyingfish,Hirundichthys marginatus,Banded flyingfish,272170,645257
+188,Hirundichthys rondeletii,Black wing flyingfish,126386,616693,Hirundichthys rondeletii,blackwing flyingfish,Hirundichthys rondeletii,blackwing flyingfish,Hirundichthys rondeletii,Black wing flyingfish,126386,616693
+189,Prognichthys,NA,205070,165523,Prognichthys,NA,Prognichthys,NA,Prognichthys,NA,205070,165523
+190,Myctophiformes,NA,10309,162368,Myctophiformes,NA,Myctophiformes,NA,Myctophiformes,NA,10309,162368
+191,Scomberesox saurus,Atlantic saury,126392,165612,Scomberesox saurus,saury,Scomberesox saurus,Atlantic saury,Scomberesox saurus,Atlantic saury,126392,165612
+192,Hirundichthys speculiger,Mirrorwing flyingfish,126387,165517,Hirundichthys speculiger,mirrorwing flying-fish,Hirundichthys speculiger,mirrorwing flyingfish,Hirundichthys speculiger,Mirrorwing flyingfish,126387,165517
+193,Cheilopogon dorsomacula,Blackspot flyingfish,272153,645237,Cheilopogon dorsomacula,blackspot flyingfish,Cheilopogon dorsomacula,blackspot flyingfish,Cheilopogon dorsomacula,Blackspot flyingfish,272153,645237
+194,Hyporhamphus,halfbeaks,125696,165473,Hyporhamphus,NA,Hyporhamphus,halfbeaks,Hyporhamphus,NA,125696,165473
+195,Notosudidae,Paperbones,125445,553189,Notosudidae,waryfishes,Notosudidae,waryfishes,Notosudidae,Paperbones,125445,553189
+196,Scopelosaurus,Paperbones,125672,162565,Scopelosaurus,NA,Scopelosaurus,NA,Scopelosaurus,Paperbones,125672,162565
+200,Aulopidae,Aulopus,125441,644666,Aulopidae,aulopus,Aulopidae,flagfins,Aulopidae,Aulopus,125441,644666
+201,Aulopus,NA,125663,162370,Aulopus,NA,Aulopus,NA,Aulopus,NA,125663,162370
+202,Synodus lacertinus,Sauro lizardfish,272130,644734,Synodus lacertinus,calico lizardfish,Synodus lacertinus,calico lizardfish,Synodus lacertinus,Sauro lizardfish,272130,644734
+203,Synodus scituliceps,Shorthead lizardfish,272139,644735,Synodus scituliceps,lance lizardfish,Synodus scituliceps,lance lizardfish,Synodus scituliceps,Shorthead lizardfish,272139,644735
+204,Synodontidae,Lizardfishes,125449,162374,Synodontidae,lizardfishes,Synodontidae,lizardfishes,Synodontidae,Lizardfishes,125449,162374
+206,Synodus,lizard fishes,125686,162375,Synodus,NA,Synodus,lizard fishes,Synodus,NA,125686,162375
+207,Synodus lucioceps,California lizardfish,272132,162378,Synodus lucioceps,smallscale lizardfish,Synodus lucioceps,California lizardfish,Synodus lucioceps,California lizardfish,272132,162378
+208,Synodus sechurae,Sechura lizardfish,272140,644736,Synodus sechurae,iguana lizardfish,Synodus sechurae,iguana lizardfish,Synodus sechurae,Sechura lizardfish,272140,644736
+209,Synodus evermanni,spotted lizardfish,272124,644732,Synodus evermanni,spotted lizardfish,Synodus evermanni,spotted lizardfish,Synodus evermanni,NA,272124,644732
+210,Alepisauridae,Lancetfishes,125439,162523,Alepisauridae,lancetfishes,Alepisauridae,lancetfishes,Alepisauridae,Lancetfishes,125439,162523
+211,Alepisaurus ferox,Longnose lancetfish,126333,162527,Alepisaurus ferox,longnose lancetfish,Alepisaurus ferox,longnose lancetfish,Alepisaurus ferox,Longnose lancetfish,126333,162527
+214,Bathypterois,Tripod fishes,125669,162439,Bathypterois,Spiderfish,Bathypterois,NA,Bathypterois,Tripod fishes,125669,162439
+215,Myctophidae,Lanternfishes,125498,162575,Myctophidae,lanternfishes,Myctophidae,lanternfishes,Myctophidae,Lanternfishes,125498,162575
+216,Benthosema,NA,125815,162679,Benthosema,NA,Benthosema,NA,Benthosema,NA,125815,162679
+217,Benthosema panamense,Panama lanternfish,272648,623748,Benthosema panamense,NA,Benthosema panamense,NA,Benthosema panamense,Panama lanternfish,272648,623748
+219,Benthosema suborbitale,Smallfin lanternfish,126581,162682,Benthosema suborbitale,Smallfin lanternfish,Benthosema suborbitale,smallfin lanternfish,Benthosema suborbitale,NA,126581,162682
+221,Centrobranchus nigroocellatus,Roundnose lanternfish,126584,162732,Centrobranchus nigroocellatus,roundnose lanternfish,Centrobranchus nigroocellatus,NA,Centrobranchus nigroocellatus,Roundnose lanternfish,126584,162732
+224,Ceratoscopelus warmingii,Warming's lantern fish,126586,623722,Ceratoscopelus warmingii,Warming's lantern fish,Ceratoscopelus warmingii,Warming's lanternfish,Ceratoscopelus warmingii,NA,126586,623722
+225,Ceratoscopelus,NA,125818,162576,Ceratoscopelus,NA,Ceratoscopelus,NA,Ceratoscopelus,NA,125818,162576
+226,Ceratoscopelus townsendi,Dogtooth lampfish,272656,162577,Ceratoscopelus townsendi,dogtooth lampfish,Ceratoscopelus townsendi,dogtooth lampfish,Ceratoscopelus townsendi,Dogtooth lampfish,272656,162577
+227,Diaphus theta,California headlightfish,272694,162584,Diaphus theta,california headlightfish,Diaphus theta,California headlightfish,Diaphus theta,California headlightfish,272694,162584
+228,Diaphus,Headlightfishes,125819,162583,Diaphus,NA,Diaphus,NA,Diaphus,Headlightfishes,125819,162583
+229,Diaphus pacificus,Pacific headlightfish,272684,623790,Diaphus pacificus,NA,Diaphus pacificus,NA,Diaphus pacificus,Pacific headlightfish,272684,623790
+239,Diogenichthys atlanticus,Longfin lanternfish,126599,162676,Diogenichthys atlanticus,NA,Diogenichthys atlanticus,NA,Diogenichthys atlanticus,Longfin lanternfish,126599,162676
+241,Diogenichthys,NA,125820,162675,Diogenichthys,NA,Diogenichthys,NA,Diogenichthys,NA,125820,162675
+242,Diogenichthys laternatus,Diogenes lanternfish,272701,162677,Diogenichthys laternatus,Diogenes lanternfish,Diogenichthys laternatus,Diogenes lanternfish,Diogenichthys laternatus,Diogenes lanternfish,272701,162677
+243,Electrona risso,Chubby flashlightfish,126600,623732,Electrona risso,Electric lantern fish,Electrona risso,NA,Electrona risso,Chubby flashlightfish,126600,623732
+248,Lampadena,NA,125824,162702,Lampadena,NA,Lampadena,NA,Lampadena,NA,125824,162702
+249,Gonichthys tenuiculus,Slendertail lanternfish,272702,623813,Gonichthys tenuiculus,NA,Gonichthys tenuiculus,NA,Gonichthys tenuiculus,Slendertail lanternfish,272702,623813
+250,Hygophum,NA,125823,162692,Hygophum,NA,Hygophum,NA,Hygophum,NA,125823,162692
+251,Hygophum atratum,Thickhead lanternfish,272704,162695,Hygophum atratum,NA,Hygophum atratum,NA,Hygophum atratum,Thickhead lanternfish,272704,162695
+252,Hygophum reinhardtii,Slender lanternfish,126604,623875,Hygophum reinhardtii,Reinhardt's lantern fish,Hygophum reinhardtii,NA,Hygophum reinhardtii,Slender lanternfish,126604,623875
+253,Hygophum proximum,Firefly lanternfish,217700,623721,Hygophum proximum,Firefly lanternfish,Hygophum proximum,NA,Hygophum proximum,NA,217700,623721
+254,Bolinichthys,NA,125816,162761,Bolinichthys,NA,Bolinichthys,NA,Bolinichthys,NA,125816,162761
+255,Bolinichthys longipes,Popeye lampfish,272650,623750,Bolinichthys longipes,NA,Bolinichthys longipes,NA,Bolinichthys longipes,Popeye lampfish,272650,623750
+256,Lampadena urophaos,Sunbeam lampfish,126609,162703,Lampadena urophaos,sunbeam lampfish,Lampadena urophaos,NA,Lampadena urophaos,Sunbeam lampfish,126609,162703
+257,Lampadena luminosa,Luminous lanternfish,158896,162706,Lampadena luminosa,Luminous lanternfish,Lampadena luminosa,NA,Lampadena luminosa,NA,158896,162706
+258,Taaningichthys minimus,NA,126632,162742,Taaningichthys minimus,NA,Taaningichthys minimus,NA,Taaningichthys minimus,NA,126632,162742
+261,Lampanyctus,NA,125825,162632,Lampanyctus,NA,Lampanyctus,NA,Lampanyctus,NA,125825,162632
+263,Lampanyctus omostigma,NA,272714,182885,Lampanyctus omostigma,NA,Lampanyctus omostigma,NA,Lampanyctus omostigma,NA,272714,182885
+264,Lampanyctus parvicauda,Slimtail lampfish,272715,623832,Lampanyctus parvicauda,NA,Lampanyctus parvicauda,NA,Lampanyctus parvicauda,Slimtail lampfish,272715,623832
+265,Lampanyctus steinbecki,Longfin lampfish,272717,623836,Lampanyctus steinbecki,Longfin lampfish,Lampanyctus steinbecki,NA,Lampanyctus steinbecki,Longfin lampfish,272717,623836
+266,Lobianchia gemellarii,Cocco's lantern fish,158901,623876,Lobianchia gemellarii,Cocco's lantern fish,Lobianchia gemellarii,NA,Lobianchia gemellarii,NA,158901,623876
+267,Lampanyctus tenuiformis,Slender lanternfish,158898,623716,Lampanyctus tenuiformis,Slender lanternfish,Lampanyctus tenuiformis,NA,Lampanyctus tenuiformis,NA,158898,623716
+270,Loweina rara,Dwarf lanternfish,126625,162717,Loweina rara,Laura's lantern fish,Loweina rara,NA,Loweina rara,Dwarf lanternfish,126625,162717
+271,Dasyscopelus obtusirostris,NA,1525495,623878,Dasyscopelus obtusirostris,NA,Myctophum obtusirostre,NA,Myctophum obtusirostre,NA,1525495,623878
+272,Myctophum aurolaternatum,Golden lanternfish,217715,162727,Myctophum aurolaternatum,NA,Myctophum aurolaternatum,NA,Myctophum aurolaternatum,Golden lanternfish,217715,162727
+273,Myctophum nitidulum,Pearly lanternfish,126626,162726,Myctophum nitidulum,Pearly lanternfish,Myctophum nitidulum,NA,Myctophum nitidulum,Pearly lanternfish,126626,162726
+274,Myctophum,NA,125829,162719,Myctophum,NA,Myctophum,NA,Myctophum,NA,125829,162719
+275,Myctophum lychnobium,Nightlight lanternfish,272723,623845,Myctophum lychnobium,Nightlight lanternfish,Myctophum lychnobium,NA,Myctophum lychnobium,NA,272723,623845
+276,Dasyscopelus asper,NA,317659,162721,Dasyscopelus asper,NA,Myctophum asperum,NA,Myctophum asperum,NA,317659,162721
+277,Lampanyctus nobilis,Noble lampfish,158897,162643,Lampanyctus nobilis,Noble lampfish,Lampanyctus nobilis,NA,Lampanyctus nobilis,NA,158897,162643
+279,Dasyscopelus selenops,NA,1525496,162724,Dasyscopelus selenops,NA,Myctophum selenops,NA,Myctophum selenops,NA,1525496,162724
+281,Notolychnus valdiviae,Topside lampfish,126629,162729,Notolychnus valdiviae,topside lampfish,Notolychnus valdiviae,NA,Notolychnus valdiviae,Topside lampfish,126629,162729
+282,Notoscopelus,NA,125831,162653,Notoscopelus,NA,Notoscopelus,NA,Notoscopelus,NA,125831,162653
+283,Notoscopelus resplendens,Patchwork lampfish,158916,162654,Notoscopelus resplendens,patchwork lampfish,Notoscopelus resplendens,patchwork lampfish,Notoscopelus resplendens,Patchwork lampfish,158916,162654
+285,Parvilux boschmai,NA,282177,623860,Parvilux boschmai,NA,Parvilux boschmai,NA,Parvilux boschmai,NA,282177,623860
+286,Parvilux ingens,Giant lampfish,282178,162771,Parvilux ingens,NA,Parvilux ingens,NA,Parvilux ingens,Giant lampfish,282178,162771
+287,Protomyctophum thompsoni,Northern flashlightfish,272732,162687,Protomyctophum thompsoni,bigeye lanternfish,Protomyctophum thompsoni,NA,Protomyctophum thompsoni,Northern flashlightfish,272732,162687
+288,Protomyctophum crockeri,California flashlightfish,272731,162685,Protomyctophum crockeri,penlight fish,Protomyctophum crockeri,flashlightfish,Protomyctophum crockeri,California flashlightfish,272731,162685
+289,Protomyctophum,NA,125832,162684,Protomyctophum,NA,Protomyctophum,NA,Protomyctophum,NA,125832,162684
+292,Stenobrachius leucopsarus,Northern lampfish,254363,162664,Stenobrachius leucopsarus,northern lampfish,Stenobrachius leucopsarus,northern lampfish,Stenobrachius leucopsarus,Northern lampfish,254363,162664
+293,Stenobrachius nannochir,Garnet lampfish,254364,162665,Stenobrachius nannochir,garnet lampfish,Stenobrachius nannochir,garnet lampfish,Stenobrachius nannochir,Garnet lampfish,254364,162665
+296,Symbolophorus californiensis,California lanternfish,272733,623871,Symbolophorus californiensis,Bigfin lanternfish,Symbolophorus californiensis,bigfin lanternfish,Symbolophorus californiensis,California lanternfish,272733,623871
+297,Symbolophorus evermanni,Evermann's lanternfish,217718,162671,Symbolophorus evermanni,Evermann's lantern fish,Symbolophorus evermanni,NA,Symbolophorus evermanni,Evermann's lanternfish,217718,162671
+298,Symbolophorus,NA,125833,162666,Symbolophorus,NA,Symbolophorus,NA,Symbolophorus,NA,125833,162666
+299,Tarletonbeania crenularis,Blue lanternfish,282927,162673,Tarletonbeania crenularis,blue lanternfish,Tarletonbeania crenularis,blue lanternfish,Tarletonbeania crenularis,Blue lanternfish,282927,162673
+301,Triphoturus mexicanus,Mexican lampfish,278566,162766,Triphoturus mexicanus,Mexican lampfish,Triphoturus mexicanus,Mexican lampfish,Triphoturus mexicanus,Mexican lampfish,278566,162766
+302,Triphoturus nigrescens,Highseas lampfish,217721,623873,Triphoturus nigrescens,Highseas lampfish,Triphoturus nigrescens,NA,Triphoturus nigrescens,Highseas lampfish,217721,623873
+303,Triphoturus,NA,205908,162765,Triphoturus,NA,Triphoturus,NA,Triphoturus,NA,205908,162765
+305,Scopelengys tristis,Pacific blackchin,126636,162777,Scopelengys tristis,Pacific blackchin,Scopelengys tristis,NA,Scopelengys tristis,Pacific blackchin,126636,162777
+306,Scopelengys,NA,125836,162776,Scopelengys,NA,Scopelengys,NA,Scopelengys,NA,125836,162776
+310,Paralepididae,Barradcudinas,125447,162463,Paralepididae,barracudinas,Paralepididae,barracudinas,Paralepididae,Barradcudinas,125447,162463
+311,Lestidiops ringens,Slender barracudina,272096,644717,Lestidiops ringens,Slender barracudina,Lestidiops ringens,slender barracudina,Lestidiops ringens,Slender barracudina,272096,644717
+312,Lestidiops,NA,125675,162476,Lestidiops,NA,Lestidiops,NA,Lestidiops,NA,125675,162476
+313,Lestidiops neles,NA,272094,644724,Lestidiops neles,NA,Lestidiops neles,NA,Lestidiops neles,NA,272094,644724
+314,Lestidiops pacificus,NA,272095,644725,Lestidiops pacificus,NA,Lestidiops pacificus,NA,Lestidiops pacificus,NA,272095,644725
+315,Stemonosudis macrura,Sharpchin barracudina,220334,644731,Stemonosudis macrura,NA,Stemonosudis macrura,NA,Stemonosudis macrura,Sharpchin barracudina,220334,644731
+316,Stemonosudis,Black-spotted barracudina,158749,162501,Stemonosudis,Black-spotted barracudina,Stemonosudis,NA,Stemonosudis,NA,158749,162501
+317,Arctozenus risso,Ribbon barracudina,126352,644687,Arctozenus risso,white barracudina,Arctozenus risso,white barracudina,Arctozenus risso,Ribbon barracudina,126352,644687
+318,Magnisudis atlantica,Duckbill barracudina,126359,644691,Magnisudis atlantica,duckbill barracudina,Magnisudis atlantica,duckbill barracudina,Magnisudis atlantica,Duckbill barracudina,126359,644691
+319,Saccopharyngidae,swallowers,125586,161644,Saccopharyngidae,swallowers,Saccopharyngidae,swallowers,Saccopharyngidae,NA,125586,161644
+320,Saccopharynx,Whiptail gulpers,126138,161645,Saccopharynx,NA,Saccopharynx,NA,Saccopharynx,Whiptail gulpers,126138,161645
+321,Sudis atrox,Hideous barracudina,158752,162505,Sudis atrox,fierce pike smelt,Sudis atrox,NA,Sudis atrox,Hideous barracudina,158752,162505
+322,Saccopharynx lavenbergi,Whiptail gulper,274336,635769,Saccopharynx lavenbergi,NA,Saccopharynx lavenbergi,NA,Saccopharynx lavenbergi,Whiptail gulper,274336,635769
+323,Lestidium,NA,158870,162464,Lestidium,NA,Lestidium,NA,Lestidium,NA,158870,162464
+324,Lestidium bigelowi,NA,398374,644835,Lestidium bigelowi,NA,Lestidium bigelowi,NA,Lestidium bigelowi,NA,398374,644835
+325,Chlorophthalmus,Greeneyes,125664,162428,Chlorophthalmus,NA,Chlorophthalmus,NA,Chlorophthalmus,Greeneyes,125664,162428
+326,Anotopterus pharao,Daggertooth,126334,162534,Anotopterus pharao,daggertooth,Anotopterus pharao,daggertooth,Anotopterus pharao,Daggertooth,126334,162534
+327,Uncisudis quadrimaculata,NA,126364,644716,Uncisudis quadrimaculata,NA,Uncisudis quadrimaculata,NA,Uncisudis quadrimaculata,NA,126364,644716
+328,Uncisudis advena,NA,272101,644693,Uncisudis advena,NA,Uncisudis advena,NA,Uncisudis advena,NA,272101,644693
+329,Nemichthyidae,Snipe Eels,125432,161612,Nemichthyidae,snipe eels,Nemichthyidae,snipe eels,Nemichthyidae,Snipe Eels,125432,161612
+331,Omosudis lowii,halterfish,272087,644694,Omosudis lowii,halterfish,Omosudis lowii,halterfish,Omosudis lowii,NA,272087,644694
+332,Avocettina,NA,125638,161614,Avocettina,NA,Avocettina,NA,Avocettina,NA,125638,161614
+333,Avocettina infans,Blackline snipe eel,126304,161619,Avocettina infans,avocet snipe-eel,Avocettina infans,snipe eel,Avocettina infans,Blackline snipe eel,126304,161619
+334,Benthalbella,NA,125681,162549,Benthalbella,NA,Benthalbella,NA,Benthalbella,NA,125681,162549
+335,Scopelarchidae,Pearleyes,125448,162548,Scopelarchidae,pearleyes,Scopelarchidae,pearleyes,Scopelarchidae,Pearleyes,125448,162548
+336,Benthalbella dentata,Northern pearleye,254572,162550,Benthalbella dentata,northern pearleye,Benthalbella dentata,northern pearleye,Benthalbella dentata,Northern pearleye,254572,162550
+337,Benthalbella linguidens,longfin pearleye,272103,644721,Benthalbella linguidens,longfin pearleye,Benthalbella linguidens,longfin pearleye,Benthalbella linguidens,NA,272103,644721
+338,Scopelarchus,Pearleyes,125683,162553,Scopelarchus,NA,Scopelarchus,NA,Scopelarchus,Pearleyes,125683,162553
+339,Scopelarchus analis,Blackbelly pearleye,126367,162555,Scopelarchus analis,short fin pearleye,Scopelarchus analis,short fin pearleye,Scopelarchus analis,Blackbelly pearleye,126367,162555
+340,Scopelarchus guentheri,Staring pearleye,217724,162561,Scopelarchus guentheri,NA,Scopelarchus guentheri,NA,Scopelarchus guentheri,Staring pearleye,217724,162561
+341,Scopelarchus stephensi,NA,272107,644730,Scopelarchus stephensi,NA,Scopelarchus stephensi,NA,Scopelarchus stephensi,NA,272107,644730
+342,Scopelarchoides nicholsi,NA,275617,644696,Scopelarchoides nicholsi,NA,Scopelarchoides nicholsi,NA,Scopelarchoides nicholsi,NA,275617,644696
+343,Rosenblattichthys volucris,Chubby pearleye,272106,644711,Rosenblattichthys volucris,NA,Rosenblattichthys volucris,NA,Rosenblattichthys volucris,Chubby pearleye,272106,644711
+344,Neoconger vermiformis,NA,275441,635484,Neoconger vermiformis,NA,Neoconger vermiformis,NA,Neoconger vermiformis,NA,275441,635484
+345,Evermannellidae,Sabertooth Fishes,125443,162535,Evermannellidae,sabertooth fishes,Evermannellidae,sabertoothfishes,Evermannellidae,Sabertooth Fishes,125443,162535
+346,Evermannella indica,Sabertooth,126339,162544,Evermannella indica,Indian sabertooth,Evermannella indica,Indian sabretooth,Evermannella indica,Sabertooth,126339,162544
+347,Evermannella ahlstromi,NA,272063,644723,Evermannella ahlstromi,NA,Evermannella ahlstromi,NA,Evermannella ahlstromi,NA,272063,644723
+348,Eurypharynx pelecanoides,Umbrellamouth gulper,127165,161653,Eurypharynx pelecanoides,pelican gulper,Eurypharynx pelecanoides,pelican gulper,Eurypharynx pelecanoides,Umbrellamouth gulper,127165,161653
+349,Gymnothorax,common morays,125636,161185,Gymnothorax,NA,Gymnothorax,common morays,Gymnothorax,NA,125636,161185
+350,Cetomimidae,Ribbontails,125460,162809,Cetomimidae,flabby whalefishes,Mirapinnidae,hairy fishes,Mirapinnidae,Ribbontails,125460,162809
+351,Eutaeniophorus,NA,125711,162814,Eutaeniophorus,NA,Eutaeniophorus,NA,Eutaeniophorus,NA,125711,162814
+352,Eutaeniophorus festivus,Festive ribbontail,126409,162815,Eutaeniophorus festivus,festive ribbonfish,Eutaeniophorus festivus,NA,Eutaeniophorus festivus,Festive ribbontail,126409,162815
+353,Facciolella gilbertii,Dogface witch eel,271908,635857,Facciolella gilbertii,NA,Facciolella gilbertii,dogface witch-eel,Facciolella gilbertii,Dogface witch eel,271908,635857
+354,Rhynchoconger,NA,158570,635342,Rhynchoconger,NA,Rhynchoconger,NA,Rhynchoconger,NA,158570,635342
+355,Anguilliformes,Eels,10295,161123,Anguilliformes,NA,Anguilliformes,eels,Anguilliformes,Eels,10295,161123
+356,Nettastomatidae,Duckbill Eels,125433,161301,Nettastomatidae,duckbill eels,Nettastomatidae,duckbill eels,Nettastomatidae,Duckbill Eels,125433,161301
+357,Bathycongrus macrurus,Shorthead conger,276870,635917,Bathycongrus macrurus,shorthead conger,Bathycongrus macrurus,shorthead conger,Bathycongrus macrurus,Shorthead conger,276870,635917
+358,Congridae,Conger Eels,125427,161324,Congridae,garden eels,Congridae,conger eels,Congridae,Conger Eels,125427,161324
+359,Ariosoma gilberti,Gilbert's conger,271722,635894,Ariosoma gilberti,sharpnose conger,Ariosoma gilberti,sharpnose conger,Ariosoma gilberti,Gilbert's conger,271722,635894
+361,Paraconger californiensis,California conger,271789,635695,Paraconger californiensis,ringeye conger,Paraconger californiensis,ringeye conger,Paraconger californiensis,California conger,271789,635695
+362,Rhynchoconger nitens,Bignose nitens,275426,635725,Rhynchoconger nitens,needletail conger,Rhynchoconger nitens,needletail conger,Rhynchoconger nitens,Bignose nitens,275426,635725
+363,Chiloconger,NA,268744,635341,Chiloconger,NA,Chiloconger,NA,Chiloconger,NA,268744,635341
+364,Nemichthys,NA,125639,161621,Nemichthys,NA,Nemichthys,NA,Nemichthys,NA,125639,161621
+365,Nemichthys scolopaceus,Brown snipe eel,126306,161624,Nemichthys scolopaceus,slender snipe eel,Nemichthys scolopaceus,Atlantic snipe eel,Nemichthys scolopaceus,Brown snipe eel,126306,161624
+366,Heteroconger digueti,Cortez garden eel,271778,635966,Heteroconger digueti,Cortez garden eel,Heteroconger digueti,Cortez garden eel,Heteroconger digueti,Cortez garden eel,271778,635966
+367,Cyema atrum,Bobtail eel (small leaflike eel),127164,161632,Cyema atrum,bobtail Eel,Cyema atrum,deepwater eel,Cyema atrum,Bobtail eel (small leaflike eel),127164,161632
+368,Cyematidae,Bobtail Eels,125583,161630,Cyematidae,bobtail snipe eels,Cyematidae,bobtail snipe eels,Cyematidae,Bobtail Eels,125583,161630
+369,Cyematidae,bobtail snipe eels,125583,635826,Cyematidae,bobtail snipe eels,Leptocephalus holti,NA,Leptocephalus holti,NA,125583,635826
+370,Muraenidae,Morays,125431,161160,Muraenidae,moray eels,Muraenidae,morays,Muraenidae,Morays,125431,161160
+371,Chlopsis,NA,125621,161157,Chlopsis,NA,Chlopsis,NA,Chlopsis,NA,125621,161157
+372,Gymnothorax mordax,California moray,271856,161194,Gymnothorax mordax,California moray,Gymnothorax mordax,California moray,Gymnothorax mordax,California moray,271856,161194
+373,Avocettina bowersii,Smalleye snipe eel,271904,635681,Avocettina bowersii,NA,Avocettina bowersii,NA,Avocettina bowersii,Smalleye snipe eel,271904,635681
+374,Serrivomer sector,Sawtooth eel,272005,161609,Serrivomer sector,Deep-sea snipe,Serrivomer sector,NA,Serrivomer sector,Sawtooth eel,272005,161609
+375,Ophichthidae,Snake Eels,125434,161419,Ophichthidae,snake eels,Ophichthidae,worm eels,Ophichthidae,Snake Eels,125434,161419
+376,Ophichthus zophochir,Yellow snake eel,271991,161469,Ophichthus zophochir,yellow snake eel,Ophichthus zophochir,yellow snake eel,Ophichthus zophochir,Yellow snake eel,271991,161469
+377,Ophichthus,snake eels,125647,161458,Ophichthus,NA,Ophichthus,snake eels,Ophichthus,NA,125647,161458
+378,Serrivomeridae,Sawtooth Eels,125435,161603,Serrivomeridae,sawtooth eels,Serrivomeridae,sawtooth eels,Serrivomeridae,Sawtooth Eels,125435,161603
+379,Leptocephalus giganteus,NA,314780,635825,Leptocephalus giganteus,NA,Leptocephalus giganteus,NA,Leptocephalus giganteus,NA,314780,635825
+380,Trachipteridae,Ribbonfishes,125483,166339,Trachipteridae,ribbonfishes,Trachipteridae,ribbonfishes,Trachipteridae,Ribbonfishes,125483,166339
+381,Trachipterus,ribbonfishes,125788,166340,Trachipterus,NA,Trachipterus,ribbonfishes,Trachipterus,NA,125788,166340
+382,Trachipterus altivelis,King-of-the-salmon,272531,166341,Trachipterus altivelis,king-of-the-salmon,Trachipterus altivelis,king-of-the-salmon,Trachipterus altivelis,King-of-the-salmon,272531,166341
+383,Trachipterus fukuzakii,Tapertail ribbonfish,272532,166343,Trachipterus fukuzakii,tapertail ribbonfish,Trachipterus fukuzakii,tapertail ribbonfish,Trachipterus fukuzakii,Tapertail ribbonfish,272532,166343
+384,Zu cristatus,Scalloped ribbonfish,126529,166353,Zu cristatus,scalloped ribbonfish,Zu cristatus,scalloped ribbonfish,Zu cristatus,Scalloped ribbonfish,126529,166353
+385,Desmodema lorum,Whiptail ribbonfish,275872,166351,Desmodema lorum,whiptail ribbonfish,Desmodema lorum,whiptail ribbonfish,Desmodema lorum,Whiptail ribbonfish,275872,166351
+386,Radiicephalus elongatus,Tapertail,126524,615910,Radiicephalus elongatus,NA,Radiicephalus elongatus,NA,Radiicephalus elongatus,Tapertail,126524,615910
+387,Lophotidae,Crestfishes,125479,166332,Lophotidae,crestfishes,Lophotidae,crestfishes,Lophotidae,Crestfishes,125479,166332
+388,Beryciformes,NA,10322,166083,Beryciformes,NA,Beryciformes,NA,Beryciformes,NA,10322,166083
+389,Sargocentron suborbitale,Tinsel squirrelfish,1021098,622127,Sargocentron suborbitale,NA,Sargocentron suborbitalis,tinsel squirrelfish,Sargocentron suborbitalis,Tinsel squirrelfish,1021098,622127
+390,Diretmidae,Spinyfins,125457,166131,Diretmidae,spinyfins,Diretmidae,spinyfins,Diretmidae,Spinyfins,125457,166131
+391,Diretmoides pauciradiatus,Silver spinyfin,126397,622112,Diretmoides pauciradiatus,NA,Diretmoides pauciradiatus,NA,Diretmoides pauciradiatus,Silver spinyfin,126397,622112
+392,Myrophis vafer,Pacific worm eel,275496,161454,Myrophis vafer,Pacific worm eel,Myrophis vafer,Pacific worm eel,Myrophis vafer,Pacific worm eel,275496,161454
+393,Monacanthidae,Filefishes,125610,203428,Monacanthidae,filefishes,Monacanthidae,filefishes,Monacanthidae,Filefishes,125610,203428
+394,Aluterus scriptus,Scrawled filefish,159491,173134,Aluterus scriptus,scrawled filefish,Aluterus scriptus,scrawled filefish,Aluterus scriptus,Scrawled filefish,159491,173134
+395,Melamphaidae,Bigscales,125599,166092,Melamphaidae,ridgeheads,Melamphaidae,deepsea bigscale fishes,Melamphaidae,Bigscales,125599,166092
+396,Melamphaes lugubris,Highsnout bigscale,274932,166094,Melamphaes lugubris,highsnout melamphid,Melamphaes lugubris,highsnout melamphid,Melamphaes lugubris,Highsnout bigscale,274932,166094
+397,Melamphaes parvus,Little bigscale,274935,649666,Melamphaes parvus,NA,Melamphaes parvus,NA,Melamphaes parvus,Little bigscale,274935,649666
+398,Melamphaes,NA,126181,166093,Melamphaes,NA,Melamphaes,NA,Melamphaes,NA,126181,166093
+399,Melamphaes simus,NA,127269,166103,Melamphaes simus,NA,Melamphaes simus,NA,Melamphaes simus,NA,127269,166103
+400,Mola mola,Ocean sunfish,127405,173414,Mola mola,ocean sunfish,Mola mola,ocean sunfish,Mola mola,Ocean sunfish,127405,173414
+401,Myripristis,NA,159383,166210,Myripristis,NA,Myripristis,NA,Myripristis,NA,159383,166210
+402,Anoplogaster cornuta,Fangtooth,126393,166152,Anoplogaster cornuta,fangtooth,Anoplogaster cornuta,fangtooth,Anoplogaster cornuta,Fangtooth,126393,166152
+403,Congriscus megastoma,Big mouth (Large leaflike eel),280374,635931,Congriscus megastoma,Bigmouth conger,Congriscus megastomus,NA,Congriscus megastomus,Big mouth (Large leaflike eel),280374,635931
+404,Poromitra,NA,126182,166107,Poromitra,NA,Poromitra,NA,Poromitra,NA,126182,166107
+405,Poromitra crassiceps,Crested bigscale,127273,166108,Poromitra crassiceps,crested bigscale,Poromitra crassiceps,crested bigscale,Poromitra crassiceps,Crested bigscale,127273,166108
+406,Poromitra megalops,NA,127274,166110,Poromitra megalops,NA,Poromitra megalops,NA,Poromitra megalops,NA,127274,166110
+407,Myripristis leiognathus,Panamic squirrelfish,276199,166238,Myripristis leiognathus,Panamic soldierfish,Myripristis leiognathus,Pacific soldierfish,Myripristis leiognathus,Panamic squirrelfish,276199,166238
+408,Lactoria fornasini,Thornback cowfish,219902,173255,Lactoria fornasini,thornback cowfish,Lactoria fornasini,shortspined cowfish,Lactoria fornasini,Thornback cowfish,219902,173255
+409,Scopeloberyx robustus,Longjaw bigscale,127276,182909,Scopeloberyx robustus,Longjaw bigscale,Scopeloberyx robustus,NA,Scopeloberyx robustus,Longjaw bigscale,127276,182909
+410,Lactoria diaphana,Spiny boxfish,219903,173257,Lactoria diaphana,spiny boxfish,Lactoria diaphana,spiny boxfish,Lactoria diaphana,Spiny boxfish,219903,173257
+411,Scopelogadus,NA,126184,166115,Scopelogadus,NA,Scopelogadus,NA,Scopelogadus,NA,126184,166115
+412,Scopelogadus bispinosus,Twospine bigscale,306621,182911,Scopelogadus bispinosus,NA,Scopelogadus mizolepis bispinosus,NA,Scopelogadus mizolepis bispinosus,Twospine bigscale,306621,182911
+413,Holocentridae,Squirrelfishes,125458,166170,Holocentridae,soldierfishes,Holocentridae,soldierfishes,Holocentridae,Squirrelfishes,125458,166170
+414,Ostraciidae,Boxfishes,125611,173235,Ostraciidae,boxfishes,Ostraciidae,cowfishes,Ostraciidae,Boxfishes,125611,173235
+415,Balistidae,Triggerfishes,125607,173128,Balistidae,triggerfishes,Balistidae,filefishes,Balistidae,Triggerfishes,125607,173128
+416,Ostracion meleagris,Spotted boxfish,219905,173252,Ostracion meleagris,whitespotted boxfish,Ostracion meleagris,pahu,Ostracion meleagris,Spotted boxfish,219905,173252
+417,Balistes polylepis,Finescale triggerfish,275234,173140,Balistes polylepis,finescale triggerfish,Balistes polylepis,finescale triggerfish,Balistes polylepis,Finescale triggerfish,275234,173140
+418,Canthidermis maculata,Rough triggerfish,127398,173169,Canthidermis maculata,rough trigger-fish,Canthidermis maculata,rough triggerfish,Canthidermis maculata,Rough triggerfish,127398,173169
+419,Diodon hystrix,Porcupinefish,127403,173391,Diodon hystrix,spot-fin porcupinefish,Diodon hystrix,porcupinefish,Diodon hystrix,Porcupinefish,127403,173391
+420,Tetraodontidae,Puffers,125612,173283,Tetraodontidae,puffers,Tetraodontidae,toadfishes,Tetraodontidae,Puffers,125612,173283
+421,Diodon eydouxii,pelagic porcupinefish,127401,615870,Diodon eydouxii,pelagic porcupinefish,Diodon eydouxii,pelagic porcupinefish,Diodon eydouxii,NA,127401,615870
+422,Diodon holocanthus,Balloonfish,127402,173392,Diodon holocanthus,long-spine porcupinefish,Diodon holocanthus,balloonfish,Diodon holocanthus,Balloonfish,127402,173392
+423,Perciformes,perch-like fishes,11014,167640,Perciformes,NA,Perciformes,perch-like fishes,Perciformes,NA,11014,167640
+424,Diodon,porcupinefishes,126231,173390,Diodon,NA,Diodon,porcupinefishes,Diodon,NA,126231,173390
+425,Serranidae,Sea Basses,125561,167674,Serranidae,sea basses: groupers and fairy basslets,Serranidae,groupers,Serranidae,Sea Basses,125561,167674
+426,Epinephelus,groupers,126068,167694,Epinephelus,NA,Epinephelus,groupers,Epinephelus,NA,126068,167694
+427,Epinephelidae,NA,1776907,551018,Epinephelidae,NA,Epinephelinae,NA,Epinephelinae,NA,151758,551018
+428,Pronotogrammus multifasciatus,Threadfin bass,282366,167841,Pronotogrammus multifasciatus,threadfin bass,Pronotogrammus multifasciatus,threadfin bass,Pronotogrammus multifasciatus,Threadfin bass,282366,167841
+429,Paralabrax clathratus,Kelp bass,282054,167832,Paralabrax clathratus,kelp bass,Paralabrax clathratus,kelp bass,Paralabrax clathratus,Kelp bass,282054,167832
+430,Serranidae,sea basses: groupers and fairy basslets,125561,643089,Serranidae,sea basses: groupers and fairy basslets,Serraninae,NA,Serraninae,NA,151756,643089
+431,Paralabrax,Kelp and sand basses,270221,167830,Paralabrax,NA,Paralabrax,NA,Paralabrax,Kelp and sand basses,270221,167830
+432,Paralabrax nebulifer,Barred sand bass,282059,167834,Paralabrax nebulifer,barred sand bass,Paralabrax nebulifer,barred sand bass,Paralabrax nebulifer,Barred sand bass,282059,167834
+433,Diplectrum,NA,159349,167791,Diplectrum,NA,Diplectrum,NA,Diplectrum,NA,159349,167791
+434,Serranus,NA,126070,167849,Serranus,NA,Serranus,NA,Serranus,NA,126070,167849
+435,Anthiadidae,NA,1758484,167675,Anthiadidae,NA,Anthiinae,NA,Anthiinae,NA,1061345,167675
+436,Phtheirichthys lineatus,Slender suckerfish,126849,168578,Phtheirichthys lineatus,slender suckerfish,Phtheirichthys lineatus,slender suckerfish,Phtheirichthys lineatus,Slender suckerfish,126849,168578
+437,Hemanthias peruanus,Rose threadfin bass,275930,167802,Hemanthias peruanus,splittail bass,Hemanthias peruanus,splittail bass,Hemanthias peruanus,Rose threadfin bass,275930,167802
+438,Epinephelidae,Soapfishes,1776907,643093,Epinephelidae,NA,Grammistini,NA,Grammistini,Soapfishes,151758,643093
+439,Hemanthias signifer,Deepwater thread bass (splittail bass),275931,167804,Hemanthias signifer,hookthroat bass,Hemanthias signifer,splittail bass,Hemanthias signifer,Deepwater thread bass (splittail bass),275931,167804
+440,Priacanthidae,Bigeyes,125555,168176,Priacanthidae,catalufas,Priacanthidae,bigeyes,Priacanthidae,Bigeyes,125555,168176
+441,Pristigenys serrula,Popeye catalufa,276037,168192,Pristigenys serrula,popeye catalufa,Pristigenys serrula,popeye catalufa,Pristigenys serrula,Popeye catalufa,276037,168192
+442,Remora,NA,125964,168568,Remora,NA,Remora,NA,Remora,NA,125964,168568
+443,Howellidae,Pelagic basslets,267023,641836,Howellidae,oceanic basslets,Howellidae,NA,Howellidae,Pelagic basslets,267023,641836
+444,Apogon,cardinalfishes,125913,168197,Apogon,NA,Apogon,cardinalfishes,Apogon,NA,125913,168197
+445,Apogonidae,Cardinalfishes,125518,168196,Apogonidae,cardinalfishes,Apogonidae,cardinalfishes,Apogonidae,Cardinalfishes,125518,168196
+446,Howella,Pelagic basslet,126040,168331,Howella,NA,Howella,NA,Howella,Pelagic basslet,126040,168331
+447,Howella pammelas,NA,273683,641889,Howella pammelas,NA,Howella pammelas,NA,Howella pammelas,NA,273683,641889
+448,Hemanthias,NA,159223,167799,Hemanthias,NA,Hemanthias,NA,Hemanthias,NA,159223,167799
+449,Lutjanus novemfasciatus,Dog snapper,276544,168890,Lutjanus novemfasciatus,Pacific dog snapper,Lutjanus novemfasciatus,black snapper,Lutjanus novemfasciatus,Dog snapper,276544,168890
+450,Lutjanidae,Snappers,151453,168845,Lutjanidae,snappers,Lutjanidae,snappers,Lutjanidae,Snappers,151453,168845
+451,Xenichthys xanti,Longfin salema,283177,630232,Xenichthys xanti,longfin salema,Xenichthys xanti,bigeye grunt,Xenichthys xanti,Longfin salema,283177,630232
+452,Brachygenys californiensis,Salema,1577329,169118,Brachygenys californiensis,NA,Xenistius californiensis,salema,Xenistius californiensis,Salema,1577329,169118
+453,Cephalopholis colonus,Pacific creolefish,1750630,551113,Cephalopholis colonus,NA,Paranthias colonus,Pacific creole-fish,Paranthias colonus,Pacific creolefish,282083,551113
+454,Lutjanus,common snappers,159791,168846,Lutjanus,NA,Lutjanus,common snappers,Lutjanus,NA,159791,168846
+455,Lutjanus peru,Red snapper,276546,168897,Lutjanus peru,Pacific red snapper,Lutjanus peru,Pacific Red Snapper,Lutjanus peru,Red snapper,276546,168897
+456,Haemulon,grunts,158806,169057,Haemulon,NA,Haemulon,grunts,Haemulon,NA,158806,169057
+457,Pronotogrammus,NA,270526,167839,Pronotogrammus,NA,Pronotogrammus,NA,Pronotogrammus,NA,270526,167839
+458,Pomadasys,burros,126011,169091,Pomadasys,NA,Pomadasys,burros,Pomadasys,NA,126011,169091
+459,Apogon atricaudus,Plain cardinalfish,272978,642065,Apogon atricaudus,plain cardinalfish,Apogon atricaudus,plain cardinalfish,Apogon atricaudus,Plain cardinalfish,272978,642065
+460,Mullidae,Goatfishes,125547,169406,Mullidae,goatfishes,Mullidae,goat fishes,Mullidae,Goatfishes,125547,169406
+461,Mulloidichthys dentatus,Mexican goatfish,277990,169414,Mulloidichthys dentatus,Mexican goatfish,Mulloidichthys dentatus,Mexican goatfish,Mulloidichthys dentatus,Mexican goatfish,277990,169414
+462,Apogon retrosella,Barspot cardinalfish,273084,168278,Apogon retrosella,barspot cardinalfish,Apogon retrosella,Cortez cardinalfish,Apogon retrosella,Barspot cardinalfish,273084,168278
+470,Atherinopsidae,Silversides,266995,630579,Atherinopsidae,neotropical silversides,Atherinopsidae,New World silversides,Atherinopsidae,Silversides,266995,630579
+471,Atherinops,NA,268431,165985,Atherinops,NA,Atherinops,NA,Atherinops,NA,268431,165985
+479,Lobotes surinamensis,Tripletail,126973,169007,Lobotes surinamensis,tripletail,Lobotes surinamensis,tripletail,Lobotes surinamensis,Tripletail,126973,169007
+480,Mugilidae,Mullets,125546,170333,Mugilidae,mullets,Mugilidae,mullets,Mugilidae,Mullets,125546,170333
+481,Mugil,gray mullets,126032,170334,Mugil,NA,Mugil,gray mullets,Mugil,NA,126032,170334
+485,Sphyraenidae,Barracudas,125565,170424,Sphyraenidae,barracudas,Sphyraenidae,barracudas,Sphyraenidae,Barracudas,125565,170424
+486,Sphyraena argentea,Pacific barracuda (California barracuda),273978,170426,Sphyraena argentea,Pacific barracuda,Sphyraena argentea,Pacific barracuda,Sphyraena argentea,Pacific barracuda (California barracuda),273978,170426
+487,Sphyraena,barracudas,126084,170425,Sphyraena,NA,Sphyraena,barracudas,Sphyraena,NA,126084,170425
+488,Sphyraena ensis,Mexican barracuda,273979,170437,Sphyraena ensis,Mexican barracuda,Sphyraena ensis,vicuda,Sphyraena ensis,Mexican barracuda,273979,170437
+490,Polynemidae,Threadfins,125551,170445,Polynemidae,threadfins,Polynemidae,threadfins,Polynemidae,Threadfins,125551,170445
+491,Gnathanodon speciosus,Golden jack,218429,168753,Gnathanodon speciosus,golden trevally,Gnathanodon speciosus,yellow jack,Gnathanodon speciosus,Golden jack,218429,168753
+492,Selene peruviana,Pacific moonfish,273286,168683,Selene peruviana,Pacific moonfish,Selene peruviana,Pacific Moonfish,Selene peruviana,Pacific moonfish,273286,168683
+493,Trachinotus paitensis,Paloma pompano,273296,168714,Trachinotus paitensis,paloma pompano,Trachinotus paitensis,Paloma Pompano,Trachinotus paitensis,Paloma pompano,273296,168714
+494,Trachinotus kennedyi,Pacific permit,273292,168713,Trachinotus kennedyi,blackblotch pompano,Trachinotus kennedyi,Blackblotch Pompano,Trachinotus kennedyi,Pacific permit,273292,168713
+495,Gerreidae,Mojarras,151456,169013,Gerreidae,mojarras,Gerreidae,mojarras,Gerreidae,Mojarras,151456,169013
+496,Eucinostomus,Pacific flagfin mojarra,159731,169014,Eucinostomus,NA,Eucinostomus,mojarras,Eucinostomus,Pacific flagfin mojarra,159731,169014
+497,Trachinotus rhodopus,Gafftopsail pompano,273297,168715,Trachinotus rhodopus,gafftopsail pompano,Trachinotus rhodopus,Gafftopsail Pompano,Trachinotus rhodopus,Gafftopsail pompano,273297,168715
+498,Oligoplites saurus,Yellowtail leatherjacket,159645,168673,Oligoplites saurus,leatherjack,Oligoplites saurus,Leatherjack,Oligoplites saurus,Yellowtail leatherjacket,159645,168673
+499,Alectis ciliaris,African pompano,159629,168602,Alectis ciliaris,African pompano,Alectis ciliaris,African Pompano,Alectis ciliaris,African pompano,159629,168602
+500,Carangidae,Jacks,125523,168584,Carangidae,jacks and pompanos,Carangidae,jacks,Carangidae,Jacks,125523,168584
+501,Caranx,cavallas,125936,168605,Caranx,NA,Caranx,cavallas,Caranx,NA,125936,168605
+502,Caranx caballus,Green jack,273271,168611,Caranx caballus,green jack,Caranx caballus,Green Jack,Caranx caballus,Green jack,273271,168611
+503,Caranx sexfasciatus,Bigeye crevalle jack,218404,168620,Caranx sexfasciatus,bigeye trevally,Caranx sexfasciatus,great trevally,Caranx sexfasciatus,Bigeye crevalle jack,218404,168620
+504,Elagatis bipinnulata,Rainbow runner,126809,168738,Elagatis bipinnulata,rainbow runner,Elagatis bipinnulata,Rainbow Runner,Elagatis bipinnulata,Rainbow runner,126809,168738
+505,Selene,"Moonfishes, lookdowns",125943,168679,Selene,NA,Selene,moonfishes,Selene,"Moonfishes, lookdowns",125943,168679
+506,Chloroscombrus,Bumpers,159481,168669,Chloroscombrus,NA,Chloroscombrus,bumpers,Chloroscombrus,Bumpers,159481,168669
+507,Chloroscombrus orqueta,Pacific bumper,276245,168671,Chloroscombrus orqueta,Pacific bumper,Chloroscombrus orqueta,Pacific Bumper,Chloroscombrus orqueta,Pacific bumper,276245,168671
+508,Decapterus,Scads,125937,168723,Decapterus,NA,Decapterus,mackerel scads,Decapterus,Scads,125937,168723
+509,Decapterus muroadsi,Mexican scad,273279,168736,Decapterus muroadsi,Brown-striped mackerel scad,Decapterus muroadsi,brownstriped mackerel scad,Decapterus scombrinus,Mexican scad,273279,168731
+510,Hemicaranx,NA,159638,168739,Hemicaranx,NA,Hemicaranx,NA,Hemicaranx,NA,159638,168739
+511,Nematistius pectoralis,Roosterfish,281664,168744,Nematistius pectoralis,roosterfish,Nematistius pectoralis,roosterfish,Nematistius pectoralis,Roosterfish,281664,168744
+512,Naucrates ductor,Pilotfish,126811,168742,Naucrates ductor,Rudderfish,Naucrates ductor,Pilotfish,Naucrates ductor,Pilotfish,126811,168742
+513,Oligoplites,Leatherjackets,159642,168672,Oligoplites,NA,Oligoplites,pompanos,Oligoplites,Leatherjackets,159642,168672
+514,Trachurus symmetricus,Jack mackerel,273305,168586,Trachurus symmetricus,jack mackerel,Trachurus symmetricus,Jack Mackerel,Trachurus symmetricus,Jack mackerel,273305,168586
+515,Seriola rivoliana,Almaco jack,126818,168691,Seriola rivoliana,Almaco jack,Seriola rivoliana,Almaco Jack,Seriola rivoliana,Almaco jack,126818,168691
+516,Seriola,"Amberjacks, yellowtails",125944,168688,Seriola,NA,Seriola,amberfishes,Seriola,"Amberjacks, yellowtails",125944,168688
+517,Seriola lalandi,Yellowtail,218436,168695,Seriola lalandi,yellowtail,Seriola lalandi,great amberjack,Seriola lalandi,Yellowtail,218436,168695
+518,Selar crumenophthalmus,Bigeye scad,159646,168677,Selar crumenophthalmus,bigeye scad,Selar crumenophthalmus,Bigeye Scad,Selar crumenophthalmus,Bigeye scad,159646,168677
+519,Seriola peruana,Fortune jack,276650,641997,Seriola peruana,fortune jack,Seriola peruana,Fortune Jack,Seriola peruana,Fortune jack,276650,641997
+520,Nomeidae,"Flotsamfishes, driftfishes",125548,172535,Nomeidae,driftfishes,Nomeidae,driftfishes,Nomeidae,"Flotsamfishes, driftfishes",125548,172535
+521,Nomeus gronovii,Man-of-war fish,126991,172554,Nomeus gronovii,man-of-war fish,Nomeus gronovii,man-of-war fish,Nomeus gronovii,Man-of-war fish,126991,172554
+522,Cubiceps,NA,126037,172545,Cubiceps,NA,Cubiceps,NA,Cubiceps,NA,126037,172545
+523,Psenes,NA,126039,172555,Psenes,NA,Psenes,NA,Psenes,NA,126039,172555
+524,Psenes sio,twospine driftfish,273682,642597,Psenes sio,twospine driftfish,Psenes sio,twospine driftfish,Psenes sio,NA,273682,642597
+525,Psenes pellucidus,Bluefin driftfish (blackrag),126993,172558,Psenes pellucidus,bluefin driftfish,Psenes pellucidus,bluefin driftfish,Psenes pellucidus,Bluefin driftfish (blackrag),126993,172558
+526,Cubiceps baxteri,cigarfish,219745,642573,Cubiceps baxteri,cigarfish,Cubiceps baxteri,NA,Cubiceps baxteri,NA,219745,642573
+527,Cubiceps pauciradiatus,Bigeye cigarfish,159424,172546,Cubiceps pauciradiatus,bigeye cigarfish,Cubiceps pauciradiatus,bigeye cigarfish,Cubiceps pauciradiatus,Bigeye cigarfish,159424,172546
+528,Psenes arafurensis,NA,273681,172560,Psenes arafurensis,NA,Psenes arafurensis,NA,Psenes arafurensis,NA,273681,172560
+529,Psenes cyanophrys,Freckled driftfish,159427,172556,Psenes cyanophrys,freckled driftfish,Psenes cyanophrys,freckled driftfish,Psenes cyanophrys,Freckled driftfish,159427,172556
+530,Stromateidae,Butterfishes,125567,172563,Stromateidae,butterfishes,Stromateidae,rudderfishes,Stromateidae,Butterfishes,125567,172563
+531,Peprilus simillimus,Pacific butterfish,276563,172565,Peprilus simillimus,Pacific pompano,Peprilus simillimus,Pacific pompano,Peprilus simillimus,Pacific butterfish,276563,172565
+533,Psenes maculatus,silver driftfish,126992,172557,Psenes maculatus,silver driftfish,Psenes maculatus,silver driftfish,Psenes maculatus,NA,126992,172557
+534,Amarsipus carlsbergi,NA,219735,642535,Amarsipus carlsbergi,NA,Amarsipus carlsbergi,NA,Amarsipus carlsbergi,NA,219735,642535
+535,Centrolophidae,Medusafishes,125526,172508,Centrolophidae,medusafishes,Centrolophidae,rudderfishes,Centrolophidae,Medusafishes,125526,172508
+536,Icichthys lockingtoni,Medusafish,279354,172510,Icichthys lockingtoni,medusafish,Icichthys lockingtoni,brown rudderfish,Icichthys lockingtoni,Medusafish,279354,172510
+541,Icosteus aenigmaticus,Ragfish,281153,171663,Icosteus aenigmaticus,ragfish,Icosteus aenigmaticus,ragfish,Icosteus aenigmaticus,Ragfish,281153,171663
+543,Opistognathidae,Jawfishes,151443,170920,Opistognathidae,jawfishes,Opistognathidae,jawfishes,Opistognathidae,Jawfishes,151443,170920
+545,Tetragonuridae,Squaretails,125569,172578,Tetragonuridae,squaretails,Tetragonuridae,squaretails,Tetragonuridae,Squaretails,125569,172578
+546,Tetragonurus cuvieri,Smalleye squaretail,127080,172580,Tetragonurus cuvieri,smalleye squaretail,Tetragonurus cuvieri,smalleye squaretail,Tetragonurus cuvieri,Smalleye squaretail,127080,172580
+547,Tetragonurus atlanticus,Bigeye squaretail,127079,172581,Tetragonurus atlanticus,bigeye squaretail,Tetragonurus atlanticus,bigeye squaretail,Tetragonurus atlanticus,Bigeye squaretail,127079,172581
+548,Taractichthys steindachneri,Pacific bigscale pomfret,221420,170313,Taractichthys steindachneri,sickle pomfret,Taractichthys steindachneri,sickle pomfret,Taractichthys steindachneri,Pacific bigscale pomfret,221420,170313
+549,Pteraclis aesticola,North Pacific fanfish,273151,170309,Pteraclis aesticola,Pacific fanfish,Pteraclis aesticola,Pacific fanfish,Pteraclis aesticola,North Pacific fanfish,273151,170309
+550,Bramidae,Pomfrets,125520,170287,Bramidae,pomfrets,Bramidae,pomfrets,Bramidae,Pomfrets,125520,170287
+551,Brama,pomfrets,125924,170288,Brama,NA,Brama,pomfrets,Brama,NA,125924,170288
+552,Brama japonica,Pacific pomfret,273148,170289,Brama japonica,(Pacific) pomfret,Brama japonica,Pacific pomfret,Brama japonica,Pacific pomfret,273148,170289
+553,Brama dussumieri,Lowfin pomfret,221416,170292,Brama dussumieri,lowfin pomfret,Brama dussumieri,lowfin pomfret,Brama dussumieri,Lowfin pomfret,221416,170292
+554,Coryphaena,NA,125960,168790,Coryphaena,NA,Coryphaena,NA,Coryphaena,NA,125960,168790
+555,Coryphaenidae,Dolphinfishes,125531,168789,Coryphaenidae,dolphinfishes,Coryphaenidae,dolphins,Coryphaenidae,Dolphinfishes,125531,168789
+556,Coryphaena hippurus,Common dolphinfish,126846,168791,Coryphaena hippurus,mahi mahi,Coryphaena hippurus,dolphin,Coryphaena hippurus,Common dolphinfish,126846,168791
+557,Coryphaena equiselis,Pompano dolphinfish,126845,168792,Coryphaena equiselis,pompano dolphin,Coryphaena equiselis,pompano dolphin,Coryphaena equiselis,Pompano dolphinfish,126845,168792
+558,Caristiidae,Veilfins,125524,168820,Caristiidae,manefishes,Caristiidae,manefishes,Caristiidae,Veilfins,125524,168820
+559,Paracaristius maderensis,Manefin,282011,645450,Paracaristius maderensis,NA,Caristius maderensis,NA,Caristius maderensis,Manefin,282011,645450
+560,Scombridae,Mackerels,125559,172398,Scombridae,mackerels,Scombridae,albacores,Scombridae,Mackerels,125559,172398
+561,Auxis,frigate mackerels,126057,172454,Auxis,NA,Auxis,frigate mackerels,Auxis,NA,126057,172454
+562,Auxis thazard,Frigate mackerel,127016,172456,Auxis thazard,frigate tuna,Auxis thazard,frigate mackerel,Auxis thazard,Frigate mackerel,127016,172456
+563,Auxis rochei,Bullet mackerel,127015,172455,Auxis rochei,bullet tuna,Auxis rochei,bullet mackerel,Auxis rochei,Bullet mackerel,127015,172455
+564,Euthynnus,lesser tunas,126058,172399,Euthynnus,NA,Euthynnus,lesser tunas,Euthynnus,NA,126058,172399
+565,Euthynnus lineatus,Black skipjack,273806,172405,Euthynnus lineatus,black skipjack,Euthynnus lineatus,black skipjack,Euthynnus lineatus,Black skipjack,273806,172405
+566,Caristius,NA,125947,168821,Caristius,NA,Caristius,NA,Caristius,NA,125947,168821
+567,Katsuwonus pelamis,Skipjack tuna,127018,172401,Katsuwonus pelamis,skipjack tuna,Katsuwonus pelamis,skipjack tuna,Katsuwonus pelamis,Skipjack tuna,127018,172401
+571,Sarda chiliensis,Pacific bonito,293729,172408,Sarda chiliensis,Eastern Pacific bonito,Sarda chiliensis,eastern Pacific bonito,Sarda chiliensis,Pacific bonito,293729,172408
+572,Sarda orientalis,Striped bonito,219713,172410,Sarda orientalis,striped bonito,Sarda orientalis,striped bonito,Sarda orientalis,Striped bonito,219713,172410
+574,Scomber japonicus,Pacific mackerel (chub mackerel),127022,172412,Scomber japonicus,Pacific chub mackerel,Scomber japonicus,chub mackerel,Scomber japonicus,Pacific mackerel (chub mackerel),127022,172412
+576,Acanthocybium solandri,Wahoo,127014,172451,Acanthocybium solandri,wahoo,Acanthocybium solandri,wahoo,Acanthocybium solandri,Wahoo,127014,172451
+577,Scomberomorus,wahoos,126064,172434,Scomberomorus,NA,Scomberomorus,wahoos,Scomberomorus,NA,126064,172434
+578,Scomberomorus sierra,Pacific sierra,273821,172440,Scomberomorus sierra,Pacific sierra,Scomberomorus sierra,Mexican sierra,Scomberomorus sierra,Pacific sierra,273821,172440
+580,Thunnus,albacores,126065,172418,Thunnus,NA,Thunnus,albacores,Thunnus,NA,126065,172418
+581,Thunnus albacares,Yellowfin tuna,127027,172423,Thunnus albacares,Allison tuna,Thunnus albacares,yellowfin tuna,Thunnus albacares,Yellowfin tuna,127027,172423
+584,Istiophoridae,Billfishes,125539,172486,Istiophoridae,billfishes,Istiophoridae,billfishes,Istiophoridae,Billfishes,125539,172486
+585,Acanthuridae,Surgeonfishes,125515,172250,Acanthuridae,surgeonfishes,Acanthuridae,tangs,Acanthuridae,Surgeonfishes,125515,172250
+586,Istiophorus platypterus,Sailfish,158812,172488,Istiophorus platypterus,Indo-Pacific sailfish,Istiophorus platypterus,Atlantic sailfish,Istiophorus platypterus,Sailfish,158812,172488
+587,Luvarus imperialis,Louvar,126974,172485,Luvarus imperialis,luvar,Luvarus imperialis,louvar,Luvarus imperialis,Louvar,126974,172485
+588,Acanthurus triostegus,Convict surgeonfish,219630,172270,Acanthurus triostegus,convict surgeonfish,Acanthurus triostegus,convict tang,Acanthurus triostegus,Convict surgeonfish,219630,172270
+590,Gempylidae,Snake Mackerels,125536,172354,Gempylidae,snake mackerels,Gempylidae,snake mackerels,Gempylidae,Snake Mackerels,125536,172354
+591,Gempylus serpens,Snake Mackerel,126862,172360,Gempylus serpens,snake mackerel,Gempylus serpens,snake mackerel,Gempylus serpens,Snake Mackerel,126862,172360
+592,Nealotus tripes,Black snake mackerel,126864,172368,Nealotus tripes,black snake mackerel,Nealotus tripes,black snake mackerel,Nealotus tripes,Black snake mackerel,126864,172368
+593,Lepidocybium flavobrunneum,Escolar,126863,172362,Lepidocybium flavobrunneum,escolar,Lepidocybium flavobrunneum,escolar,Lepidocybium flavobrunneum,Escolar,126863,172362
+594,Ruvettus pretiosus,Oilfish,126867,172364,Ruvettus pretiosus,Scourer,Ruvettus pretiosus,oilfish,Ruvettus pretiosus,Oilfish,126867,172364
+595,Trichiuridae,Cutlassfishes,125571,172378,Trichiuridae,cutlassfishes,Trichiuridae,ribbonfishes,Trichiuridae,Cutlassfishes,125571,172378
+596,Lepidopus fitchi,Pacific scabbardfish,274018,172393,Lepidopus fitchi,Pacific scabbardfish,Lepidopus fitchi,black scabbardfish,Lepidopus fitchi,Pacific scabbardfish,274018,172393
+597,Diplospinus multistriatus,Ribbon snake mackerel,126861,172376,Diplospinus multistriatus,striped escolar,Diplospinus multistriatus,striped escolar,Diplospinus multistriatus,Ribbon snake mackerel,126861,172376
+598,Trichiurus lepturus,Pacific cutlassfish,127089,172385,Trichiurus lepturus,largehead hairtail,Trichiurus lepturus,Atlantic cutlassfish,Trichiurus lepturus,Pacific cutlassfish,127089,172385
+599,Larimus,NA,159319,169268,Larimus,NA,Larimus,NA,Larimus,NA,159319,169268
+600,Haemulidae,Grunts,125538,169055,Haemulidae,grunts,Haemulidae,grunts,Haemulidae,Grunts,125538,169055
+601,Anisotremus davidsonii,Sargo,279617,553364,Anisotremus davidsonii,sargo,Anisotremus davidsonii,sargo,Anisotremus davidsonii,Sargo,279617,553364
+602,Anisotremus,smallmouth grunts,268319,169080,Anisotremus,NA,Anisotremus,smallmouth grunts,Anisotremus,NA,268319,169080
+604,Centropomus,Snooks,268680,167643,Centropomus,NA,Centropomus,snooks,Centropomus,Snooks,268680,167643
+605,Sparidae,Porgies,125564,169180,Sparidae,porgies,Sparidae,porgies,Sparidae,Porgies,125564,169180
+607,Calamus brachysomus,Pacific porgy,275967,169204,Calamus brachysomus,Pacific porgy,Calamus brachysomus,Pacific porgy,Calamus brachysomus,Pacific porgy,275967,169204
+608,Chaetodontidae,Butterflyfishes,125528,169554,Chaetodontidae,butterflyfishes,Chaetodontidae,butterflyfishes,Chaetodontidae,Butterflyfishes,125528,169554
+609,Atractoscion nobilis,White seabass,278535,169387,Atractoscion nobilis,white seabass,Atractoscion nobilis,white seabass,Atractoscion nobilis,White seabass,278535,169387
+610,Sciaenidae,Croakers,125558,169237,Sciaenidae,drums or croakers,Sciaenidae,croakers,Sciaenidae,Croakers,125558,169237
+611,Cynoscion,sea trout,159304,169238,Cynoscion,NA,Cynoscion,sea trout,Cynoscion,NA,159304,169238
+612,Genyonemus lineatus,White croaker,280830,169257,Genyonemus lineatus,white croaker,Genyonemus lineatus,white croaker,Genyonemus lineatus,White croaker,280830,169257
+613,Seriphus politus,Queenfish,282761,169362,Seriphus politus,queenfish,Seriphus politus,queenfish,Seriphus politus,Queenfish,282761,169362
+614,Cheilotrema saturnum,Black croaker,280137,169358,Cheilotrema saturnum,black croaker,Cheilotrema saturnum,black croaker,Cheilotrema saturnum,Black croaker,280137,169358
+615,Ephippidae,Spadefishes,151426,553178,Ephippidae,"spadefishes, batfishes and scats",Ephippidae,spadefishes,Ephippidae,Spadefishes,151426,553178
+616,Chaetodipterus zonatus,Pacific spadefish,276412,169540,Chaetodipterus zonatus,Pacific spadefish,Chaetodipterus zonatus,Pacific spadefish,Chaetodipterus zonatus,Pacific spadefish,276412,169540
+617,Menticirrhus,kingfishes,159324,169273,Menticirrhus,NA,Menticirrhus,kingfishes,Menticirrhus,NA,159324,169273
+618,Roncador stearnsii,Spotfin croaker,282628,646515,Roncador stearnsii,spotfin croaker,Roncador stearnsii,spotfin croaker,Roncador stearnsii,Spotfin croaker,282628,646515
+619,Umbrina roncador,Yellowfin croaker,273802,169303,Umbrina roncador,yellowfin croaker,Umbrina roncador,yellowfin croaker,Umbrina roncador,Yellowfin croaker,273802,169303
+620,Menticirrhus undulatus,California corbina,276150,169280,Menticirrhus undulatus,California corbina,Menticirrhus undulatus,California corbina,Menticirrhus undulatus,California corbina,276150,169280
+621,Abudefduf declivifrons,Mexican nightsergeant,273698,615041,Abudefduf declivifrons,Mexican night sergeant,Abudefduf declivifrons,Mexican night sergeant,Abudefduf declivifrons,Mexican nightsergeant,273698,615041
+622,Abudefduf troschelii,Panamic sergeant major,273702,170054,Abudefduf troschelii,Panamic sergeant major,Abudefduf troschelii,Pacific sergeant major,Abudefduf troschelii,Panamic sergeant major,273702,170054
+623,Abudefduf,Sergeant majors,126044,170045,Abudefduf,sergeants,Abudefduf,sergeant majors,Abudefduf,Sergeant majors,126044,170045
+624,Stegastes,NA,203822,613171,Stegastes,NA,Stegastes,NA,Stegastes,NA,203822,613171
+625,Pomacentridae,Damselfishes,125553,170044,Pomacentridae,damselfishes,Pomacentridae,damselfishes,Pomacentridae,Damselfishes,125553,170044
+626,Chromis punctipinnis,Blacksmith,273751,170085,Chromis punctipinnis,blacksmith,Chromis punctipinnis,blacksmith,Chromis punctipinnis,Blacksmith,273751,170085
+627,Stegastes rectifraenum,Cortez damselfish,276680,615080,Stegastes rectifraenum,Cortez damselfish,Stegastes rectifraenum,brown damselfish,Stegastes rectifraenum,Cortez damselfish,276680,615080
+628,Hypsypops rubicundus,Garibaldi,281130,170120,Hypsypops rubicundus,garibaldi,Hypsypops rubicundus,garibaldi,Hypsypops rubicundus,Garibaldi,281130,170120
+629,Mugil cephalus,Striped mullet,126983,170335,Mugil cephalus,striped mullet,Mugil cephalus,striped mullet,Mugil cephalus,Striped mullet,126983,170335
+630,Mugil curema,White mullet,159416,170336,Mugil curema,silverside mullet,Mugil curema,white mullet,Mugil curema,White mullet,159416,170336
+631,Polydactylus approximans,Blue bobo,276587,170449,Polydactylus approximans,blue bobo,Polydactylus approximans,blue bobo,Polydactylus approximans,Blue bobo,276587,170449
+632,Polydactylus opercularis,Yellow bobo,367295,170452,Polydactylus opercularis,yellow bobo,Polydactylus opercularis,yellow bobo,Polydactylus opercularis,Yellow bobo,367295,170452
+633,Cheilodactylus,"Merwongs, fingerfins",205497,170253,Cheilodactylus,NA,Cheilodactylus,NA,Cheilodactylus,"Merwongs, fingerfins",205497,170253
+635,Labridae,Wrasses,125541,170477,Labridae,wrasses,Labridae,rainbowfishes,Labridae,Wrasses,125541,170477
+636,Halichoeres,wrasses,158813,170501,Halichoeres,NA,Halichoeres,wrasses,Halichoeres,NA,158813,170501
+637,Halichoeres semicinctus,Rock wrasse,275798,170511,Halichoeres semicinctus,rock wrasse,Halichoeres semicinctus,rock wrasse,Halichoeres semicinctus,Rock wrasse,275798,170511
+638,Xyrichtys,NA,126025,613036,Xyrichtys,NA,Xyrichtys,NA,Xyrichtys,NA,126025,613036
+639,Oxyjulis californica,Senorita,240727,170597,Oxyjulis californica,señorita,Oxyjulis californica,senorita,Oxyjulis californica,Senorita,240727,170597
+640,Thalassoma,NA,126024,170567,Thalassoma,NA,Thalassoma,NA,Thalassoma,NA,126024,170567
+641,Bodianus pulcher,California sheephead,1702292,170744,Bodianus pulcher,NA,Semicossyphus pulcher,California sheephead,Semicossyphus pulcher,California sheephead,1702292,170744
+642,Xyrichtys mundiceps,Razorfish,273604,614509,Xyrichtys mundiceps,Cape razorfish,Xyrichtys mundiceps,Cape razorfish,Xyrichtys mundiceps,Razorfish,273604,614509
+643,Polylepion cruentum,Bleeding Wrasse,282314,614109,Polylepion cruentum,bleeding wrasse,Polylepion cruentum,bleeding wrasse,Polylepion cruentum,Bleeding Wrasse,282314,614109
+648,Azurina atrilobata,Scissortail damselfish,1580692,170102,Azurina atrilobata,NA,Chromis atrilobata,scissortail chromis,Chromis atrilobata,Scissortail damselfish,1580692,170102
+649,Microspathodon,NA,269877,170115,Microspathodon,NA,Microspathodon,NA,Microspathodon,NA,269877,170115
+650,Scaridae,Parrotfishes,125557,170809,Scaridae,parrotfishes,Scaridae,parrotfishes,Scaridae,Parrotfishes,125557,170809
+651,Scarus,parrotfishes,159299,170810,Scarus,NA,Scarus,parrotfishes,Scarus,NA,159299,170810
+656,Girella nigricans,Opaleye,280865,169515,Girella nigricans,opaleye,Girella nigricans,opaleye,Girella nigricans,Opaleye,280865,169515
+660,Kyphosidae,Sea Chubs,125540,169503,Kyphosidae,sea chubs,Kyphosidae,pilotfishes,Kyphosidae,Sea Chubs,125540,169503
+661,Kyphosus,rudderfishes,126015,169504,Kyphosus,NA,Kyphosus,rudderfishes,Kyphosus,NA,126015,169504
+665,Kyphosus ocyurus,Bluestriped sea chub,1018702,169527,Kyphosus ocyurus,NA,Sectator ocyurus,bluestriped chub,Sectator ocyurus,Bluestriped sea chub,1018702,169527
+666,Medialuna californiensis,Halfmoon,281541,169522,Medialuna californiensis,halfmoon,Medialuna californiensis,halfmoon,Medialuna californiensis,Halfmoon,281541,169522
+669,Scorpaenoidei,scorpion fishes,154247,166702,Scorpaenoidei,NA,Scorpaeniformes,scorpion fishes,Scorpaeniformes,NA,154247,166702
+670,Scorpaenidae,Scorpionfishes,125595,166704,Scorpaenidae,rockfishes,Scorpaenidae,firefishes,Scorpaenidae,Scorpionfishes,125595,166704
+671,Pontinus,NA,126170,166798,Pontinus,NA,Pontinus,NA,Pontinus,NA,126170,166798
+672,Pontinus sierra,Speckled scorpionfish,274693,644371,Pontinus sierra,speckled scorpionfish,Pontinus sierra,speckled scorpionfish,Pontinus sierra,Speckled scorpionfish,274693,644371
+675,Scorpaenodes xyris,Rainbow scorpionfish,274756,166864,Scorpaenodes xyris,rainbow scorpionfish,Scorpaenodes xyris,rainbow scorpionfish,Scorpaenodes xyris,Rainbow scorpionfish,274756,166864
+676,Scorpaena,scorpionfishes,126171,166811,Scorpaena,NA,Scorpaena,scorpionfishes,Scorpaena,NA,126171,166811
+678,Scorpaena guttata,California scorpionfish (sculpin),274713,166827,Scorpaena guttata,California scorpionfish,Scorpaena guttata,California scorpionfish,Scorpaena guttata,California scorpionfish (sculpin),274713,166827
+681,Sebastes semicinctus,Halfbanded rockfish,274851,166762,Sebastes semicinctus,halfbanded rockfish,Sebastes semicinctus,halfbanded rockfish,Sebastes semicinctus,Halfbanded rockfish,274851,166762
+682,Sebastes saxicola,Stripetail rockfish,274848,166741,Sebastes saxicola,stripetail rockfish,Sebastes saxicola,stripetail rockfish,Sebastes saxicola,Stripetail rockfish,274848,166741
+683,Sebastes,Rockfishes,126175,166705,Sebastes,NA,Sebastes,rockfishes,Sebastes,Rockfishes,126175,166705
+684,Sebastes jordani,Shortbelly rockfish,274806,166725,Sebastes jordani,shortbelly rockfish,Sebastes jordani,shortbelly rockfish,Sebastes jordani,Shortbelly rockfish,274806,166725
+685,Sebastes levis,Cow rockfish (cowcod),274812,166754,Sebastes levis,cowcod,Sebastes levis,cowcod,Sebastes levis,Cow rockfish (cowcod),274812,166754
+686,Sebastes paucispinis,Bocaccio,274833,166733,Sebastes paucispinis,bocaccio,Sebastes paucispinis,bocaccio,Sebastes paucispinis,Bocaccio,274833,166733
+687,Sebastes macdonaldi,Mexican rockfish,274814,166755,Sebastes macdonaldi,Mexican rockfish,Sebastes macdonaldi,Mexican rockfish,Sebastes macdonaldi,Mexican rockfish,274814,166755
+688,Sebastes aurora,Aurora rockfish,274774,166709,Sebastes aurora,auroro rockfish,Sebastes aurora,aurora rockfish,Sebastes aurora,Aurora rockfish,274774,166709
+689,Sebastes diploproa,Splitnose rockfish,274787,166716,Sebastes diploproa,splitnose rockfish,Sebastes diploproa,splitnose rockfish,Sebastes diploproa,Splitnose rockfish,274787,166716
+690,Sebastes lentiginosus,Freckled rockfish,274811,166769,Sebastes lentiginosus,freckled rockfish,Sebastes lentiginosus,freckled rockfish,Sebastes lentiginosus,Freckled rockfish,274811,166769
+691,Sebastes pinniger,Canary rockfish,274836,166734,Sebastes pinniger,canary rockfish,Sebastes pinniger,canary rockfish,Sebastes pinniger,Canary rockfish,274836,166734
+692,Sebastes dallii,Calico rockfish,274786,644576,Sebastes dallii,calico rockfish,Sebastes dallii,calico rockfish,Sebastes dallii,Calico rockfish,274786,644576
+693,Sebastes goodei,Chilipepper,274798,166722,Sebastes goodei,chilpepper,Sebastes goodei,chilipepper,Sebastes goodei,Chilipepper,274798,166722
+694,Sebastes melanostomus,Blackgill rockfish,274819,166728,Sebastes melanostomus,blackgill rockfish,Sebastes melanostomus,blackgill rockfish,Sebastes melanostomus,Blackgill rockfish,274819,166728
+707,Sebastolobus,Thornyheads,270859,166782,Sebastolobus,NA,Sebastolobus,NA,Sebastolobus,Thornyheads,270859,166782
+708,Sebastolobus alascanus,Shortspine thornyhead,282740,166783,Sebastolobus alascanus,shortspine thornyhead,Sebastolobus alascanus,shortspine thornyhead,Sebastolobus alascanus,Shortspine thornyhead,282740,166783
+709,Sebastolobus altivelis,Longspine thornyhead,282741,166784,Sebastolobus altivelis,longspine thornyhead,Sebastolobus altivelis,longspine thornyhead,Sebastolobus altivelis,Longspine thornyhead,282741,166784
+710,Anoplopomatidae,Sablefishes,154666,167121,Anoplopomatidae,sablefishes,Anoplopomatidae,sablefishes,Anoplopomatidae,Sablefishes,154666,167121
+711,Anoplopoma fimbria,Sablefish (blackcod),159463,167123,Anoplopoma fimbria,sablefish,Anoplopoma fimbria,sablefish,Anoplopoma fimbria,Sablefish (blackcod),159463,167123
+715,Hexagrammidae,Greenlings,154415,167108,Hexagrammidae,greenlings,Hexagrammidae,greenlings,Hexagrammidae,Greenlings,154415,167108
+717,Hexagrammos,greenlings,240731,167109,Hexagrammos,NA,Hexagrammos,greenlings,Hexagrammos,NA,240731,167109
+718,Hexagrammos decagrammus,Kelp greenling,240732,167110,Hexagrammos decagrammus,kelp greenling,Hexagrammos decagrammus,kelp greenling,Hexagrammos decagrammus,Kelp greenling,240732,167110
+719,Hexagrammos lagocephalus,Rock greenling,240735,167111,Hexagrammos lagocephalus,rock greenling,Hexagrammos lagocephalus,rock greenling,Hexagrammos lagocephalus,Rock greenling,240735,167111
+720,Ophiodon elongatus,Lingcod,240745,167116,Ophiodon elongatus,lingcod,Ophiodon elongatus,lingcod,Ophiodon elongatus,Lingcod,240745,167116
+726,Zaniolepis,NA,271274,167127,Zaniolepis,NA,Zaniolepis,NA,Zaniolepis,NA,271274,167127
+727,Zaniolepis frenata,Shortspine combfish,283208,167129,Zaniolepis frenata,shortspine combfish,Zaniolepis frenata,shortspine combfish,Zaniolepis frenata,Shortspine combfish,283208,167129
+728,Zaniolepis latipinnis,Longspine combfish,283209,167128,Zaniolepis latipinnis,longspine combfish,Zaniolepis latipinnis,longspine combfish,Zaniolepis latipinnis,Longspine combfish,283209,167128
+730,Oxylebius pictus,Painted greenling,240743,167118,Oxylebius pictus,painted greenling,Oxylebius pictus,painted greenling,Oxylebius pictus,Painted greenling,240743,167118
+732,Ascelichthys rhodorus,Rosylip sculpin,279706,167218,Ascelichthys rhodorus,rosylip sculpin,Ascelichthys rhodorus,rosylip sculpin,Ascelichthys rhodorus,Rosylip sculpin,279706,167218
+733,Ruscarius meanyi,Puget Sound sculpin,282637,167424,Ruscarius meanyi,puget sound sculpinrockfish,Ruscarius meanyi,Puget Sound sculpin,Ruscarius meanyi,Puget Sound sculpin,282637,167424
+734,Orthonopias triacis,Snubnose sculpin,281935,167388,Orthonopias triacis,snubnose sculpin,Orthonopias triacis,snubnose sculpin,Orthonopias triacis,Snubnose sculpin,281935,167388
+735,Cottidae,Sculpins,125589,167196,Cottidae,bullheads,Cottidae,sculpins,Cottidae,Sculpins,125589,167196
+736,Scorpaenichthys marmoratus,Cabezon,282726,692068,Scorpaenichthys marmoratus,cabezon,Scorpaenichthys marmoratus,cabezon,Scorpaenichthys marmoratus,Cabezon,282726,692068
+737,Artedius,NA,268390,167211,Artedius,NA,Artedius,NA,Artedius,NA,268390,167211
+738,Artedius harringtoni,Scalyhead sculpin,279701,167213,Artedius harringtoni,scalyhead sculpin,Artedius harringtoni,scalyhead sculpin,Artedius harringtoni,Scalyhead sculpin,279701,167213
+739,Hemilepidotus spinosus,Brown Irish lord,279413,167283,Hemilepidotus spinosus,brown irish lord,Hemilepidotus spinosus,brown Irish lord,Hemilepidotus spinosus,Brown Irish lord,279413,167283
+740,Hemilepidotus hemilepidotus,Red Irish lord,254521,167279,Hemilepidotus hemilepidotus,red irish lord,Hemilepidotus hemilepidotus,red Irish lord,Hemilepidotus hemilepidotus,Red Irish lord,254521,167279
+741,Icelinus,NA,269476,167290,Icelinus,NA,Icelinus,NA,Icelinus,NA,269476,167290
+742,Leptocottus armatus,Pacific staghorn sculpin,254345,167302,Leptocottus armatus,Pacific staghorn sculpin,Leptocottus armatus,Pacific staghorn sculpin,Leptocottus armatus,Pacific staghorn sculpin,254345,167302
+743,Ruscarius creaseri,Roughcheek sculpin,282636,167422,Ruscarius creaseri,roughcheek sculpin,Ruscarius creaseri,roughcheek sculpin,Ruscarius creaseri,Roughcheek sculpin,282636,167422
+744,Chitonotus pugetensis,Roughback sculpin,280162,167380,Chitonotus pugetensis,roughback sculpin,Chitonotus pugetensis,roughback sculpin,Chitonotus pugetensis,Roughback sculpin,280162,167380
+745,Artedius fenestralis,Padded sculpin,279700,167212,Artedius fenestralis,padded sculpin,Artedius fenestralis,padded sculpin,Artedius fenestralis,Padded sculpin,279700,167212
+746,Clinocottus analis,Wooly sculpin,280219,167227,Clinocottus analis,woolly sculpin,Clinocottus analis,woolly sculpin,Clinocottus analis,Wooly sculpin,280219,167227
+747,Icelinus quadriseriatus,Yellowchin sculpin,281141,167298,Icelinus quadriseriatus,yellowchin sculpin,Icelinus quadriseriatus,yellowchin sculpin,Icelinus quadriseriatus,Yellowchin sculpin,281141,167298
+748,Artedius lateralis,Smoothhead sculpin,279702,167214,Artedius lateralis,smoothhead sculpin,Artedius lateralis,smoothhead sculpin,Artedius lateralis,Smoothhead sculpin,279702,167214
+749,Oligocottus,tidepool johnnies,270085,167332,Oligocottus,NA,Oligocottus,tidepool johnnies,Oligocottus,NA,270085,167332
+750,Paricelinus hopliticus,Thornback sculpin,282147,167338,Paricelinus hopliticus,thornback sculpin,Paricelinus hopliticus,thornback sculpin,Paricelinus hopliticus,Thornback sculpin,282147,167338
+751,Enophrys bison,Buffalo sculpin,275355,167267,Enophrys bison,buffalo sculpin,Enophrys bison,buffalo sculpin,Enophrys bison,Buffalo sculpin,275355,167267
+752,Radulinus asprellus,Slim sculpin,282541,167347,Radulinus asprellus,slim sculpin,Radulinus asprellus,slim sculpin,Radulinus asprellus,Slim sculpin,282541,167347
+753,Oligocottus maculosus,Tidepool sculpin,281872,167333,Oligocottus maculosus,tidepool sculpin,Oligocottus maculosus,tidepool sculpin,Oligocottus maculosus,Tidepool sculpin,281872,167333
+754,Psychrolutes phrictus,Blob sculpin,274678,167414,Psychrolutes phrictus,blob sculpin,Psychrolutes phrictus,NA,Psychrolutes phrictus,Blob sculpin,274678,167414
+755,Triglidae,Searobins,125598,166972,Triglidae,searobins,Triglidae,gurnards,Triglidae,Searobins,125598,166972
+756,Prionotus,North American searobins,159569,166973,Prionotus,NA,Prionotus,North American searobins,Prionotus,NA,159569,166973
+757,Prionotus stephanophrys,Lumptail searobin,276291,166995,Prionotus stephanophrys,lumptail searobin,Prionotus stephanophrys,lumptail searobin,Prionotus stephanophrys,Lumptail searobin,276291,166995
+758,Prionotus ruscarius,Common searobin,276290,166993,Prionotus ruscarius,rough searobin,Prionotus ruscarius,rough searobin,Prionotus ruscarius,Common searobin,276290,166993
+760,Agonidae,Poachers,125588,167426,Agonidae,alligatorfishes,Agonidae,alligatorfishes,Agonidae,Poachers,125588,167426
+761,Bathyagonus pentacanthus,Bigeye starsnout,254506,167450,Bathyagonus pentacanthus,Starsnout poacher,Bathyagonus pentacanthus,bigeye poacher,Bathyagonus pentacanthus,Bigeye starsnout,254506,167450
+762,Odontopyxis trispinosa,Pygmy poacher,281836,167460,Odontopyxis trispinosa,pygmy poacher,Odontopyxis trispinosa,pygmy poacher,Odontopyxis trispinosa,Pygmy poacher,281836,167460
+763,Sarritor frenatus,sawback poacher,254374,167464,Sarritor frenatus,sawback poacher,Sarritor frenatus,sawback poacher,Sarritor frenatus,NA,254374,167464
+764,Xeneretmus latifrons,Blackedge poacher,283171,167467,Xeneretmus latifrons,blacktip poacher,Xeneretmus latifrons,blacktip poacher,Xeneretmus latifrons,Blackedge poacher,283171,167467
+765,Xeneretmus leiops,Smootheye poacher,283172,167469,Xeneretmus leiops,cutfin poacher,Xeneretmus leiops,cutfin poacher,Xeneretmus leiops,Smootheye poacher,283172,167469
+766,Agonopsis sterletus,Southern spearnose,279521,167431,Agonopsis sterletus,southern spearnose poacher,Agonopsis sterletus,southern spearnose poacher,Agonopsis sterletus,Southern spearnose,279521,167431
+767,Bothragonus swanii,Rockhead,279947,643659,Bothragonus swanii,rockhead,Bothragonus swanii,rockhead,Bothragonus swanii,Rockhead,279947,643659
+768,Stellerina xyosterna,Pricklebreast poacher,254366,167472,Stellerina xyosterna,pricklebreast poacher,Stellerina xyosterna,pricklebreast poacher,Stellerina xyosterna,Pricklebreast poacher,254366,167472
+769,Agonopsis vulsa,northern spearnose poacher,279522,167428,Agonopsis vulsa,northern spearnose poacher,Agonopsis vulsa,northern spearnose poacher,Agonopsis vulsa,NA,279522,167428
+770,Cyclopteridae,"Snailfishes, Lumpsuckers",125590,167483,Cyclopteridae,lumpfishes,Cyclopteridae,lumpfishes,Cyclopteridae,"Snailfishes, Lumpsuckers",125590,167483
+771,Liparis,snailfishes,126160,167550,Liparis,snailfishes,Liparis,snailfishes,Liparis,NA,126160,167550
+772,Liparis florae,Tidepool snailfish,274513,167559,Liparis florae,tidepool snailfish,Liparis florae,tidepool snailfish,Liparis florae,Tidepool snailfish,274513,167559
+773,Liparis fucensis,Slipskin snailfish,274515,167560,Liparis fucensis,slipskin snailfish,Liparis fucensis,slipskin snailfish,Liparis fucensis,Slipskin snailfish,274515,167560
+774,Liparis mucosus,Slimy snailfish,274527,167570,Liparis mucosus,slimy snailfish,Liparis mucosus,slimy snailfish,Liparis mucosus,Slimy snailfish,274527,167570
+775,Liparis pulchellus,Showy snailfish,274533,167572,Liparis pulchellus,showy snailfish,Liparis pulchellus,showy snailfish,Liparis pulchellus,Showy snailfish,274533,167572
+776,Careproctus melanurus,Blacktail snailfish,254549,167504,Careproctus melanurus,blacktail snailfish,Careproctus melanurus,blacktail snailfish,Careproctus melanurus,Blacktail snailfish,254549,167504
+780,Macroramphosinae,Snipefishes,154403,644842,Macroramphosinae,snipefishes,Macroramphosidae,snipefishes,Macroramphosidae,Snipefishes,154403,644842
+781,Macroramphosus gracilis,Slender snipefish,275181,551496,Macroramphosus gracilis,slender snipefish,Macroramphosus gracilis,slender snipefish,Macroramphosus gracilis,Slender snipefish,275181,551496
+784,Brotula clarkae,Pacific bearded brotula,275888,164821,Brotula clarkae,Pacific bearded brotula,Brotula clarkae,Pacific bearded brotula,Brotula clarkae,NA,275888,164821
+785,Fistulariidae,Cornetfishes,154577,166414,Fistulariidae,cornetfishes,Fistulariidae,cornetfishes,Fistulariidae,Cornetfishes,154577,166414
+786,Ophidion,cusk-eels,125863,164839,Ophidion,NA,Ophidion,cusk-eels,Ophidion,NA,125863,164839
+787,Acanthogobius flavimanus,Yellowfin goby,279475,171882,Acanthogobius flavimanus,yellowfin goby,Acanthogobius flavimanus,yellowfin goby,Acanthogobius flavimanus,Yellowfin goby,279475,171882
+788,Syngnathus californiensis,Bay pipefish,275218,166462,Syngnathus californiensis,kelp pipefish,Syngnathus leptorhynchus,bay pipefish,Syngnathus leptorhynchus,Bay pipefish,275218,166462
+789,Cosmocampus arctus,Snubnose pipefish,293571,166603,Cosmocampus arctus,snubnose pipefish,Cosmocampus arctus,snubnose pipefish,Cosmocampus arctus,Snubnose pipefish,293571,166603
+790,Syngnathidae,Pipefishes,125606,166443,Syngnathidae,pipefishes and seahorses,Syngnathidae,pipefishes,Syngnathidae,Pipefishes,125606,166443
+791,Syngnathus,seaweed pipefishes,126227,166444,Syngnathus,seaweed pipefishes,Syngnathus,seaweed pipefishes,Syngnathus,NA,126227,166444
+792,Syngnathus californiensis,Kelp pipefish,275218,166457,Syngnathus californiensis,kelp pipefish,Syngnathus californiensis,great pipefish,Syngnathus californiensis,Kelp pipefish,275218,166457
+793,Macroramphosus,snipefishes,126222,551495,Macroramphosus,NA,Macroramphosus,snipefishes,Macroramphosus,NA,126222,551495
+794,Aulorhynchus flavidus,Tubesnout,279839,166404,Aulorhynchus flavidus,tube-snout,Aulorhynchus flavidus,tube-snout,Aulorhynchus flavidus,Tubesnout,279839,166404
+795,Gobiidae,Gobies,125537,171746,Gobiidae,gobies,Gobiidae,true gobies,Gobiidae,Gobies,125537,171746
+796,Rhinogobiops nicholsii,Blackeye goby,282580,636877,Rhinogobiops nicholsii,blackeye goby,Rhinogobiops nicholsii,blackeye goby,Rhinogobiops nicholsii,Blackeye goby,282580,636877
+797,Lepidogobius lepidus,Bay goby,281292,171762,Lepidogobius lepidus,bay goby,Lepidogobius lepidus,bay goby,Lepidogobius lepidus,Bay goby,281292,171762
+798,Lythrypnus,NA,269761,171898,Lythrypnus,NA,Lythrypnus,NA,Lythrypnus,NA,269761,171898
+799,Lythrypnus dalli,Bluebanded goby,281457,171899,Lythrypnus dalli,bluebanded goby,Lythrypnus dalli,bluebanded goby,Lythrypnus dalli,Bluebanded goby,281457,171899
+800,Lythrypnus zebra,Zebra goby,281472,171903,Lythrypnus zebra,zebra goby,Lythrypnus zebra,zebra goby,Lythrypnus zebra,Zebra goby,281472,171903
+801,Typhlogobius californiensis,Blind goby,283075,171914,Typhlogobius californiensis,blind goby,Typhlogobius californiensis,blind goby,Typhlogobius californiensis,Blind goby,283075,171914
+802,Ilypnus gilberti,Cheekspot goby,281174,171892,Ilypnus gilberti,cheekspot goby,Ilypnus gilberti,cheekspot goby,Ilypnus gilberti,Cheekspot goby,281174,171892
+803,Dormitator latifrons,Pacific fat sleeper,276408,171918,Dormitator latifrons,Pacific fat sleeper,Dormitator latifrons,Pacific fat sleeper,Dormitator latifrons,Pacific fat sleeper,276408,171918
+804,Clevelandia ios,Arrow goby,280215,171748,Clevelandia ios,arrow goby,Clevelandia ios,arrow goby,Clevelandia ios,Arrow goby,280215,171748
+805,Clarkichthys bilineatus,flagtail wormfish,280208,637146,Clarkichthys bilineatus,flagtail wormfish,Clarkichthys bilineatus,flagtail wormfish,Clarkichthys bilineatus,NA,280208,637146
+806,Ptereleotris,Hover gobies,204246,171953,Ptereleotris,NA,Ptereleotris,NA,Ptereleotris,Hover gobies,204246,171953
+807,Eleotridae,Sleepers,151420,172171,Eleotridae,sleepers,Eleotridae,sleepers,Eleotridae,Sleepers,151420,172171
+808,Erotelis armiger,flathead sleeper,280709,637280,Erotelis armiger,flathead sleeper,Erotelis armiger,flathead sleeper,Erotelis armiger,NA,280709,637280
+809,Microdesmus,NA,159407,172163,Microdesmus,NA,Microdesmus,NA,Microdesmus,NA,159407,172163
+810,Malacanthidae,Tilefishes,151447,168537,Malacanthidae,tilefishes,Malacanthidae,tilefishes,Malacanthidae,Tilefishes,151447,168537
+811,Caulolatilus princeps,Ocean whitefish,276217,168540,Caulolatilus princeps,ocean whitefish,Caulolatilus princeps,ocean whitefish,Caulolatilus princeps,Ocean whitefish,276217,168540
+812,Caulolatilus,NA,159400,168539,Caulolatilus,NA,Caulolatilus,NA,Caulolatilus,NA,159400,168539
+813,Pseudoscopelus,NA,125958,171093,Pseudoscopelus,NA,Pseudoscopelus,NA,Pseudoscopelus,NA,125958,171093
+814,Kali,NA,125957,171087,Kali,NA,Kali,NA,Kali,NA,125957,171087
+815,Chiasmodontidae,Swallowers,125529,171084,Chiasmodontidae,snaketooth fishes,Chiasmodontidae,black swallowers,Chiasmodontidae,Swallowers,125529,171084
+816,Chiasmodon subniger,Black swallower,273379,630466,Chiasmodon subniger,NA,Chiasmodon subniger,NA,Chiasmodon subniger,Black swallower,273379,630466
+817,Dactyloscopidae,Sand stargazers,151416,171036,Dactyloscopidae,sand stargazers,Dactyloscopidae,sand stargazers,Dactyloscopidae,Sand stargazers,151416,171036
+818,Gobiesox rhessodon,California clingfish,275679,164464,Gobiesox rhessodon,California clingfish,Gobiesox rhessodon,California clingfish,Gobiesox rhessodon,California clingfish,275679,164464
+819,Rimicola eigenmanni,Slender clingfish,282616,164467,Rimicola eigenmanni,slender clingfish,Rimicola eigenmanni,slender clingfish,Rimicola eigenmanni,Slender clingfish,282616,164467
+820,Batrachoididae,Toadfishes,125450,164412,Batrachoididae,toadfishes,Batrachoididae,toadfishes,Batrachoididae,Toadfishes,125450,164412
+821,Porichthys,NA,158783,164413,Porichthys,NA,Porichthys,NA,Porichthys,NA,158783,164413
+822,Rimicola,NA,270760,164465,Rimicola,NA,Rimicola,NA,Rimicola,NA,270760,164465
+823,Chaenopsidae,Tube Blennies,151415,171550,Chaenopsidae,"pikeblennies, tubeblennies and flagblennies",Chaenopsidae,flag blennies,Chaenopsidae,Tube Blennies,151415,171550
+824,Chaenopsis alepidota,Orangethroat pikeblenny,293559,171467,Chaenopsis alepidota,orangethroat pikeblenny,Chaenopsis alepidota,orangethroat pikeblenny,Chaenopsis alepidota,Orangethroat pikeblenny,293559,171467
+825,Gobiesocidae,Clingfishes,125477,164457,Gobiesocidae,clingfishes and singleslits,Gobiesocidae,clingfishes,Gobiesocidae,Clingfishes,125477,164457
+826,Gobiesox maeandricus,Northern clingfish,275671,164459,Gobiesox maeandricus,northern clingfish,Gobiesox maeandricus,northern clingfish,Gobiesox maeandricus,Northern clingfish,275671,164459
+827,Gobiesox eugrammus,Lined clingfish,275669,164461,Gobiesox eugrammus,lined clingfish,Gobiesox eugrammus,lined clingfish,Gobiesox eugrammus,Lined clingfish,275669,164461
+828,Alloclinus holderi,Island kelpfish,279560,171465,Alloclinus holderi,island kelpfish,Alloclinus holderi,island kelpfish,Alloclinus holderi,Island kelpfish,279560,171465
+829,Labrisomus,NA,269590,171408,Labrisomus,NA,Labrisomus,NA,Labrisomus,NA,269590,171408
+830,Synchiropus atrilabiatus,Dragonet,273238,642601,Synchiropus atrilabiatus,blacklip dragonet,Synchiropus atrilabiatus,blacklip dragonet,Synchiropus atrilabiatus,Dragonet,273238,642601
+831,Labrisomidae,Labrisomid kelpfishes,151414,553227,Labrisomidae,labrisomids,Labrisomidae,labrisomid blennies,Labrisomidae,Labrisomid kelpfishes,151414,553227
+832,Cryptotrema corallinum,Deepwater kelpfish,280447,171472,Cryptotrema corallinum,deepwater blenny,Cryptotrema corallinum,deepwater blenny,Cryptotrema corallinum,Deepwater kelpfish,280447,171472
+833,Labrisomus multiporosus,Porehead blenny,281258,638559,Labrisomus multiporosus,porehead blenny,Labrisomus multiporosus,porehead blenny,Labrisomus multiporosus,Porehead blenny,281258,638559
+834,Labrisomus xanti,Largemouth blenny,281266,171418,Labrisomus xanti,largemouth blenny,Labrisomus xanti,rock blenny,Labrisomus xanti,Largemouth blenny,281266,171418
+835,Uranoscopidae,Stargazers,125573,171053,Uranoscopidae,stargazers,Uranoscopidae,stargazers,Uranoscopidae,Stargazers,125573,171053
+836,Astroscopus,electric stargazers,159250,171054,Astroscopus,NA,Astroscopus,electric stargazers,Astroscopus,NA,159250,171054
+837,Neoclinus blanchardi,Sarcastic fringehead,281679,171478,Neoclinus blanchardi,sarcastic fringehead,Neoclinus blanchardi,sarcastic fringehead,Neoclinus blanchardi,Sarcastic fringehead,281679,171478
+838,Neoclinus,NA,269994,171477,Neoclinus,NA,Neoclinus,NA,Neoclinus,NA,269994,171477
+839,Neoclinus stephensae,Yellowfin fringehead,281685,171479,Neoclinus stephensae,yellowfin fringehead,Neoclinus stephensae,yellowfin fringehead,Neoclinus stephensae,Yellowfin fringehead,281685,171479
+840,Clinidae,Kelpfishes,125530,171396,Clinidae,clinids,Clinidae,kelpfishes,Clinidae,Kelpfishes,125530,171396
+841,Gibbonsia,NA,269206,171397,Gibbonsia,NA,Gibbonsia,NA,Gibbonsia,NA,269206,171397
+842,Heterostichus rostratus,Giant kelpfish,281075,171476,Heterostichus rostratus,giant kelpfish,Heterostichus rostratus,giant kelpfish,Heterostichus rostratus,Giant kelpfish,281075,171476
+843,Zoarcoidei,zoarcoids,151739,165214,Zoarcoidei,NA,Zoarcoidei,zoarcoids,Zoarcoidei,NA,151739,165214
+844,Microdesmidae,Wormfishes,151423,172161,Microdesmidae,wormfishes,Microdesmidae,wormfishes,Microdesmidae,Wormfishes,151423,172161
+845,Blenniiformes,blennies,1517542,171123,Blenniiformes,NA,Blennioidei,blennies,Blennioidei,NA,1517542,171123
+846,Stichaeidae,Pricklebacks,125566,171554,Stichaeidae,pricklebacks,Stichaeidae,pricklebacks,Stichaeidae,Pricklebacks,125566,171554
+847,Anoplarchus purpurescens,High cockscomb,279633,171564,Anoplarchus purpurescens,high cocksbomb,Anoplarchus purpurescens,high cockscomb,Anoplarchus purpurescens,High cockscomb,279633,171564
+848,Pholidae,Gunnels,125550,171632,Pholidae,gunnels,Pholidae,gunnels,Pholidae,Gunnels,125550,171632
+849,Plectobranchus evides,Bluebarred prickleback,282283,171592,Plectobranchus evides,bluebarred prickleback,Plectobranchus evides,bluebarred prickleback,Plectobranchus evides,Bluebarred prickleback,282283,171592
+850,Blenniidae,Combtooth Blennies,125519,171124,Blenniidae,combtooth blennies,Blenniidae,blennies,Blenniidae,Combtooth Blennies,125519,171124
+851,Hypsoblennius,NA,159603,171155,Hypsoblennius,NA,Hypsoblennius,NA,Hypsoblennius,NA,159603,171155
+852,Hypsoblennius gentilis,Bay blenny,276323,171158,Hypsoblennius gentilis,bay blenny,Hypsoblennius gentilis,bay blenny,Hypsoblennius gentilis,Bay blenny,276323,171158
+853,Hypsoblennius jenkinsi,Mussel blenny,276328,171160,Hypsoblennius jenkinsi,mussel blenny,Hypsoblennius jenkinsi,mussel blenny,Hypsoblennius jenkinsi,Mussel blenny,276328,171160
+854,Hypsoblennius gilberti,Rockpool blenny,276324,171159,Hypsoblennius gilberti,rockpool blenny,Hypsoblennius gilberti,rockpool blenny,Hypsoblennius gilberti,Rockpool blenny,276324,171159
+855,Bathymasteridae,Ronquils,151388,170945,Bathymasteridae,ronquils,Bathymasteridae,ronquils,Bathymasteridae,Ronquils,151388,170945
+856,Rathbunella,"Ronquils (Bluebanded, Deepwater, Fanged)",270703,170952,Rathbunella,NA,Rathbunella,NA,Rathbunella,"Ronquils (Bluebanded, Deepwater, Fanged)",270703,170952
+857,Rathbunella alleni,stripefin ronquil,282555,170953,Rathbunella alleni,stripefin ronquil,Rathbunella alleni,rough ronquil,Rathbunella alleni,NA,282555,170953
+858,Ronquilus jordani,Northern ronquil,282629,170951,Ronquilus jordani,northern ronquil,Ronquilus jordani,northern ronquil,Ronquilus jordani,Northern ronquil,282629,170951
+859,Entomacrodus chiostictus,Notchfin blenny,277243,171184,Entomacrodus chiostictus,notchfin blenny,Entomacrodus chiostictus,notchfin blenny,Entomacrodus chiostictus,Notchfin blenny,277243,171184
+860,Zoarcidae,Eelpouts,125575,165215,Zoarcidae,eelpouts,Zoarcidae,eelpouts,Zoarcidae,Eelpouts,125575,165215
+861,Paraclinus integripinnis,Reef finspot,282025,171432,Paraclinus integripinnis,reef finspot,Paraclinus integripinnis,reef finspot,Paraclinus integripinnis,Reef finspot,282025,171432
+862,Anarrhichthys ocellatus,Wolf-eel,279605,171345,Anarrhichthys ocellatus,wolf-eel,Anarrhichthys ocellatus,wolf-eel,Anarrhichthys ocellatus,Wolf-eel,279605,171345
+863,Hypsoblennius proteus,Socorro blenny,276330,636384,Hypsoblennius proteus,Socorro blenny,Hypsoblennius proteus,Socorro blenny,Hypsoblennius proteus,NA,276330,636384
+864,Hypsoblennius brevipinnis,Barnaclebill blenny,276319,636379,Hypsoblennius brevipinnis,barnaclebill blenny,Hypsoblennius brevipinnis,barnaclebill blenny,Hypsoblennius brevipinnis,Barnaclebill blenny,276319,636379
+865,Bythitidae,Livebearing Brotulas,125503,165140,Bythitidae,viviparous brotulas,Bythitidae,viviparous brotulas,Bythitidae,Livebearing Brotulas,125503,165140
+866,Brosmophycis marginata,Red brotula,280000,164809,Brosmophycis marginata,red brotula,Brosmophycis marginata,red brotula,Brosmophycis marginata,Red brotula,280000,164809
+867,Cataetyx rubrirostris,Rubynose brotula,272767,164905,Cataetyx rubrirostris,NA,Cataetyx rubrirostris,NA,Cataetyx rubrirostris,Rubynose brotula,272767,164905
+868,Ophioblennius steindachneri,Panamic fanged blenny,273126,636462,Ophioblennius steindachneri,Panamic fanged blenny,Ophioblennius steindachneri,Panamic fanged blenny,Ophioblennius steindachneri,Panamic fanged blenny,273126,636462
+869,Ophidiiformes,ophidiiforms,10314,553139,Ophidiiformes,NA,Ophidiiformes,ophidiiforms,Ophidiiformes,NA,10314,553139
+870,Ophidiidae,Cusk-eels,125505,164807,Ophidiidae,cusk-eels,Ophidiidae,brotulas,Ophidiidae,Cusk-eels,125505,164807
+871,Ophidion scrippsae,Basketweave cusk-eel,272835,164856,Ophidion scrippsae,basketweave cusk-eel,Ophidion scrippsae,basketweave cusk-eel,Ophidion scrippsae,Basketweave cusk-eel,272835,164856
+872,Chilara taylori,Spotted cusk-eel,280146,165006,Chilara taylori,spotted cusk-eel,Chilara taylori,spotted cusk-eel,Chilara taylori,Spotted cusk-eel,280146,165006
+873,Cherublemma emmelas,Black brotula,280144,164998,Cherublemma emmelas,NA,Cherublemma emmelas,NA,Cherublemma emmelas,Black brotula,280144,164998
+874,Paraclinus,NA,270199,171427,Paraclinus,NA,Paraclinus,NA,Paraclinus,NA,270199,171427
+875,Carapidae,Pearlfishes,125504,165094,Carapidae,pearlfishes,Carapidae,pearlfishes,Carapidae,Pearlfishes,125504,165094
+876,Echiodon exsilium,nocturnal pearlfish,272782,165117,Echiodon exsilium,nocturnal pearlfish,Echiodon exsilium,nocturnal pearlfish,Echiodon exsilium,NA,272782,165117
+877,Scartichthys,NA,270817,636246,Scartichthys,NA,Scartichthys,NA,Scartichthys,NA,270817,636246
+878,Kali kerberti,Needletooth swallower,302801,171091,Kali kerberti,NA,Kali normani,NA,Kali normani,Needletooth swallower,302801,171091
+879,Lepophidium,NA,158761,164823,Lepophidium,NA,Lepophidium,NA,Lepophidium,NA,158761,164823
+880,Ammodytidae,Sand Lances,125516,171670,Ammodytidae,sand lances,Ammodytidae,sand lances,Ammodytidae,Sand Lances,125516,171670
+881,Ammodytes hexapterus,Pacific sand lance,254510,171672,Ammodytes hexapterus,Arctic sand lance,Ammodytes hexapterus,Pacific sand lance,Ammodytes hexapterus,Pacific sand lance,254510,171672
+882,Lamprogrammus niger,Paperbone cusk-eel,126672,164933,Lamprogrammus niger,NA,Lamprogrammus niger,NA,Lamprogrammus niger,Paperbone cusk-eel,126672,164933
+883,Lycenchelys,slipskin,126103,165230,Lycenchelys,slipskin,Lycenchelys,NA,Lycenchelys,NA,126103,165230
+884,Ammodytoides gilli,Panamic sand lance,276856,630395,Ammodytoides gilli,Panamic sand lance,Ammodytoides gilli,Panamic sand lance,Ammodytoides gilli,NA,276856,630395
+885,Bregmacerotidae,Codlets,125468,164694,Bregmacerotidae,codlets,Bregmacerotidae,bregmacerotid codfishes,Bregmacerotidae,Codlets,125468,164694
+886,Bregmaceros,NA,125727,164695,Bregmaceros,NA,Bregmaceros,NA,Bregmaceros,NA,125727,164695
+887,Bregmaceros bathymaster,Codlet,272290,550687,Bregmaceros bathymaster,East Pacific codlet,Bregmaceros bathymaster,East Pacific codlet,Bregmaceros bathymaster,Codlet,272290,550687
+888,Lycodapus mandibularis,Pallid eelpout,279391,165253,Lycodapus mandibularis,pallid eelpout,Lycodapus mandibularis,pallid eelpout,Lycodapus mandibularis,Pallid eelpout,279391,165253
+889,Melanonus zugmayeri,Arrowtail,126483,164746,Melanonus zugmayeri,winged hake,Melanonus zugmayeri,pelagic cod,Melanonus zugmayeri,Arrowtail,126483,164746
+890,Melanostigma pammelas,Midwater eelpout,274134,165295,Melanostigma pammelas,Pacific softpout,Melanostigma pammelas,black eelpout,Melanostigma pammelas,Midwater eelpout,274134,165295
+891,Coryphaenoides,Grenadiers,125748,165333,Coryphaenoides,NA,Coryphaenoides,NA,Coryphaenoides,Grenadiers,125748,165333
+892,Coryphaenoides acrolepis,Pacific grenadier,272313,165334,Coryphaenoides acrolepis,roughscale rattail,Coryphaenoides acrolepis,roughscale rattail,Coryphaenoides acrolepis,Pacific grenadier,272313,165334
+893,Coryphaenoides leptolepis,Ghostly grenadier,158959,622867,Coryphaenoides leptolepis,ghostly grenadier,Coryphaenoides leptolepis,ghostly grenadier,Coryphaenoides leptolepis,Ghostly grenadier,158959,622867
+894,Nezumia,NA,125754,165393,Nezumia,NA,Nezumia,NA,Nezumia,NA,125754,165393
+895,Macrouridae,Grenadiers,125471,165332,Macrouridae,rattails,Macrouridae,grenadiers,Macrouridae,Grenadiers,125471,165332
+896,Albatrossia pectoralis,Giant grenadier,236135,165427,Albatrossia pectoralis,pectoral rattail,Albatrossia pectoralis,giant grenadier,Albatrossia pectoralis,Giant grenadier,236135,165427
+897,Lepophidium negropinna,Specklefin cusk-eel,275623,623190,Lepophidium negropinna,specklefin cusk-eel,Lepophidium negropinna,specklefin cusk-eel,Lepophidium negropinna,Specklefin cusk-eel,275623,623190
+898,Malacoctenus hubbsi,Redside blenny,281499,638573,Malacoctenus hubbsi,redside blenny,Malacoctenus hubbsi,redside blenny,Malacoctenus hubbsi,Redside blenny,281499,638573
+899,Merluccius,Dwarf hake,125762,164790,Merluccius,NA,Merluccius,hakes,Merluccius,Dwarf hake,125762,164790
+900,Merlucciidae,Hakes,125473,164789,Merlucciidae,merluccid hakes,Merlucciidae,hakes,Merlucciidae,Hakes,125473,164789
+901,Merluccius productus,Pacific hake or whiting,272458,164792,Merluccius productus,whiting,Merluccius productus,Pacific hake,Merluccius productus,Pacific hake or whiting,272458,164792
+902,Merluccius gayi,Peruvian hake,293628,164799,Merluccius gayi,Peruvian hake,Merluccius gayi,Chilean hake,Merluccius gayi,NA,293628,164799
+903,Lophiodes spilurus,Threadfin goosefish,278534,649761,Lophiodes spilurus,threadfin goosefish,Lophiodes spilurus,Threadfin Goosefish,Lophiodes spilurus,Threadfin goosefish,278534,649761
+904,Gadus macrocephalus,Pacific cod,254538,164711,Gadus macrocephalus,Pacific cod,Gadus macrocephalus,Pacific cod,Gadus macrocephalus,Pacific cod,254538,164711
+905,Gadidae,Cods,125469,164701,Gadidae,cods and haddocks,Gadidae,codfishes,Gadidae,Cods,125469,164701
+906,Microgadus proximus,Pacific tomcod,275873,164719,Microgadus proximus,Pacific tomcod,Microgadus proximus,Pacific tomcod,Microgadus proximus,Pacific tomcod,275873,164719
+907,Gadus chalcogrammus,Walleye pollock,300735,934083,Gadus chalcogrammus,NA,Gadus chalcogrammus,Walleye Pollock,Gadus chalcogrammus,Walleye pollock,300735,934083
+908,Physiculus,NA,125770,164678,Physiculus,NA,Physiculus,NA,Physiculus,NA,125770,164678
+909,Moridae,Codlings,125474,164670,Moridae,morid cods,Moridae,codlings,Moridae,Codlings,125474,164670
+910,Physiculus rastrelliger,Hundred-fathom codling,272510,164681,Physiculus rastrelliger,hundred-fathom codling,Physiculus rastrelliger,hundred-fathom codling,Physiculus rastrelliger,Hundred-fathom codling,272510,164681
+911,Physiculus nematopus,Charcoal mora,272504,550848,Physiculus nematopus,charcoal codling,Physiculus nematopus,charcoal codling,Physiculus nematopus,Charcoal mora,272504,550848
+912,Citharichthys gordae,Mimic sanddab,275690,616291,Citharichthys gordae,mimic sanddab,Citharichthys gordae,mimic sanddab,Citharichthys gordae,Mimic sanddab,275690,616291
+913,Etropus,NA,158797,172728,Etropus,NA,Etropus,NA,Etropus,NA,158797,172728
+914,Syacium,NA,158875,172790,Syacium,NA,Syacium,NA,Syacium,NA,158875,172790
+915,Pleuronectiformes,flatfishes,10331,172702,Pleuronectiformes,NA,Pleuronectiformes,flatfishes,Pleuronectiformes,NA,10331,172702
+916,Bothidae,Lefteye Flounders,125576,172714,Bothidae,lefteye flounders,Bothidae,lefteyed flounders,Bothidae,Lefteye Flounders,125576,172714
+917,Bothus,NA,126110,172758,Bothus,NA,Bothus,NA,Bothus,NA,126110,172758
+918,Bothus leopardinus,Pacific leopard flounder,274186,616278,Bothus leopardinus,Pacific leopard flounder,Bothus leopardinus,Pacific leopard flounder,Bothus leopardinus,Pacific leopard flounder,274186,616278
+919,Paralichthyidae,Lefteye flounders and sanddabs,154168,553179,Paralichthyidae,large-tooth flounders,Paralichthyidae,lefteye flounders,Paralichthyidae,Lefteye flounders and sanddabs,154168,553179
+920,Citharichthys platophrys,Small sanddab,275693,616294,Citharichthys platophrys,small sanddab,Citharichthys platophrys,small sanddab,Citharichthys platophrys,Small sanddab,275693,616294
+921,Citharichthys fragilis,Gulf sanddab,275687,172727,Citharichthys fragilis,Gulf sanddab,Citharichthys fragilis,Gulf sanddab,Citharichthys fragilis,Gulf sanddab,275687,172727
+922,Citharichthys gilberti,Bigmouth sanddab,275688,616289,Citharichthys gilberti,bigmouth sanddab,Citharichthys gilberti,bigmouth sanddab,Citharichthys gilberti,Bigmouth sanddab,275688,616289
+923,Citharichthys sordidus,Pacific sanddab,275694,172716,Citharichthys sordidus,Pacific sanddab,Citharichthys sordidus,Pacific sanddab,Citharichthys sordidus,Pacific sanddab,275694,172716
+924,Citharichthys,Sanddabs,158786,172715,Citharichthys,NA,Citharichthys,sanddabs,Citharichthys,Sanddabs,158786,172715
+925,Citharichthys stigmaeus,Speckled sanddab,275696,172717,Citharichthys stigmaeus,speckled sanddab,Citharichthys stigmaeus,speckled sanddab,Citharichthys stigmaeus,Speckled sanddab,275696,172717
+926,Citharichthys xanthostigma,Longfin sanddab,275699,172726,Citharichthys xanthostigma,longfin sanddab,Citharichthys xanthostigma,longfin sanddab,Citharichthys xanthostigma,Longfin sanddab,275699,172726
+927,Syacium ovale,Oval flounder,275843,616481,Syacium ovale,oval flounder,Syacium ovale,oval flounder,Syacium ovale,Oval flounder,275843,616481
+928,Etropus crossotus,Fringed flounder,158799,172729,Etropus crossotus,fringed flounder,Etropus crossotus,fringed flounder,Etropus crossotus,Fringed flounder,158799,172729
+929,Hippoglossina stomata,Bigmouth sole,275827,172784,Hippoglossina stomata,bigmouth sole,Hippoglossina stomata,bigmouth sole,Hippoglossina stomata,Bigmouth sole,275827,172784
+930,Cyclopsetta,NA,158794,172775,Cyclopsetta,NA,Cyclopsetta,NA,Cyclopsetta,NA,158794,172775
+931,Engyophrys sanctilaurentii,Speckledtail flounder,276187,616354,Engyophrys sanctilaurentii,speckledtail flounder,Engyophrys sanctilaurentii,speckledtail flounder,Engyophrys sanctilaurentii,Speckledtail flounder,276187,616354
+932,Paralichthys californicus,California halibut,275809,172743,Paralichthys californicus,California halibut,Paralichthys californicus,California halibut,Paralichthys californicus,California halibut,275809,172743
+933,Hippoglossina,NA,158831,172782,Hippoglossina,NA,Hippoglossina,NA,Hippoglossina,NA,158831,172782
+934,Paralichthys,Summer flounders,158823,172734,Paralichthys,NA,Paralichthys,Summer flounders,Paralichthys,NA,158823,172734
+935,Perissias taeniopterus,Stripedfin flounder,282219,616165,Perissias taeniopterus,flag flounder,Perissias taeniopterus,flag flounder,Perissias taeniopterus,Stripedfin flounder,282219,616165
+936,Xystreurys liolepis,Fantail sole,283199,172800,Xystreurys liolepis,fantail sole,Xystreurys liolepis,fantail sole,Xystreurys liolepis,Fantail sole,283199,172800
+937,Monolene,NA,159208,172785,Monolene,NA,Monolene,NA,Monolene,NA,159208,172785
+938,Etropus peruvianus,Peruvian flounder,275709,616374,Etropus peruvianus,Peruvian flounder,Etropus peruvianus,Peruvian flounder,Etropus peruvianus,Peruvian flounder,275709,616374
+939,Cyclopsetta panamensis,God's flounder,275702,616306,Cyclopsetta panamensis,Panamic flounder,Cyclopsetta panamensis,Panamic flounder,Cyclopsetta panamensis,God's flounder,275702,616306
+940,Pleuronectidae,Righteyed Flounders,125579,172859,Pleuronectidae,righteye flounders,Pleuronectidae,halibuts,Pleuronectidae,Righteyed Flounders,125579,172859
+941,Glyptocephalus zachirus,Rex sole,274287,172978,Glyptocephalus zachirus,rex sole,Glyptocephalus zachirus,rex sole,Glyptocephalus zachirus,Rex sole,274287,172978
+942,Pleuronichthys guttulatus,Diamond turbot,293680,172945,Pleuronichthys guttulatus,diamond turbot,Hypsopsetta guttulata,diamond turbot,Hypsopsetta guttulata,Diamond turbot,293680,172945
+943,Lyopsetta exilis,Slender sole,281452,172871,Lyopsetta exilis,slender sole,Lyopsetta exilis,slender sole,Lyopsetta exilis,Slender sole,281452,172871
+944,Lepidopsetta bilineata,Rock sole,281305,172917,Lepidopsetta bilineata,rock sole,Lepidopsetta bilineata,rock sole,Lepidopsetta bilineata,Rock sole,281305,172917
+945,Hippoglossus stenolepis,Pacific halibut,274290,172932,Hippoglossus stenolepis,Pacific halibut,Hippoglossus stenolepis,Pacific halibut,Hippoglossus stenolepis,Pacific halibut,274290,172932
+946,Microstomus pacificus,Dover sole,274294,172887,Microstomus pacificus,Dover sole,Microstomus pacificus,Dover sole,Microstomus pacificus,Dover sole,274294,172887
+947,Hippoglossoides elassodon,Flathead sole,274289,172875,Hippoglossoides elassodon,flathead sole,Hippoglossoides elassodon,flathead sole,Hippoglossoides elassodon,Flathead sole,274289,172875
+948,Parophrys vetulus,English sole,254393,172921,Parophrys vetulus,English sole,Parophrys vetulus,English sole,Parophrys vetulus,English sole,254393,172921
+949,Platichthys stellatus,Starry flounder,154781,172893,Platichthys stellatus,starry flounder,Platichthys stellatus,starry flounder,Platichthys stellatus,Starry flounder,154781,172893
+950,Reinhardtius hippoglossoides,Greenland halibut (Greenland turbot),127144,172930,Reinhardtius hippoglossoides,green halibut,Reinhardtius hippoglossoides,Greenland halibut,Reinhardtius hippoglossoides,Greenland halibut (Greenland turbot),127144,172930
+951,Pleuronichthys coenosus,C-O turbot,282290,172923,Pleuronichthys coenosus,c-o sole,Pleuronichthys coenosus,C-O sole,Pleuronichthys coenosus,C-O turbot,282290,172923
+952,Pleuronichthys decurrens,Curlfin turbot,282292,172924,Pleuronichthys decurrens,curlfin sole,Pleuronichthys decurrens,curlfin sole,Pleuronichthys decurrens,Curlfin turbot,282292,172924
+953,Pleuronichthys ritteri,Spotted turbot,282294,172925,Pleuronichthys ritteri,spotted turbot,Pleuronichthys ritteri,spotted turbot,Pleuronichthys ritteri,Spotted turbot,282294,172925
+954,Pleuronichthys,Turbots,270459,172922,Pleuronichthys,NA,Pleuronichthys,NA,Pleuronichthys,Turbots,270459,172922
+955,Pleuronichthys verticalis,Hornyhead turbot,282295,172926,Pleuronichthys verticalis,hornyhead turbot,Pleuronichthys verticalis,hornyhead turbot,Pleuronichthys verticalis,Hornyhead turbot,282295,172926
+956,Lophiodes caulinaris,Spottedtail goosefish,278525,164508,Lophiodes caulinaris,spottedtail goosefish,Lophiodes caulinaris,Spottedtail Goosefish,Lophiodes caulinaris,Spottedtail goosefish,278525,164508
+957,Oneirodes eschrichtii,Twopole dreamer,126572,622880,Oneirodes eschrichtii,Bulbous dreamer,Oneirodes eschrichtii,cosmopolitan dreamer,Oneirodes eschrichtii,Twopole dreamer,126572,622880
+958,Psettichthys melanostictus,Sand sole,282396,172928,Psettichthys melanostictus,sand sole,Psettichthys melanostictus,sand sole,Psettichthys melanostictus,Sand sole,282396,172928
+959,Atheresthes stomias,Arrowtooth flounder,279792,172862,Atheresthes stomias,arrowtooth flounder,Atheresthes stomias,arrowtooth flounder,Atheresthes stomias,Arrowtooth flounder,279792,172862
+960,Eopsetta jordani,Petrale sole,280690,172868,Eopsetta jordani,petrale sole,Eopsetta jordani,petrale sole,Eopsetta jordani,Petrale sole,280690,172868
+961,Microstomus bathybius,Deepsea sole,305684,172866,Microstomus bathybius,NA,Embassichthys bathybius,deepsea sole,Embassichthys bathybius,Deepsea sole,305684,172866
+962,Isopsetta isolepis,Butter sole,281189,172919,Isopsetta isolepis,butter sole,Isopsetta isolepis,butter sole,Isopsetta isolepis,Butter sole,281189,172919
+964,Symphurus elongatus,Elongate tonguefish,274241,616489,Symphurus elongatus,elongate tonguefish,Symphurus elongatus,elongate tonguefish,Symphurus elongatus,Elongate tonguefish,274241,616489
+965,Cynoglossidae,Tonguefishes,125578,173060,Cynoglossidae,tonguefishes,Cynoglossidae,tongue soles,Cynoglossidae,Tonguefishes,125578,173060
+966,Symphurus,straightmouth tonguefishes,126113,173061,Symphurus,NA,Symphurus,straightmouth tonguefishes,Symphurus,NA,126113,173061
+967,Symphurus atricauda,California tonguefish,305635,616607,Symphurus atricauda,NA,Symphurus atricaudus,California tonguefish,Symphurus atricaudus,California tonguefish,305635,616607
+968,Soleidae,Soles,125581,172980,Soleidae,soles,Soleidae,soles,Soleidae,Soles,125581,172980
+969,Achirus mazatlanus,Pacific lined sole,279494,172989,Achirus mazatlanus,Pacific lined sole,Achirus mazatlanus,Mexican sole,Achirus mazatlanus,Pacific lined sole,279494,172989
+970,Symphurus callopterus,Chocolate tonguefish,274237,616485,Symphurus callopterus,chocolate tonguefish,Symphurus callopterus,chocolate tonguefish,Symphurus callopterus,Chocolate tonguefish,274237,616485
+971,Lophiiformes,anglerfishes,10316,164495,Lophiiformes,NA,Lophiiformes,anglerfishes,Lophiiformes,NA,10316,164495
+972,Borophryne apogon,Netdevil,279941,622907,Borophryne apogon,NA,Borophryne apogon,NA,Borophryne apogon,Netdevil,279941,622907
+973,Zalieutes elater,Spotted batfish,283203,164598,Zalieutes elater,roundel batfish,Zalieutes elater,roundel batfish,Zalieutes elater,Spotted batfish,283203,164598
+974,Borophryne,NA,268562,622778,Borophryne,NA,Borophryne,NA,Borophryne,NA,268562,622778
+975,Lophiidae,Goosefishes,125493,164497,Lophiidae,goosefishes,Lophiidae,anglerfishes,Lophiidae,Goosefishes,125493,164497
+976,Dolopichthys,NA,125807,164635,Dolopichthys,NA,Dolopichthys,NA,Dolopichthys,NA,125807,164635
+977,Fowlerichthys avalonis,Roughjaw frogfish,712506,164529,Fowlerichthys avalonis,NA,Antennarius avalonis,roughjaw frogfish,Antennarius avalonis,Roughjaw frogfish,712506,164529
+978,Cryptopsaras couesii,Triplewart seadevil,126538,623188,Cryptopsaras couesii,triplewart seadevil,Cryptopsaras couesii,triplewart seadevil,Cryptopsaras couesii,Triplewart seadevil,126538,623188
+979,Ceratias holboelli,Northern giant seadevil,126537,164655,Ceratias holboelli,deepsea angler,Ceratias holboelli,deepsea angler,Ceratias holboelli,Northern giant seadevil,126537,164655
+980,Antennariidae,Frogfishes,125484,164518,Antennariidae,frogfishes,Antennariidae,frogfishes,Antennariidae,Frogfishes,125484,164518
+981,Antennarius,frogfishes,125790,164522,Antennarius,NA,Antennarius,frogfishes,Antennarius,NA,125790,164522
+982,Chaenophryne,NA,125805,164626,Chaenophryne,NA,Chaenophryne,NA,Chaenophryne,NA,125805,164626
+983,Centrophryne spinulosa,NA,126536,164652,Centrophryne spinulosa,NA,Centrophryne spinulosa,NA,Centrophryne spinulosa,NA,126536,164652
+984,Melanocetus,NA,125803,164612,Melanocetus,NA,Melanocetus,NA,Melanocetus,NA,125803,164612
+985,Chaunacidae,Gapers,125488,164569,Chaunacidae,sea toads,Chaunacidae,sea toads,Chaunacidae,Gapers,125488,164569
+986,Chaunax,NA,125796,164570,Chaunax,NA,Chaunax,NA,Chaunax,NA,125796,164570
+987,Caulophryne,Fanfins,125792,164660,Caulophryne,NA,Caulophryne,NA,Caulophryne,Fanfins,125792,164660
+988,Caulophryne pelagica,Pelagic fanfin,272546,649743,Caulophryne pelagica,Pelagic fanfin,Caulophryne pelagica,NA,Caulophryne pelagica,NA,272546,649743
+989,Melanocetus johnsonii,Blackdevil,126556,622873,Melanocetus johnsonii,Humpback anglerfish,Melanocetus johnsonii,Johnson's black anglerfish,Melanocetus johnsonii,Blackdevil,126556,622873
+990,Lophiiformes,NA,10316,553153,Lophiiformes,NA,Ogcocephalioidei,NA,Ogcocephalioidei,NA,10316,553153
+991,Oneirodidae,Dreamers,125496,164625,Oneirodidae,dreamers,Oneirodidae,dreamers,Oneirodidae,Dreamers,125496,164625
+992,Ceratiidae,Seadevils,125487,164653,Ceratiidae,seadevils,Ceratiidae,seadevils,Ceratiidae,Seadevils,125487,164653
+993,Linophrynidae,Netdevils,125492,164661,Linophrynidae,leftvents,Linophrynidae,devil anglers,Linophrynidae,Netdevils,125492,164661
+994,Melanocetidae,Blackdevils,125494,164611,Melanocetidae,black seadevils,Melanocetidae,devil-anglers,Melanocetidae,Blackdevils,125494,164611
+995,Gigantactinidae,Whipnoses,125490,164642,Gigantactinidae,whipnose anglers,Gigantactinidae,whipnose anglerfishes,Gigantactinidae,Whipnoses,125490,164642
+996,Gigantactis,Whipnoses,125798,164643,Gigantactis,NA,Gigantactis,NA,Gigantactis,Whipnoses,125798,164643
+997,Linophryne,NA,125801,164662,Linophryne,NA,Linophryne,NA,Linophryne,NA,125801,164662
+998,Ogcocephalidae,Batfishes,125495,164573,Ogcocephalidae,batfishes,Ogcocephalidae,batfishes,Ogcocephalidae,Batfishes,125495,164573
+999,Oneirodes,Dreamers,125811,164629,Oneirodes,NA,Oneirodes,NA,Oneirodes,Dreamers,125811,164629
+1005,Chlopsidae,False Moray,125426,553181,Chlopsidae,false morays,Chlopsidae,false morays,Chlopsidae,False Moray,125426,553181
+1015,Bathycongrus,NA,203953,635345,Bathycongrus,NA,Bathycongrus,NA,Bathycongrus,NA,203953,635345
+1020,Gnathophis cinctus,Catalina conger,271755,635714,Gnathophis cinctus,hardtail conger,Gnathophis cinctus,hardtail conger,Gnathophis cinctus,Catalina conger,271755,635714
+1025,Derichthys serpentinus,Longneck eel,126291,161601,Derichthys serpentinus,neckeel,Derichthys serpentinus,narrowneck eel,Derichthys serpentinus,Longneck eel,126291,161601
+1030,Ariosoma,NA,125622,161343,Ariosoma,NA,Ariosoma,NA,Ariosoma,NA,125622,161343
+1031,Ariosoma marginatum,Large-eye conger eel,271725,635690,Ariosoma marginatum,NA,Ariosoma marginatum,NA,Ariosoma marginatum,Large-eye conger eel,271725,635690
+1050,Serrivomer beanii,Bean's sawtooth eel,126319,635762,Serrivomer beanii,stout sawpalate,Serrivomer beanii,sawtooth eel,Serrivomer beanii,Bean's sawtooth eel,126319,635762
+1060,Hoplunnis,Pike-conger,158589,161289,Hoplunnis,NA,Hoplunnis,NA,Hoplunnis,Pike-conger,158589,161289
+1062,Hoplunnis sicarius,NA,275449,635754,Hoplunnis sicarius,NA,Hoplunnis sicarius,NA,Hoplunnis sicarius,NA,275449,635754
+1075,Encrasicholina punctifer,Buccaneer anchovy,219982,161879,Encrasicholina punctifer,buccaneer anchovy,Encrasicholina punctifer,buccaneer anchovy,Encrasicholina punctifer,Buccaneer anchovy,219982,161879
+1085,Bathylagoides,NA,268508,623317,Bathylagoides,NA,Bathylagoides,NA,Bathylagoides,NA,268508,623317
+1090,Melanolagus bericoides,Bigscale deepsea smelt,126721,623332,Melanolagus bericoides,Bigscale deepsea smelt,Melanolagus bericoides,deep-sea smelt,Melanolagus bericoides,NA,126721,623332
+1100,Dolichopteryx,winged spookfish,125895,162102,Dolichopteryx,winged spookfish,Dolichopteryx,NA,Dolichopteryx,NA,125895,162102
+1115,Maurolicinae,NA,154224,622314,Maurolicinae,NA,Maurolicinae,NA,Maurolicinae,NA,154224,622314
+1123,Margrethia obtusirostra,Bighead portholefish,127297,622694,Margrethia obtusirostra,Bighead portholefish,Margrethia obtusirostra,NA,Margrethia obtusirostra,NA,127297,622694
+1125,Sigmops,NA,221510,622342,Sigmops,NA,Sigmops,NA,Sigmops,NA,221510,622342
+1126,Sigmops elongatus,Elongated bristlemouth fish,221512,162185,Sigmops elongatus,elongated bristlemouth fish,Gonostoma elongatum,longtooth anglemouth,Gonostoma elongatum,Elongated bristlemouth fish,221512,162185
+1127,Sigmops gracilis,Slender fangjaw,279336,622490,Sigmops gracilis,Slender fangjaw,Sigmops gracilis,NA,Sigmops gracilis,Slender fangjaw,279336,622490
+1128,Sigmops bathyphilus,NA,398363,162184,Sigmops bathyphilus,NA,Gonostoma bathyphilum,NA,Gonostoma bathyphilum,NA,398363,162184
+1140,Phosichthyidae,Lightfishes,125602,622313,Phosichthyidae,lightfishes,Phosichthyidae,lightfishes,Phosichthyidae,Lightfishes,125602,622313
+1143,Vinciguerria attenuata,slender lightfish,127302,162193,Vinciguerria attenuata,slender lightfish,Vinciguerria attenuata,slender lightfish,Vinciguerria attenuata,NA,127302,162193
+1150,Stomiidae,Dragonfishes,125604,162282,Stomiidae,barbeled dragonfishes,Stomiidae,dragonfishes,Stomiidae,Dragonfishes,125604,162282
+1155,Borostomias,Snaggletooth,126204,162239,Borostomias,NA,Borostomias,NA,Borostomias,Snaggletooth,126204,162239
+1158,Bathophilus brevis,Deepbody dragonfish,127329,622372,Bathophilus brevis,NA,Bathophilus brevis,NA,Bathophilus brevis,Deepbody dragonfish,127329,622372
+1170,Aristostomias,NA,126201,162273,Aristostomias,NA,Aristostomias,NA,Aristostomias,NA,126201,162273
+1176,Idiacanthus fasciola,ribbon sawtailfish,127354,162300,Idiacanthus fasciola,ribbon sawtailfish,Idiacanthus fasciola,black dragonfish,Idiacanthus fasciola,NA,127354,162300
+1180,Gigantura indica,Telescopefish,158858,644689,Gigantura indica,telescopefish,Gigantura indica,NA,Gigantura indica,Telescopefish,158858,644689
+1185,Aulopus bajacali,Eastern Pacific flagfin,272041,644741,Aulopus bajacali,eastern Pacific flagfin,Aulopus bajacali,eastern Pacific flagfin,Aulopus bajacali,Eastern Pacific flagfin,272041,644741
+1191,Benthalbella infans,Zugmayer's pearleye,126365,162552,Benthalbella infans,Zugmayer's pearleye,Benthalbella infans,NA,Benthalbella infans,Zugmayer's pearleye,126365,162552
+1194,Rosenblattichthys hubbsi,Hubb's pearleye,126366,644709,Rosenblattichthys hubbsi,NA,Rosenblattichthys hubbsi,NA,Rosenblattichthys hubbsi,Hubb's pearleye,126366,644709
+1196,Scopelarchus michaelsarsi,Bigfin pearleye,126368,162558,Scopelarchus michaelsarsi,big fin pearleye,Scopelarchus michaelsarsi,bigfin pearleye,Scopelarchus michaelsarsi,Bigfin pearleye,126368,162558
+1200,Ahliesaurus brevis,Short paperbone,272078,644705,Ahliesaurus brevis,Short paperbone,Ahliesaurus brevis,NA,Ahliesaurus brevis,NA,272078,644705
+1203,Scopelosaurus hoedti,NA,272084,162570,Scopelosaurus hoedti,NA,Scopelosaurus hoedti,NA,Scopelosaurus hoedti,NA,272084,162570
+1204,Scopelosaurus smithii,NA,126350,162569,Scopelosaurus smithii,NA,Scopelosaurus smithii,NA,Scopelosaurus smithii,NA,126350,162569
+1205,Scopelosaurus hubbsi,NA,272085,644826,Scopelosaurus hubbsi,NA,Scopelosaurus hubbsi,NA,Scopelosaurus hubbsi,NA,272085,644826
+1210,Synodus binotatus,Twospot lizardfish,217674,162384,Synodus binotatus,twospot lizardfish,Synodus binotatus,twospot lizardfish,Synodus binotatus,Twospot lizardfish,217674,162384
+1217,Trachinocephalus myops,Snakefish,158884,162420,Trachinocephalus myops,snakefish,Trachinocephalus myops,snakefish,Trachinocephalus myops,Snakefish,158884,162420
+1222,Lestidiops indopacificus,NA,220327,644790,Lestidiops indopacificus,NA,Lestidiops indopacifica,NA,Lestidiops indopacifica,NA,220327,644790
+1228,Lestrolepis,NA,158872,162515,Lestrolepis,NA,Lestrolepis,NA,Lestrolepis,NA,158872,162515
+1230,Lestrolepis intermedia,Brilliant-bellied barracudina,158873,162516,Lestrolepis intermedia,Brilliant-bellied barracudina,Lestrolepis intermedia,NA,Lestrolepis intermedia,NA,158873,162516
+1231,Lestrolepis japonica,Japanese barracudina,275835,644793,Lestrolepis japonica,Japanese barracudina,Lestrolepis japonica,NA,Lestrolepis japonica,NA,275835,644793
+1241,Stemonosudis elegans,NA,220335,644829,Stemonosudis elegans,NA,Stemonosudis elegans,NA,Stemonosudis elegans,NA,220335,644829
+1245,Uncisudis,NA,125680,162517,Uncisudis,NA,Uncisudis,NA,Uncisudis,NA,125680,162517
+1249,Coccorella atlantica,Atlantic sabertooth,126337,162537,Coccorella atlantica,Atlantic sabertooth,Coccorella atlantica,Atlantic sabretooth,Coccorella atlantica,Atlantic sabertooth,126337,162537
+1250,Evermannella,Sabretooth,125666,162541,Evermannella,Sabretooth,Evermannella,NA,Evermannella,NA,125666,162541
+1255,Bolinichthys distofax,NA,272649,623739,Bolinichthys distofax,NA,Bolinichthys distofax,NA,Bolinichthys distofax,NA,272649,623739
+1257,Diaphus anderseni,Andersen's lantern fish,272657,162586,Diaphus anderseni,Andersen's lantern fish,Diaphus anderseni,NA,Diaphus anderseni,NA,272657,162586
+1260,Lampanyctus acanthurus,Spinytail lampfish,272709,623827,Lampanyctus acanthurus,Spinytail lampfish,Lampanyctus acanthurus,NA,Lampanyctus acanthurus,Spinytail lampfish,272709,623827
+1275,Notoscopelus caudispinosus,Lanternfish,158914,162657,Notoscopelus caudispinosus,Lobisomem,Notoscopelus caudispinosus,NA,Notoscopelus caudispinosus,Lanternfish,158914,162657
+1280,Benthosema fibulatum,Spinycheek lanternfish,217681,623747,Benthosema fibulatum,spinycheek lanternfish,Benthosema fibulatum,NA,Benthosema fibulatum,Spinycheek lanternfish,217681,623747
+1283,Centrobranchus andreae,NA,272653,162734,Centrobranchus andreae,NA,Centrobranchus andreae,NA,Centrobranchus andreae,NA,272653,162734
+1286,Hygophum hygomii,Bermuda lanternfish,126603,623714,Hygophum hygomii,NA,Hygophum hygomii,NA,Hygophum hygomii,Bermuda lanternfish,126603,623714
+1289,Dasyscopelus spinosus,NA,1525960,162725,Dasyscopelus spinosus,NA,Myctophum spinosum,NA,Myctophum spinosum,NA,1525960,162725
+1295,Lampris guttatus,Opah,126522,166326,Lampris guttatus,moonfish,Lampris guttatus,opah,Lampris guttatus,Opah,126522,166326
+1297,Stylephorus chordatus,Tube-eyes,126526,166360,Stylephorus chordatus,tube eye,Stylephorus chordatus,sticklebacks,Stylephorus chordatus,Tube-eyes,126526,166360
+1300,Gadiformes,cods,10313,164665,Gadiformes,NA,Gadiformes,cods,Gadiformes,NA,10313,164665
+1305,Mesovagus berryi,Midwater grenadier,1524320,623139,Mesovagus berryi,NA,Mesobius berryi,NA,Mesobius berryi,Midwater grenadier,1524320,623139
+1310,Laemonema verecundum,Bighead mora,272479,623030,Laemonema verecundum,NA,Laemonema verecundum,NA,Laemonema verecundum,Bighead mora,272479,623030
+1315,Brotula,brotulas,159065,164817,Brotula,NA,Brotula,brotulas,Brotula,NA,159065,164817
+1320,Spectrunculus grandis,Giant Cusk-eel,126678,622862,Spectrunculus grandis,pudgy cuskeel,Spectrunculus grandis,giant cusk-eel,Spectrunculus grandis,Giant Cusk-eel,126678,622862
+1323,Echiodon,NA,125854,165114,Echiodon,NA,Echiodon,NA,Echiodon,NA,125854,165114
+1325,Encheliophis,NA,206890,165119,Encheliophis,NA,Encheliophis,NA,Encheliophis,NA,206890,165119
+1328,Porichthys notatus,Plainfin midshipman,275658,164414,Porichthys notatus,plainfin midshipman,Porichthys notatus,plainfin midshipman,Porichthys notatus,Plainfin midshipman,275658,164414
+1330,Himantolophus,NA,125799,164623,Himantolophus,NA,Himantolophus,NA,Himantolophus,NA,125799,164623
+1345,Lophodolos indicus,NA,272619,690540,Lophodolos indicus,NA,Lophodolos indicus,NA,Lophodolos indicus,NA,272619,690540
+1355,Ceratias,NA,125794,164654,Ceratias,NA,Ceratias,NA,Ceratias,NA,125794,164654
+1357,Gobiesox,common clingfishes,158785,164458,Gobiesox,NA,Gobiesox,common clingfishes,Gobiesox,NA,158785,164458
+1360,Odontesthes regia,Silverside,281830,630683,Odontesthes regia,NA,Odontesthes regia,NA,Odontesthes regia,Silverside,281830,630683
+1370,Tylosurus pacificus,Agujon needlefish,272147,645131,Tylosurus pacificus,Pacific agujon,Tylosurus pacificus,Pacific agujon,Tylosurus pacificus,Agujon needlefish,272147,645131
+1375,Hemiramphus depauperatus,Polynesian halfbeak,272176,165464,Hemiramphus depauperatus,NA,Hemiramphus depauperatus,NA,Hemiramphus depauperatus,Polynesian halfbeak,272176,165464
+1380,Hyporhamphus pacificus,Acute halfbeak,1018969,165483,Hyporhamphus pacificus,NA,Hyporhamphus acutus pacificus,NA,Hyporhamphus acutus pacificus,Acute halfbeak,1018969,165483
+1381,Hyporhamphus rosae,California halfbeak,272195,165477,Hyporhamphus rosae,California halfbeak,Hyporhamphus rosae,California halfbeak,Hyporhamphus rosae,NA,272195,165477
+1383,Hyporhamphus unifasciatus,Silverstripe helfbeak,159281,165474,Hyporhamphus unifasciatus,common halfbeak,Hyporhamphus unifasciatus,halfbeak,Hyporhamphus unifasciatus,Silverstripe helfbeak,159281,165474
+1395,Parexocoetus brachypterus,Sailfin flyingfish,217872,165522,Parexocoetus brachypterus,sailfin flyingfish,Parexocoetus brachypterus,sailfin flyingfish,Parexocoetus brachypterus,Sailfin flyingfish,217872,165522
+1398,Prognichthys sealei,Sailor flyingfish,217874,165528,Prognichthys sealei,sailor flyingfish,Prognichthys sealei,sailor flyingfish,Prognichthys sealei,Sailor flyingfish,217874,165528
+1410,Scopeloberyx,NA,126183,166112,Scopeloberyx,NA,Scopeloberyx,NA,Scopeloberyx,NA,126183,166112
+1411,Diretmichthys parini,Parin's spinyfin,126396,622111,Diretmichthys parini,Parin's spinyfin,Diretmichthys parini,black discfish,Diretmichthys parini,Parin's spinyfin,126396,622111
+1412,Diretmus argenteus,Silver spinyfin,126398,166133,Diretmus argenteus,spinyfin,Diretmus argenteus,discfish,Diretmus argenteus,Silver spinyfin,126398,166133
+1420,Beryx splendens,Splendid alfonsino,126395,166156,Beryx splendens,splendid beryx,Beryx splendens,alfonsino,Beryx splendens,Splendid alfonsino,126395,166156
+1425,Holocentrinae,NA,267057,622094,Holocentrinae,NA,Holocentrinae,NA,Holocentrinae,NA,267057,622094
+1440,Myripristinae,NA,267056,622095,Myripristinae,NA,Myripristinae,NA,Myripristinae,NA,267056,622095
+1460,Zenion,NA,126245,166276,Zenion,NA,Zenion,NA,Zenion,NA,126245,166276
+1480,Aulostomus chinensis,Chinese trumpetfish,217964,166412,Aulostomus chinensis,Chinese trumpetfish,Aulostomus chinensis,painted flute mouth,Aulostomus chinensis,Chinese trumpetfish,217964,166412
+1485,Fistularia corneta,Deepwater cornetfish,276231,644991,Fistularia corneta,deepwater cornetfish,Fistularia corneta,deepwater cornetfish,Fistularia corneta,Deepwater cornetfish,276231,644991
+1488,Syngnathus exilis,Barcheek pipefish,275223,166461,Syngnathus exilis,barcheek pipefish,Syngnathus exilis,barcheek pipefish,Syngnathus exilis,Barcheek pipefish,275223,166461
+1490,Hippocampus kuda,Yellow seahorse,212237,166495,Hippocampus kuda,spotted seahorse,Hippocampus kuda,spotted seahorse,Hippocampus kuda,Yellow seahorse,212237,166495
+1500,Hexagrammos stelleri,Whitespotted greenling,254545,167113,Hexagrammos stelleri,whitespotted greenling,Hexagrammos stelleri,whitespotted greenling,Hexagrammos stelleri,Whitespotted greenling,254545,167113
+1520,Hemilepidotus,NA,248338,167276,Hemilepidotus,NA,Hemilepidotus,NA,Hemilepidotus,NA,248338,167276
+1525,Clinocottus,Lesser sculpin,268796,167222,Clinocottus,Lesser sculpin,Clinocottus,sharpnose sculpins,Clinocottus,NA,268796,167222
+1528,Oligocottus snyderi,fluffy sculpin,281875,167335,Oligocottus snyderi,fluffy sculpin,Oligocottus snyderi,fluffy sculpin,Oligocottus snyderi,NA,281875,167335
+1529,Radulinus,NA,270690,167346,Radulinus,NA,Radulinus,NA,Radulinus,NA,270690,167346
+1530,Bathyagonus,NA,254303,167444,Bathyagonus,NA,Bathyagonus,NA,Bathyagonus,NA,254303,167444
+1540,Synchirus gilli,Manacled sculpin,282921,167365,Synchirus gilli,manacled sculpin,Synchirus gilli,manacled sculpin,Synchirus gilli,Manacled sculpin,282921,167365
+1550,Nectoliparis pelagicus,tadpole snailfish,281641,167591,Nectoliparis pelagicus,tadpole snailfish,Nectoliparis pelagicus,tadpole snailfish,Nectoliparis pelagicus,NA,281641,167591
+1580,Paralabrax maculatofasciatus,Spotted sand bass,282058,167833,Paralabrax maculatofasciatus,spotted sand bass,Paralabrax maculatofasciatus,spotted sand bass,Paralabrax maculatofasciatus,Spotted sand bass,282058,167833
+1590,Luzonichthys,Splitfins,203852,643104,Luzonichthys,NA,Luzonichthys,NA,Luzonichthys,Splitfins,203852,643104
+1595,Pseudogramma thaumasia,Pacific reef bass,398485,643392,Pseudogramma thaumasia,NA,Pseudogramma thaumasium,Pacific reef bass,Pseudogramma thaumasium,Pacific reef bass,398485,643392
+1600,Epinephelus analogus,Spotted cabrilla,273835,167697,Epinephelus analogus,spotted grouper,Epinephelus analogus,spotted cabrilla,Epinephelus analogus,Spotted cabrilla,273835,167697
+1610,Symphysanodon,NA,159830,167907,Symphysanodon,NA,Symphysanodon,NA,Symphysanodon,NA,159830,167907
+1630,Apogon guadalupensis,Guadalupe Cardinalfish,273016,168211,Apogon guadalupensis,Guadalupe cardinalfish,Apogon guadalupensis,Guadaloupe cardinalfish,Apogon guadalupensis,Guadalupe Cardinalfish,273016,168211
+1640,Pseudamiops,NA,206303,168312,Pseudamiops,NA,Pseudamiops,NA,Pseudamiops,NA,206303,168312
+1650,Epigonus,NA,125967,168295,Epigonus,NA,Epigonus,NA,Epigonus,NA,125967,168295
+1654,Trachinotus,Pompano,125945,168707,Trachinotus,NA,Trachinotus,pompanos,Trachinotus,Pompano,125945,168707
+1656,Echeneidae,Remoras,125533,168567,Echeneidae,remoras,Echeneidae,remoras,Echeneidae,Remoras,125533,168567
+1675,Lutjanus argentiventris,amarillo snapper,276524,168851,Lutjanus argentiventris,amarillo snapper,Lutjanus argentiventris,yellowtail snapper,Lutjanus argentiventris,NA,276524,168851
+1700,Hoplopagrus guentherii,barred pargo,281087,643073,Hoplopagrus guentherii,barred pargo,Hoplopagrus guentherii,striped pargo,Hoplopagrus guentherii,NA,281087,643073
+1715,Conodon serrifer,Armed grunt,280387,630219,Conodon serrifer,armed grunt,Conodon serrifer,armed grunt,Conodon serrifer,Armed grunt,280387,630219
+1725,Polydactylus,Threadfin,159849,170446,Polydactylus,NA,Polydactylus,barbudos,Polydactylus,Threadfin,159849,170446
+1750,Chaetodon,butterflyfishes,125954,169555,Chaetodon,NA,Chaetodon,butterflyfishes,Chaetodon,NA,125954,169555
+1770,Pomacanthidae,Angelfishes,151470,553237,Pomacanthidae,angelfishes,Pomacanthidae,angelfishes,Pomacanthidae,Angelfishes,151470,553237
+1775,Centropyge,NA,206379,169610,Centropyge,NA,Centropyge,NA,Centropyge,NA,206379,169610
+1780,Cirrhitidae,Hawkfishes,151475,170222,Cirrhitidae,hawkfishes,Cirrhitidae,hawkfishes,Cirrhitidae,Hawkfishes,151475,170222
+1790,Opistognathus,Jawfishes,159746,170925,Opistognathus,NA,Opistognathus,spotfin jawfishes,Opistognathus,Jawfishes,159746,170925
+1815,Chromis,NA,126045,170079,Chromis,NA,Chromis,NA,Chromis,NA,126045,170079
+1825,Plectroglyphidodon imparipennis,Brighteye damselfish,212856,170129,Plectroglyphidodon imparipennis,brighteye damselfish,Plectroglyphidodon imparipennis,stop-start damsel,Plectroglyphidodon imparipennis,Brighteye damselfish,212856,170129
+1840,Bodianus diplotaenia,Mexican hogfish,273527,170494,Bodianus diplotaenia,Mexican hogfish,Bodianus diplotaenia,Pacific hogfish,Bodianus diplotaenia,Mexican hogfish,273527,170494
+1855,Halichoeres dispilus,chameleon wrasse,275763,613701,Halichoeres dispilus,chameleon wrasse,Halichoeres dispilus,chameleon wrasse,Halichoeres dispilus,chameleon wrasse,275763,613701
+1875,Oxycheilinus,NA,205227,613121,Oxycheilinus,NA,Oxycheilinus,NA,Oxycheilinus,NA,205227,613121
+1890,Pseudocheilinus,NA,205714,170628,Pseudocheilinus,NA,Pseudocheilinus,NA,Pseudocheilinus,NA,205714,170628
+1900,Iniistius pavo,Pacific razorfish,219004,170765,Iniistius pavo,peacock razorfish,Iniistius pavo,peacock wrasse,Iniistius pavo,Pacific razorfish,219004,170765
+1906,Calotomus,NA,203850,170871,Calotomus,NA,Calotomus,NA,Calotomus,NA,203850,170871
+1910,Nicholsina denticulata,Loosetooth parrotfish,276038,614667,Nicholsina denticulata,loosetooth parrotfish,Nicholsina denticulata,loosetooth parrotfish,Nicholsina denticulata,Loosetooth parrotfish,276038,614667
+1935,Chiasmodon,NA,125956,171085,Chiasmodon,NA,Chiasmodon,NA,Chiasmodon,NA,125956,171085
+1945,Champsodon,NA,206066,171081,Champsodon,NA,Champsodon,NA,Champsodon,NA,206066,171081
+1950,Pinguipedidae,Sandperches,151413,553226,Pinguipedidae,sandperches,Pinguipedidae,sandperches,Pinguipedidae,Sandperches,151413,553226
+1956,Parapercis,sand-divers,204083,170958,Parapercis,NA,Parapercis,sand-divers,Parapercis,NA,204083,170958
+1960,Parapercis schauinslandii,Redspotted sandpech,219158,170959,Parapercis schauinslandii,NA,Parapercis schauinslandii,NA,Parapercis schauinslandii,Redspotted sandpech,219158,170959
+1962,Crystallodytes cookei,South Pacific sandburrower,280453,171019,Crystallodytes cookei,NA,Crystallodytes cookei,NA,Crystallodytes cookei,South Pacific sandburrower,280453,171019
+1964,Limnichthys,NA,204983,171026,Limnichthys,NA,Limnichthys,NA,Limnichthys,NA,204983,171026
+1969,Ammodytoides pylei,Pyle's sandlance,276859,630417,Ammodytoides pylei,NA,Ammodytoides pylei,NA,Ammodytoides pylei,Pyle's sandlance,276859,630417
+1975,Kathetostoma averruncus,smooth stargazer,275989,171063,Kathetostoma averruncus,smooth stargazer,Kathetostoma averruncus,smooth stargazer,Kathetostoma averruncus,smooth stargazer,275989,171063
+2005,Cryptacanthodes aleutensis,dwarf wrymouth,276390,171610,Cryptacanthodes aleutensis,dwarf wrymouth,Cryptacanthodes aleutensis,dwarf wrymouth,Cryptacanthodes aleutensis,NA,276390,171610
+2006,Cebidichthys violaceus,monkeyface prickleback,280053,171618,Cebidichthys violaceus,monkeyface prickleback,Cebidichthys violaceus,monkeyface prickleback,Cebidichthys violaceus,NA,280053,171618
+2007,Chirolophis,warbonnets,126086,171565,Chirolophis,NA,Chirolophis,warbonnets,Chirolophis,NA,126086,171565
+2008,Pholis,NA,126041,171637,Pholis,NA,Pholis,NA,Pholis,NA,126041,171637
+2009,Chirolophis decoratus,decorated warbonnet,254576,171572,Chirolophis decoratus,decorated warbonnet,Chirolophis decoratus,decorated warbonnet,Chirolophis decoratus,decorated warbonnet,254576,171572
+2012,Ulvicola sanctaerosae,kelp gunnel,322270,630995,Ulvicola sanctaerosae,kelp gunnel,Apodichthys sanctaerosae,kelp gunnel,Apodichthys sanctaerosae,kelp gunnel,322270,630995
+2015,Gibbonsia elegans,Spotted kelpfish,280833,171401,Gibbonsia elegans,spotted kelpfish,Gibbonsia elegans,spotted kelpfish,Gibbonsia elegans,Spotted kelpfish,280833,171401
+2016,Gibbonsia metzi,striped kelpfish,280835,171398,Gibbonsia metzi,striped kelpfish,Gibbonsia metzi,striped kelpfish,Gibbonsia metzi,NA,280835,171398
+2020,Gillellus,sand stargazer,269211,171037,Gillellus,NA,Gillellus,NA,Gillellus,sand stargazer,269211,171037
+2040,Cirripectes,NA,203854,636225,Cirripectes,NA,Cirripectes,NA,Cirripectes,NA,203854,636225
+2070,Plagiotremus,NA,205546,171206,Plagiotremus,NA,Plagiotremus,NA,Plagiotremus,NA,205546,171206
+2100,Callionymidae,Dragonets,125522,171691,Callionymidae,dragonets,Callionymidae,dragonets,Callionymidae,Dragonets,125522,171691
+2115,Gillichthys mirabilis,Longjaw mudsucker,280851,171967,Gillichthys mirabilis,longjaw mudsucker,Gillichthys mirabilis,longjaw mudsucker,Gillichthys mirabilis,Longjaw mudsucker,280851,171967
+2120,Gnatholepis,NA,204522,171827,Gnatholepis,NA,Gnatholepis,NA,Gnatholepis,NA,204522,171827
+2125,Gobulus crescentalis,crescent goby,280908,637464,Gobulus crescentalis,crescent goby,Gobulus crescentalis,crescent goby,Gobulus crescentalis,NA,280908,637464
+2130,Quietula y-cauda,Shadow goby,282537,171910,Quietula y-cauda,shadow goby,Quietula y-cauda,shadow goby,Quietula y-cauda,Shadow goby,282537,171910
+2140,Oxyurichthys,arrowfin gobies,125998,171945,Oxyurichthys,NA,Oxyurichthys,arrowfin gobies,Oxyurichthys,NA,125998,171945
+2155,Cerdale,Wormfish,268690,172168,Cerdale,NA,Cerdale,NA,Cerdale,Wormfish,268690,172168
+2160,Gunnellichthys curiosus,Curious wormfish,219608,637470,Gunnellichthys curiosus,NA,Gunnellichthys curiosus,NA,Gunnellichthys curiosus,Curious wormfish,219608,637470
+2165,Microdesmus multiradiatus,NA,293677,637628,Microdesmus multiradiatus,NA,Microdesmus multiradiatus,NA,Microdesmus multiradiatus,NA,293677,637628
+2167,Microdesmus suttkusi,Spotside wormfish,276230,637630,Microdesmus suttkusi,spotside wormfish,Microdesmus suttkusi,spotside wormfish,Microdesmus suttkusi,Spotside wormfish,276230,637630
+2170,Ptereleotrinae,Dartfishes,151752,636573,Ptereleotrinae,NA,Ptereleotrinae,NA,Ptereleotrinae,Dartfishes,151752,636573
+2175,Ptereleotris heteroptera,Indigo dartfish,219617,171956,Ptereleotris heteroptera,blacktail goby,Ptereleotris heteroptera,indigo hover goby,Ptereleotris heteroptera,Indigo dartfish,219617,171956
+2190,Acanthurus,lancetfishes,125908,172251,Acanthurus,NA,Acanthurus,lancetfishes,Acanthurus,NA,125908,172251
+2200,Ctenochaetus hawaiiensis,Black surgeonfish,277561,172306,Ctenochaetus hawaiiensis,NA,Ctenochaetus hawaiiensis,chevron tang,Ctenochaetus hawaiiensis,Black surgeonfish,277561,172306
+2210,Naso,Unicornfishes,205230,172288,Naso,NA,Naso,nosefishes,Naso,Unicornfishes,205230,172288
+2219,Scombroidei,ribbonfishes,151748,172353,Scombroidei,NA,Scombroidei,ribbonfishes,Scombroidei,NA,151748,172353
+2220,Scombrolabrax heterolepis,Black mackerel,127030,172366,Scombrolabrax heterolepis,longfin escolar,Scombrolabrax heterolepis,NA,Scombrolabrax heterolepis,Black mackerel,127030,172366
+2230,Nesiarchus nasutus,Black gemfish,126865,172370,Nesiarchus nasutus,black gemfish,Nesiarchus nasutus,black gemfish,Nesiarchus nasutus,Black gemfish,126865,172370
+2240,Aphanopus arigato,Pacific black scabbardfish,274008,646749,Aphanopus arigato,Pacific black scabbardfish,Aphanopus arigato,NA,Aphanopus arigato,Pacific black scabbardfish,274008,646749
+2245,Assurger anzac,Razorback scabbardfish,279766,172397,Assurger anzac,razorback scabbardfish,Assurger anzac,razorback scabbardfish,Assurger anzac,Razorback scabbardfish,279766,172397
+2250,Lepidopus calcar,Hawaiian Ridge scabbardfish,274016,551142,Lepidopus calcar,Hawaiian ridge scabbardfish,Lepidopus calcar,Hawaiian Ridge scabbardfish,Lepidopus calcar,Hawaiian Ridge scabbardfish,274016,551142
+2270,Bothus pantherinus,Leopard flounder,219795,172764,Bothus pantherinus,panther flounder,Bothus pantherinus,panther flounder,Bothus pantherinus,Leopard flounder,219795,172764
+2275,Engyprosopon,NA,204480,172816,Engyprosopon,NA,Engyprosopon,NA,Engyprosopon,NA,204480,172816
+2278,Monolene asaedae,Asaedai flounder,1015120,1007802,Monolene asaedae,NA,Monolene asaedae,NA,Monolene asaedae,Asaedai flounder,1015120,1007802
+2280,Parabothus,NA,270184,172822,Parabothus,NA,Parabothus,NA,Parabothus,NA,270184,172822
+2290,Samariscus,NA,206731,172946,Samariscus,NA,Samariscus,NA,Samariscus,NA,206731,172946
+2295,Achirus,hogchokers,268211,172984,Achirus,NA,Achirus,hogchokers,Achirus,NA,268211,172984
+2301,Sphoeroides,swellfishes,126241,173289,Sphoeroides,NA,Sphoeroides,swellfishes,Sphoeroides,NA,126241,173289
+2303,Sphoeroides lobatus,Longnose puffer,275279,173301,Sphoeroides lobatus,longnose puffer,Sphoeroides lobatus,botete,Sphoeroides lobatus,Longnose puffer,275279,173301
+2309,Diodontidae,Porcupinefishes,125608,173382,Diodontidae,porcupinefishes,Diodontidae,porcupinefishes,Diodontidae,Porcupinefishes,125608,173382
+2310,Chilomycterus,Burrfishes,126230,173383,Chilomycterus,NA,Chilomycterus,burrfishes,Chilomycterus,Burrfishes,126230,173383
+2311,Aseraggodes,NA,268394,172996,Aseraggodes,NA,Aseraggodes,NA,Aseraggodes,NA,268394,172996
+2500,Orthopristis,pigfishes,158809,169076,Orthopristis,NA,Orthopristis,pigfishes,Orthopristis,NA,158809,169076
+2550,Micropogonias,finebarbel croakers,151157,169282,Micropogonias,NA,Micropogonias,finebarbel croakers,Micropogonias,NA,151157,169282
+3000,Xeneretmus,NA,271228,167466,Xeneretmus,NA,Xeneretmus,NA,Xeneretmus,NA,271228,167466
+3010,Sebastes aleutianus,Rougheye rockfish,274771,166706,Sebastes aleutianus,rougheye rockfish,Sebastes aleutianus,rougheye rockfish,Sebastes aleutianus,Rougheye rockfish,274771,166706
+3011,Sebastes alutus,Pacific Ocean perch,254573,166707,Sebastes alutus,Pacific ocean perch,Sebastes alutus,Pacific ocean perch,Sebastes alutus,Pacific Ocean perch,254573,166707
+3012,Sebastes atrovirens,Kelp rockfish,274772,166747,Sebastes atrovirens,kelp rockfish,Sebastes atrovirens,kelp rockfish,Sebastes atrovirens,Kelp rockfish,274772,166747
+3013,Sebastes auriculatus,Brown rockfish,274773,166708,Sebastes auriculatus,brown rockfish,Sebastes auriculatus,brown rockfish,Sebastes auriculatus,Brown rockfish,274773,166708
+3014,Sebastes babcocki,Redbanded rockfish,274775,166710,Sebastes babcocki,redbanded rockfish,Sebastes babcocki,redbanded rockfish,Sebastes babcocki,Redbanded rockfish,274775,166710
+3015,Sebastes borealis,Shortraker rockfish,274777,166712,Sebastes borealis,shortraker rockfish,Sebastes borealis,shortraker rockfish,Sebastes borealis,Shortraker rockfish,274777,166712
+3016,Sebastes brevispinis,Silvergrey rockfish,274778,166711,Sebastes brevispinis,silvergray rockfish,Sebastes brevispinis,silvergray rockfish,Sebastes brevispinis,Silvergrey rockfish,274778,166711
+3017,Sebastes carnatus,Gopher rockfish,274779,166767,Sebastes carnatus,gopher rockfish,Sebastes carnatus,gopher rockfish,Sebastes carnatus,Gopher rockfish,274779,166767
+3018,Sebastes caurinus,Copper rockfish,274780,166713,Sebastes caurinus,copper rockfish,Sebastes caurinus,copper rockfish,Sebastes caurinus,Copper rockfish,274780,166713
+3019,Sebastes chlorostictus,Greenspotted rockfish,274781,166748,Sebastes chlorostictus,greenspotted rockfish,Sebastes chlorostictus,greenspotted rockfish,Sebastes chlorostictus,Greenspotted rockfish,274781,166748
+3020,Sebastes chrysomelas,Black-and-yellow rockfish,240737,166773,Sebastes chrysomelas,black-and-yellow rockfish,Sebastes chrysomelas,black-and-yellow rockfish,Sebastes chrysomelas,Black-and-yellow rockfish,240737,166773
+3021,Sebastes constellatus,Starry rockfish,274783,166749,Sebastes constellatus,starry rockfish,Sebastes constellatus,starry rockfish,Sebastes constellatus,Starry rockfish,274783,166749
+3022,Sebastes crameri,Darkblotched rockfish,274785,166715,Sebastes crameri,darkblotched rockfish,Sebastes crameri,darkblotched rockfish,Sebastes crameri,Darkblotched rockfish,274785,166715
+3024,Sebastes elongatus,Greenstriped rockfish,274788,166717,Sebastes elongatus,greenstriped rockfish,Sebastes elongatus,greenstriped rockfish,Sebastes elongatus,Greenstriped rockfish,274788,166717
+3025,Sebastes ensifer,Swordspine rockfish,274790,166768,Sebastes ensifer,swordspine rockfish,Sebastes ensifer,swordspine rockfish,Sebastes ensifer,Swordspine rockfish,274790,166768
+3026,Sebastes entomelas,Widow rockfish,274791,166719,Sebastes entomelas,widow rockfish,Sebastes entomelas,widow rockfish,Sebastes entomelas,Widow rockfish,274791,166719
+3027,Sebastes eos,Pink rockfish,274792,166751,Sebastes eos,pink rockfish,Sebastes eos,pink rockfish,Sebastes eos,Pink rockfish,274792,166751
+3028,Sebastes flavidus,Yellowtail rockfish,274795,166720,Sebastes flavidus,yellowtail rockfish,Sebastes flavidus,yellowtail rockfish,Sebastes flavidus,Yellowtail rockfish,274795,166720
+3029,Sebastes gilli,Bronzespotted rockfish,274796,166752,Sebastes gilli,bronzespotted rockfish,Sebastes gilli,bronzespotted rockfish,Sebastes gilli,Bronzespotted rockfish,274796,166752
+3030,Sebastes helvomaculatus,Rosethorn rockfish,274799,166723,Sebastes helvomaculatus,rosethorn rockfish,Sebastes helvomaculatus,rosethorn rockfish,Sebastes helvomaculatus,Rosethorn rockfish,274799,166723
+3031,Sebastes hopkinsi,Squarespot rockfish,274800,166753,Sebastes hopkinsi,squarespot rockfish,Sebastes hopkinsi,squarespot rockfish,Sebastes hopkinsi,Squarespot rockfish,274800,166753
+3032,Sebastes maliger,Quillback rockfish,274815,166726,Sebastes maliger,quillback rockfish,Sebastes maliger,quillback rockfish,Sebastes maliger,Quillback rockfish,274815,166726
+3033,Sebastes melanops,Black rockfish,274817,166727,Sebastes melanops,black rockfish,Sebastes melanops,black rockfish,Sebastes melanops,Black rockfish,274817,166727
+3034,Sebastes miniatus,Vermilion rockfish,274820,166729,Sebastes miniatus,vermilion rockfish,Sebastes miniatus,vermilion rockfish,Sebastes miniatus,Vermilion rockfish,274820,166729
+3035,Sebastes moseri,Whitespotted rockfish,274822,644590,Sebastes moseri,whitespotted rockfish,Sebastes moseri,whitespotted rockfish,Sebastes moseri,Whitespotted rockfish,274822,644590
+3036,Sebastes mystinus,Blue rockfish,274823,166730,Sebastes mystinus,blue rockfish,Sebastes mystinus,blue rockfish,Sebastes mystinus,Blue rockfish,274823,166730
+3037,Sebastes nebulosus,China rockfish,274824,166731,Sebastes nebulosus,china rockfish,Sebastes nebulosus,China rockfish,Sebastes nebulosus,China rockfish,274824,166731
+3038,Sebastes nigrocinctus,Tiger rockfish,274825,166732,Sebastes nigrocinctus,tiger rockfish,Sebastes nigrocinctus,tiger rockfish,Sebastes nigrocinctus,Tiger rockfish,274825,166732
+3039,Sebastes ovalis,Speckled rockfish,274830,166757,Sebastes ovalis,speckled rockfish,Sebastes ovalis,speckled rockfish,Sebastes ovalis,Speckled rockfish,274830,166757
+3040,Sebastes phillipsi,Chameleon rockfish,274835,166758,Sebastes phillipsi,chameleon rockfish,Sebastes phillipsi,chameleon rockfish,Sebastes phillipsi,Chameleon rockfish,274835,166758
+3041,Sebastes proriger,Redstripe rockfish,274838,166736,Sebastes proriger,redstripe rockfish,Sebastes proriger,redstripe rockfish,Sebastes proriger,Redstripe rockfish,274838,166736
+3042,Sebastes rastrelliger,Grass rockfish,274839,166759,Sebastes rastrelliger,grass rockfish,Sebastes rastrelliger,grass rockfish,Sebastes rastrelliger,Grass rockfish,274839,166759
+3043,Sebastes reedi,Yellowmouth rockfish,274840,166737,Sebastes reedi,yellowmouth rockfish,Sebastes reedi,yellowmouth rockfish,Sebastes reedi,Yellowmouth rockfish,274840,166737
+3044,Sebastes rosaceus,Rosy rockfish,274841,166738,Sebastes rosaceus,rosy rockfish,Sebastes rosaceus,rosy rockfish,Sebastes rosaceus,Rosy rockfish,274841,166738
+3045,Sebastes rosenblatti,Greenblotched rockfish,274842,166771,Sebastes rosenblatti,greenblotched rockfish,Sebastes rosenblatti,greenblotched rockfish,Sebastes rosenblatti,Greenblotched rockfish,274842,166771
+3046,Sebastes ruberrimus,Yelloweye rockfish,274844,166740,Sebastes ruberrimus,yelloweye rockfish,Sebastes ruberrimus,rasphead rockfish,Sebastes ruberrimus,Yelloweye rockfish,274844,166740
+3047,Sebastes rubrivinctus,Flag rockfish,274845,166760,Sebastes rubrivinctus,flag rockfish,Sebastes rubrivinctus,flag rockfish,Sebastes rubrivinctus,Flag rockfish,274845,166760
+3048,Sebastes rufinanus,Dwarf-red rockfish,274846,166772,Sebastes rufinanus,dwarf-red rockfish,Sebastes rufinanus,dwarf-red rockfish,Sebastes rufinanus,Dwarf-red rockfish,274846,166772
+3049,Sebastes rufus,Bank rockfish,274847,166761,Sebastes rufus,bank rockfish,Sebastes rufus,bank rockfish,Sebastes rufus,Bank rockfish,274847,166761
+3050,Sebastes serranoides,Olive rockfish,274852,166763,Sebastes serranoides,olive rockfish,Sebastes serranoides,olive rockfish,Sebastes serranoides,Olive rockfish,274852,166763
+3051,Sebastes serriceps,Treefish,274853,166764,Sebastes serriceps,treefish,Sebastes serriceps,treefish,Sebastes serriceps,Treefish,274853,166764
+3052,Sebastes simulator,Pinkrose rockfish,274854,166770,Sebastes simulator,pinkrose rockfish,Sebastes simulator,pinkrose rockfish,Sebastes simulator,Pinkrose rockfish,274854,166770
+3053,Sebastes umbrosus,Honeycomb rockfish,274862,166765,Sebastes umbrosus,honeycomb rockfish,Sebastes umbrosus,honeycomb rockfish,Sebastes umbrosus,Honeycomb rockfish,274862,166765
+3054,Sebastes wilsoni,Pygmy rockfish,274868,166743,Sebastes wilsoni,pygmy rockfish,Sebastes wilsoni,pygmy rockfish,Sebastes wilsoni,Pygmy rockfish,274868,166743
+3055,Sebastes zacentrus,Sharpchin rockfish,274869,166744,Sebastes zacentrus,sharpchin rockfish,Sebastes zacentrus,sharpchin rockfish,Sebastes zacentrus,Sharpchin rockfish,274869,166744
+3500,Lepophidium stigmatistium,Botchfin cusk-eel,275628,164838,Lepophidium stigmatistium,Mexican cusk-eel,Lepophidium stigmatistium,Mexican cusk-eel,Lepophidium stigmatistium,Botchfin cusk-eel,275628,164838
+9000,Animalia,Unidentified animal,2,202423,Animalia,animals,Animalia,animals,Animalia,Unidentified animal,2,202423
+9400,Halobates,Sea skaters,204105,103825,Halobates,sea skaters,Halobates,NA,Halobates,Sea skaters,204105,103825
+9490,Palinuridae,Lobster,106794,97646,Palinuridae,spiny lobsters,Palinuridae,spiny lobsters,Palinuridae,Lobster,106794,97646
+9525,Euprymna scolopes,Hawaiian bobtail squid,342322,556020,Euprymna scolopes,NA,Euprymna scolopes,NA,Euprymna scolopes,Hawaiian bobtail squid,342322,556020
+9535,Heteroteuthis hawaiiensis,NA,342189,556001,Heteroteuthis hawaiiensis,NA,Heteroteuthis hawaiiensis,NA,Heteroteuthis hawaiiensis,NA,342189,556001
+9540,Teuthida,squids,11716,82367,Teuthida,squids,Teuthida,NA,Teuthida,NA,11716,82367
+9550,Enoploteuthidae,NA,11740,82397,Enoploteuthidae,NA,Enoploteuthidae,NA,Enoploteuthidae,NA,11740,82397
+9555,Abralia,NA,137930,82406,Abralia,NA,Abralia,NA,Abralia,NA,137930,82406
+9556,Abralia trigonura,NA,341844,556021,Abralia trigonura,NA,Abralia trigonura,NA,Abralia trigonura,NA,341844,556021
+9559,Abraliopsis affinis,NA,341845,82402,Abraliopsis affinis,NA,Abraliopsis affinis,NA,Abraliopsis affinis,NA,341845,82402
+9560,Abraliopsis,NA,137931,82398,Abraliopsis,NA,Abraliopsis,NA,Abraliopsis,NA,137931,82398
+9561,Abraliopsis felis,Clawed enope squid,341849,82401,Abraliopsis felis,Clawed enope squid,Abraliopsis felis,NA,Abraliopsis felis,NA,341849,82401
+9567,Enoploteuthis,NA,341421,82396,Enoploteuthis,NA,Enoploteuthis,NA,Enoploteuthis,NA,341421,82396
+9568,Enoploteuthis jonesi,NA,342299,556064,Enoploteuthis jonesi,NA,Enoploteuthis jonesi,NA,Enoploteuthis jonesi,NA,342299,556064
+9575,Ancistrocheirus lesueurii,Sharpear enope squid,138747,556106,Ancistrocheirus lesueurii,sharpear enope squid,Ancistrocheirus lesueurii,NA,Ancistrocheirus lesueurii,Sharpear enope squid,138747,556106
+9576,Pyroteuthidae,NA,23109,555715,Pyroteuthidae,NA,Pyroteuthidae,NA,Pyroteuthidae,NA,23109,555715
+9577,Pterygioteuthis,NA,138422,82404,Pterygioteuthis,NA,Pterygioteuthis,NA,Pterygioteuthis,NA,138422,82404
+9578,Pterygioteuthis gemmata,Roundear enope squid,342104,556078,Pterygioteuthis gemmata,Roundear enope squid,Pterygioteuthis gemmata,NA,Pterygioteuthis gemmata,NA,342104,556078
+9579,Pterygioteuthis giardi,Roundear enope squid,141097,82405,Pterygioteuthis giardi,roundear enope squid,Pterygioteuthis giardi,NA,Pterygioteuthis giardi,Roundear enope squid,141097,82405
+9580,Pyroteuthis,NA,138423,555803,Pyroteuthis,NA,Pyroteuthis,NA,Pyroteuthis,NA,138423,555803
+9581,Pyroteuthis addolux,Luminous fire squid,342242,556639,Pyroteuthis addolux,Luminous fire squid,Pyroteuthis addolux,NA,Pyroteuthis addolux,NA,342242,556639
+9585,Octopoteuthidae,NA,11741,82431,Octopoteuthidae,NA,Octopoteuthidae,NA,Octopoteuthidae,NA,11741,82431
+9586,Octopoteuthis,NA,138271,82432,Octopoteuthis,NA,Octopoteuthis,NA,Octopoteuthis,NA,138271,82432
+9587,Octopoteuthis deletron,Shabby octopus squid,342057,556640,Octopoteuthis deletron,Shabby octopus squid,Octopoteuthis deletron,NA,Octopoteuthis deletron,NA,342057,556640
+9588,Octopoteuthis nielseni,NA,818990,556422,Octopoteuthis nielseni,NA,Octopoteuthis nielseni,NA,Octopoteuthis nielseni,NA,818990,556422
+9590,Onychoteuthidae,NA,11742,82436,Onychoteuthidae,NA,Onychoteuthidae,NA,Onychoteuthidae,NA,11742,82436
+9591,Onykia,Hooked squids,138292,82437,Onykia,NA,Moroteuthis,NA,Moroteuthis,Hooked squids,138292,82437
+9594,Onychoteuthis,NA,138291,82439,Onychoteuthis,NA,Onychoteuthis,NA,Onychoteuthis,NA,138291,82439
+9595,Onychoteuthis borealijaponica,Boreal clubhook squid,342069,82442,Onychoteuthis borealijaponica,boreal clubhook squid,Onychoteuthis borealijaponicus,boreal clubhook squid,Onychoteuthis borealijaponicus,Boreal clubhook squid,342069,82442
+9596,Onychoteuthis compacta,NA,342070,556017,Onychoteuthis compacta,NA,Onychoteuthis compacta,NA,Onychoteuthis compacta,NA,342070,556017
+9599,Onychoteuthis banksii,common clubhook squid,140649,82440,Onychoteuthis banksii,common clubhook squid,Onychoteuthis banksii,common clubhook squid,Onychoteuthis banksii,common clubhook squid,140649,82440
+9604,Onykia,NA,138292,82443,Onykia,NA,Onykia,NA,Onykia,NA,138292,82443
+9612,Cycloteuthis sirventi,NA,139472,82567,Cycloteuthis sirventi,NA,Cycloteuthis sirventi,NA,Cycloteuthis sirventi,NA,139472,82567
+9615,Gonatidae,NA,11743,82414,Gonatidae,NA,Gonatidae,NA,Gonatidae,NA,11743,82414
+9616,Berryteuthis,NA,341413,82429,Berryteuthis,NA,Berryteuthis,NA,Berryteuthis,NA,341413,82429
+9622,Gonatopsis borealis,Boreopacific armhook squid,342326,82417,Gonatopsis borealis,Boreopacific gonate squid,Gonatopsis borealis,NA,Gonatopsis borealis,Boreopacific armhook squid,342326,82417
+9630,Gonatus,Armhook squids,138036,82418,Gonatus,NA,Gonatus,NA,Gonatus,Armhook squids,138036,82418
+9631,Gonatus onyx,Clawed armhook squid,341859,82425,Gonatus onyx,clawed armhook squid,Gonatus onyx,clawed armhook squid,Gonatus onyx,Clawed armhook squid,341859,82425
+9632,Gonatus pyros,Fiery armhook squid,341861,82423,Gonatus pyros,fiery armhook squid,Gonatus pyros,NA,Gonatus pyros,Fiery armhook squid,341861,82423
+9640,Histioteuthis,NA,138074,82485,Histioteuthis,NA,Histioteuthis,NA,Histioteuthis,NA,138074,82485
+9641,Histioteuthis heteropsis,NA,341868,82499,Histioteuthis heteropsis,NA,Histioteuthis heteropsis,NA,Histioteuthis heteropsis,NA,341868,82499
+9642,Stigmatoteuthis hoylei,Flowervase jewel squid,410403,556138,Stigmatoteuthis hoylei,NA,Histioteuthis hoylei,NA,Histioteuthis hoylei,Flowervase jewel squid,410403,556138
+9651,Chtenopteryx sicula,Comb-finned squid,181377,82469,Chtenopteryx sicula,toothed-fin squid,Chtenopteryx sicula,NA,Chtenopteryx sicula,Comb-finned squid,181377,82469
+9653,Brachioteuthis,NA,137697,82474,Brachioteuthis,NA,Brachioteuthis,NA,Brachioteuthis,NA,137697,82474
+9660,Ommastrephidae,Flying squid,11760,82514,Ommastrephidae,NA,Ommastrephidae,NA,Ommastrephidae,Flying squid,11760,82514
+9661,Dosidicus gigas,Jumbo squid,342291,82538,Dosidicus gigas,jumbo flying squid,Dosidicus gigas,jumbo squid,Dosidicus gigas,Jumbo squid,342291,82538
+9662,Eucleoteuthis luminosa,Luminous flying squid,342313,556451,Eucleoteuthis luminosa,luminous flying squid,Eucleoteuthis luminosa,NA,Eucleoteuthis luminosa,Luminous flying squid,342313,556451
+9665,Nototodarus hawaiiensis,Hawaiian flying squid,342376,556014,Nototodarus hawaiiensis,Hawaiian flying squid,Nototodarus hawaiiensis,NA,Nototodarus hawaiiensis,Hawaiian flying squid,342376,556014
+9669,Ommastrephes bartramii,Red flying squid,181382,82527,Ommastrephes bartramii,akaika,Ommastrephes bartramii,red flying squid,Ommastrephes bartramii,Red flying squid,181382,82527
+9670,Sthenoteuthis oualaniensis,Purpleback squid,342066,556284,Sthenoteuthis oualaniensis,purpleback flying squid,Sthenoteuthis oualaniensis,NA,Sthenoteuthis oualaniensis,Purpleback squid,342066,556284
+9675,Hyaloteuthis pelagica,Glass squid,342337,556061,Hyaloteuthis pelagica,glass squid,Hyaloteuthis pelagica,NA,Hyaloteuthis pelagica,Glass squid,342337,556061
+9676,Thysanoteuthidae,NA,11762,82544,Thysanoteuthidae,NA,Thysanoteuthidae,NA,Thysanoteuthidae,NA,11762,82544
+9679,Chiroteuthidae,NA,11767,82547,Chiroteuthidae,NA,Chiroteuthidae,NA,Chiroteuthidae,NA,11767,82547
+9681,Chiroteuthis,NA,137777,82548,Chiroteuthis,NA,Chiroteuthis,NA,Chiroteuthis,NA,137777,82548
+9682,Chiroteuthis calyx,Calyсine long-armed squid,341796,82551,Chiroteuthis calyx,Calyсine long-armed squid,Chiroteuthis calyx,NA,Chiroteuthis calyx,NA,341796,82551
+9683,Chiroteuthis imperator,NA,341798,556080,Chiroteuthis imperator,NA,Chiroteuthis imperator,NA,Chiroteuthis imperator,NA,341798,556080
+9687,Planctoteuthis,NA,238752,555776,Planctoteuthis,NA,Planctoteuthis,NA,Planctoteuthis,NA,238752,555776
+9692,Mastigoteuthis inermis,NA,341901,556383,Mastigoteuthis inermis,NA,Mastigoteuthis inermis,NA,Mastigoteuthis inermis,NA,341901,556383
+9693,Mastigotragus pyrodes,Whip-lash squid,834048,82559,Mastigotragus pyrodes,NA,Mastigoteuthis pyrodes,NA,Mastigoteuthis pyrodes,Whip-lash squid,834048,82559
+9705,Cranchiidae,glass squids,11774,82575,Cranchiidae,glass squids,Cranchiidae,NA,Cranchiidae,NA,11774,82575
+9706,Cranchiinae,NA,559391,555740,Cranchiinae,NA,Cranchiinae,NA,Cranchiinae,NA,559391,555740
+9708,Cranchia scabra,cockatoo squid,181386,82578,Cranchia scabra,cockatoo squid,Cranchia scabra,NA,Cranchia scabra,NA,181386,82578
+9710,Leachia danae,NA,559389,556251,Leachia danae,NA,Drechselia danae,NA,Drechselia danae,NA,559389,556251
+9711,Liocranchia,NA,137851,555779,Liocranchia,NA,Liocranchia,NA,Liocranchia,NA,137851,555779
+9712,Liocranchia reinhardtii,Reinhardt's cranch squid,341818,556517,Liocranchia reinhardtii,Reinhardt's cranch squid,Liocranchia reinhardti,NA,Liocranchia reinhardti,NA,341818,556517
+9715,Leachia pacifica,Pacific Leach's cranch squid,341815,556231,Leachia pacifica,Pacific Leach's cranch squid,Leachia pacifica,NA,Leachia pacifica,NA,341815,556231
+9720,Taoniinae,NA,325296,555741,Taoniinae,NA,Taoniinae,NA,Taoniinae,NA,325296,555741
+9725,Galiteuthis,NA,137848,205734,Galiteuthis,NA,Galiteuthis,NA,Galiteuthis,NA,137848,205734
+9726,Galiteuthis pacifica,NA,341806,556426,Galiteuthis pacifica,NA,Galiteuthis pacifica,NA,Galiteuthis pacifica,NA,341806,556426
+9727,Galiteuthis phyllura,Helmet squid,341807,556714,Galiteuthis phyllura,Helmet squid,Galiteuthis phyllura,NA,Galiteuthis phyllura,NA,341807,556714
+9731,Helicocranchia pfefferi,Piglet squid,139424,205733,Helicocranchia pfefferi,piglet squid,Helicocranchia pfefferi,NA,Helicocranchia pfefferi,Piglet squid,139424,205733
+9735,Liguriella podophthalma,NA,342354,556232,Liguriella podophthalma,NA,Liguriella podophthalma,NA,Liguriella podophthalma,NA,342354,556232
+9740,Megalocranchia,Large cranch squid,137852,555782,Megalocranchia,Large cranch squid,Megalocranchia,NA,Megalocranchia,NA,137852,555782
+9750,Bolitaena pygmaea,Pygmy pelagic octopus,410340,82658,Bolitaena pygmaea,Pygmy pelagic octopus,Eledonella pygmaea,NA,Eledonella pygmaea,NA,410340,82658
+9751,Japetella,NA,137695,82654,Japetella,NA,Japetella,NA,Japetella,NA,137695,82654
+9752,Japetella diaphana,Diaphanous pelagic octopod,138849,82655,Japetella diaphana,Diaphanous pelagic octopod,Japetella diaphana,NA,Japetella diaphana,NA,138849,82655
+9757,Vitreledonellinae,NA,742053,82660,Vitreledonellinae,NA,Vitreledonellidae,NA,Vitreledonellidae,NA,742053,82660
+9760,Octopodidae,Octopus,11782,82590,Octopodidae,NA,Octopodidae,NA,Octopodidae,Octopus,11782,82590
+9761,Octopus,NA,138268,82595,Octopus,NA,Octopus,NA,Octopus,NA,138268,82595
+9801,Tremoctopus,blanket octopuses,138563,82667,Tremoctopus,blanket octopuses,Tremoctopus,NA,Tremoctopus,NA,138563,82667
+9802,Tremoctopus violaceus,Commom blanket octopus,141694,82668,Tremoctopus violaceus,palmate octopus,Tremoctopus violaceus,common blanket octopus,Tremoctopus violaceus,Commom blanket octopus,141694,82668
+9805,Ocythoe tuberculata,tuberculate octopus,140610,82678,Ocythoe tuberculata,tuberculate octopus,Ocythoe tuberculata,NA,Ocythoe tuberculata,NA,140610,82678
+9810,Argonauta,Argonauts,137676,82681,Argonauta,paper nautiluses,Argonauta,NA,Argonauta,Argonauts,137676,82681
+9811,Argonauta argo,Greater argonaut,138803,82683,Argonauta argo,Greater Argonaut,Argonauta argo,greater argonaut,Argonauta argo,Greater argonaut,138803,82683
+9820,Haliphron atlanticus,Seven-arm octopus,341781,205738,Haliphron atlanticus,Seven-arm octopus,Haliphron atlanticus,NA,Haliphron atlanticus,NA,341781,205738
+10000,Pyrosoma,Pyrosome,137224,159635,Pyrosoma,NA,Pyrosoma,NA,Pyrosoma,Pyrosome,137224,159635
+10001,Siphonophorae,Siphonophore,1371,718928,Siphonophorae,NA,Siphonophorae,siphonophores,Siphonophorae,Siphonophore,1371,718928
+10002,Grimothea planipes,Pelagic red crab,1607504,1202386,Grimothea planipes,NA,Grimothea planipes,tuna crab,Grimothea planipes,Pelagic red crab,1607504,1202386
+10003,Salpida,Salp,137214,159643,Salpida,salps,Salpida,salps,Salpida,Salp,137214,159643
+10004,Cnidaria,Jellyfish,1267,48738,Cnidaria,cnidarians,Cnidaria,cnidarians,Cnidaria,Jellyfish,1267,48738
+10005,Crustacea,Crustacean,1066,83677,Crustacea,crustaceans,Crustacea,crustaceans,Crustacea,Crustacean,1066,83677
+10006,Littorinimorpha,Heteropod,382213,872208,Littorinimorpha,NA,Heteropoda,NA,Heteropoda,Heteropod,382213,872208
+10007,Gastropoda,Snails,101,69459,Gastropoda,gastropods,Gastropoda,gastropods,Gastropoda,Snails,101,69459
+10008,Velella velella,Velella,117832,51267,Velella velella,by-the-wind sailor,Velella velella,by-the-wind sailor,Velella velella,Velella,117832,51267
+10009,Ctenophora,Comb jelly,1248,53856,Ctenophora,comb jellies,Ctenophora,comb jellies,Ctenophora,Comb jelly,1248,53856
+10010,Cirripedia,Barnacle,1082,89433,Cirripedia,barnacles,Cirripedia,barnacles,Cirripedia,Barnacle,1082,89433

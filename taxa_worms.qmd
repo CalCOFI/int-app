@@ -12,12 +12,17 @@ Species (WoRMS; [marinespecies.org](https://www.marinespecies.org)).
 
 ```{r setup}
 librarian::shelf(
-  DBI, dplyr, DT, duckdb, fs, glue, here, htmltools, stringr,
+  DBI, dplyr, DT, duckdb, fs, glue, here, htmltools, purrr, readr, stringr, 
+  tidyr,
   quiet = T)
+options(readr.show_col_types = F)
 
-url_cc <- "https://file.calcofi.io/calcofi.duckdb"
-cc_db  <- here("data/tmp.duckdb")
-spp_db <- glue("~/My Drive/projects/msens/data/derived/spp.duckdb")
+url_cc         <- "https://file.calcofi.io/calcofi.duckdb"
+cc_db          <- here("data/tmp.duckdb")
+spp_db         <- glue("~/My Drive/projects/msens/data/derived/spp.duckdb")
+species_csv    <- here("data/species.csv")
+taxonomy_csv   <- here("data/taxonomy.csv")
+taxon_rank_csv <- here("data/taxon_rank.csv")
 
 is_ben_laptop <- Sys.info()[["nodename"]] == "Bens-MacBook-Air.local"
 
@@ -29,34 +34,55 @@ res <- dbExecute(con_cc, glue("ATTACH IF NOT EXISTS '{url_cc}' AS calcofi; USE c
 id2url <- function(id, type = "worms") {
   # add urls for WoRMS and ITIS, show datatable with links
   if (type == "worms") {
-    glue("<a href='https://www.marinespecies.org/aphia.php?p=taxdetails&id={id}'
-        _target='_blank'>{id}</a>")
+    glue("<a href='https://www.marinespecies.org/aphia.php?p=taxdetails&id={id}' _target='_blank'>{id}</a>")
   } else if (type == "itis") {
-    glue("<a href='https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={id}'
-        _target='_blank'>{id}</a>")
+    glue("<a href='https://itis.gov/servlet/SingleRpt/SingleRpt?search_topic=TSN&search_value={id}' _target='_blank'>{id}</a>")
   } else {
     stop("Unknown type. Use 'worms' or 'itis'.")
   }
 }
 
-showtable <- function(data, filename = "table", escape = F, rownames = F) {
+showtable <- function(data, filename = "table", escape = F, rownames = F, pageLength = NULL) {
   # datatable with escape = F for links and download buttons with filenames
+  
+  n_max <- nrow(data)
+  # set lengthMenu to vector of c(5, 50, 100, n_max), excluding any options less than n_max
+  
+  lengthMenu <- c(5, 50, 100, n_max)
+  if (n_max < lengthMenu[1]) {
+    lengthMenu <- c(n_max)
+  } else if (n_max < lengthMenu[2]) {
+    lengthMenu <- c(lengthMenu[1], n_max)
+  } else if (n_max < lengthMenu[3]) {
+    lengthMenu <- c(lengthMenu[1:2], n_max)
+  }
+  
+  if (!is.null(pageLength)){
+    pageLength <- as.integer(pageLength)
+    lengthMenu <- c(lengthMenu, pageLength) |> unique() |> sort()
+  } else{
+    pageLength <- lengthMenu[1]
+  }
+  
   datatable(
     data,
     escape     = escape,
     rownames   = rownames,
     extensions = "Buttons", 
-    options = list(
-      dom     = "Bfrtip",
-      buttons = list( 
+    filter     = "top",
+    options    = list(
+      dom        = "Blfrtip",
+      pageLength = pageLength,
+      lengthMenu = lengthMenu,
+      buttons    = list( 
         list(extend = "csv",   filename = filename),
         list(extend = "excel", filename = filename) )))
 }
 ```
 
-## Fetch CalCOFI species
+## Update CalCOFI species table
 
-And so @tbl-species_init.
+### Fetch CalCOFI species
 
 ```{r tbl-species_init}
 #| tbl-cap: "CalCOFI species with original WoRMS and ITIS IDs"
@@ -86,7 +112,7 @@ d |>
     "calcofi_species_init")
 ```
 
-## Use pre-processed WoRMS database
+### Use pre-processed WoRMS database
 
 The entire WoRMS database has already been downloaded from [World Register of Marine Species at ChecklistBank.org](https://www.checklistbank.org/dataset/2011/download), which seems much more extensive (2.7 GB) than the one downloadable directly 
 from [marinespecies.org/download](https://www.marinespecies.org/download/) (547.8 MB).
@@ -99,16 +125,12 @@ the standard DarwinCore format as with other major taxonomic authorities
 #| eval: !expr is_ben_laptop
 
 con_spp <- dbConnect(duckdb(dbdir = spp_db, read_only = F))
-```
 
-```{r con_spp_tables}
-#| eval: false
-
-dbListTables(con_spp)
+# dbListTables(con_spp)
 # [1] "gbif"             "gbif_vernacular"  "iucn_redlist"
 # [4] "iucn_vernacular"  "worms"            "worms_vernacular"
 
-dbListFields(con_spp, "worms")
+# dbListFields(con_spp, "worms")
 #  [1] "taxonID"                  "scientificNameID"
 #  [3] "acceptedNameUsageID"      "parentNameUsageID"
 #  [5] "namePublishedInID"        "scientificName"
@@ -126,11 +148,11 @@ dbListFields(con_spp, "worms")
 # [29] "rightsHolder"             "datasetName"
 # [31] "institutionCode"          "datasetID"
 
-dbListFields(con_spp, "worms_vernacular")
+# dbListFields(con_spp, "worms_vernacular")
 # "taxonID"  "vernacularName"  "source"  "language"  "isPreferredName"
 ```
 
-## Update WoRMS ID
+### Update WoRMS ID
 
 ```{r tbl-worms_id}
 #| tbl-cap: "CalCOFI species changes to WoRMS IDs."
@@ -159,7 +181,7 @@ d_worms_chgs <- d |>
 if (nrow(d_worms_chgs) == 0){
   message("No changes to WoRMS IDs or scientific_name found.")
 } else {
-  message("Found ", nrow(d_worms_chgs), " changes to WoRMS IDs.")
+  # message("Found ", nrow(d_worms_chgs), " changes to WoRMS IDs.")
   d_worms_chgs |> 
     mutate(
       worms_old_url = id2url(worms_id_old, "worms"),
@@ -173,7 +195,7 @@ if (nrow(d_worms_chgs) == 0){
 }
 ```
 
-## Update ITIS ID
+### Update ITIS ID
 
 ```{r tbl-itis_id}
 #| tbl-cap: "CalCOFI species changes to ITIS IDs."
@@ -228,37 +250,91 @@ if (nrow(d_itis_chgs) == 0){
 }
 ```
 
-## Get WoRMS common name
+### Get WoRMS invalid scientific names (for searching)
+
+TODO: Fold this later into output tables.
+
+```{r tbl-worms_invalid}
+#| tbl-cap: "CalCOFI species with alternative invalid WoRMS scientific names."
+#| eval: !expr is_ben_laptop
+
+# TODO: get common names across taxons in a separate table and look up match across any for preferred
+
+d_worms_invalid <- d |> # 1,148 × 8
+  select(-itis_id_old, -worms_id_old, -itis_id, -itis_scientific_name) |> 
+  left_join(
+    tbl(con_spp, "worms") |>
+      filter(
+        acceptedNameUsageID %in% d$worms_id,
+        taxonID              !=  acceptedNameUsageID) |> 
+      select(
+        worms_id                      = acceptedNameUsageID,
+        worms_invalid_id              = taxonID,
+        worms_invalid_scientific_name = scientificName,
+        worms_invalid_status          = taxonomicStatus) |>
+      collect(),
+    by           = join_by(worms_id),
+    relationship = "many-to-many") |> 
+  filter(!is.na(worms_invalid_id)) |> 
+  arrange(sp_id, worms_invalid_scientific_name)
+# View(d_invalid)
+# d_invalid |>
+#   glimpse()
+
+if (nrow(d_worms_invalid) == 0){
+  message("No alternative invalid WoRMS scientific names found.")
+} else {
+  # message("Found ", nrow(d_worms_invalid), " alternative invalid WoRMS scientific names")
+  d_worms_invalid |> 
+    mutate(
+      worms_url         = id2url(worms_id, "worms"),
+      worms_invalid_url = id2url(worms_invalid_id, "worms")) |> 
+  select(
+    sp_id, scientific_name, 
+    common_name, worms_scientific_name, 
+    worms_id = worms_url,
+    worms_invalid_scientific_name,
+    worms_invalid_id = worms_invalid_url,
+    worms_invalid_status) |> 
+    showtable(
+      "calcofi_species_worms_invalid_alternatives")
+}
+```
+
+### Get WoRMS common name
 
 ```{r tbl-worms_common_name}
 #| tbl-cap: "CalCOFI species differences with WoRMS common names."
 #| eval: !expr is_ben_laptop
 
-# TODO: get all common names in a seperate table and look up match across any
+# TODO: get common names across taxons in a separate table and look up match across any for preferred
 
 d <- d |> # 1,148 × 8
   left_join(
     tbl(con_spp, "worms_vernacular") |>
+      mutate(
+        has_source = !is.na(source)) |> 
       filter(
         taxonID %in% d$worms_id,
         language == "ENG") |> 
       select(
         taxonID,
-        worms_common_name = vernacularName,
-        isPreferredName) |>
+        worms_common_name  = vernacularName,
+        isPreferredName,
+        has_source) |>
       collect(),
     by           = join_by(worms_id == taxonID),
     relationship = "many-to-many") |> 
   slice_max(
     by        = scientific_name,
-    order_by  = isPreferredName, 
+    order_by  = tibble(isPreferredName, has_source),
     with_ties = F) |> 
-  select(-isPreferredName)
+  select(-isPreferredName, -has_source)
 
 d_worms_cn_chgs <- d |> 
   filter(
     !is.na(worms_common_name),
-      (tolower(common_name) != tolower(worms_common_name)) ) |> 
+    (tolower(common_name) != tolower(worms_common_name)) ) |> 
   select(
     sp_id, scientific_name, 
     common_name, worms_common_name, 
@@ -270,17 +346,13 @@ if (nrow(d_worms_cn_chgs) == 0){
   message("Found ", nrow(d_worms_cn_chgs), " differences with WoRMS common name")
   d_worms_cn_chgs |> 
     mutate(
-      worms_url = id2url(worms_id, "worms")) |> 
-  select(
-    sp_id, scientific_name, 
-    common_name, worms_common_name, 
-    worms_id = worms_url) |> 
+      worms_id = id2url(worms_id, "worms")) |> 
     showtable(
       "calcofi_species_worms_common_chgs")
 }
 ```
 
-## Get ITIS common name
+### Get ITIS common name
 
 ```{r tbl-itis_common_name}
 #| tbl-cap: "CalCOFI species differences with ITIS common names."
@@ -315,237 +387,253 @@ if (nrow(d_itis_cn_chgs) == 0){
   message("Found ", nrow(d_itis_cn_chgs), " differences with itis common name")
   d_itis_cn_chgs |> 
     mutate(
-      itis_url = id2url(itis_id, "itis")) |> 
-  select(
-    sp_id, scientific_name, 
-    common_name, itis_common_name, 
-    itis_id = itis_url) |> 
+      itis_id = id2url(itis_id, "itis")) |> 
     showtable(
       "calcofi_species_itis_common_chgs")
 }
 ```
 
+### Update final species table
+
+```{r tbl-species_csv}
+#| tbl-cap: "CalCOFI updated species table."
+#| eval: !expr is_ben_laptop
+
+d <- d |> 
+  rename(
+    scientific_name_old = scientific_name,
+    common_name_old     = common_name) |> 
+  mutate(
+    scientific_name = coalesce(worms_scientific_name, itis_scientific_name, scientific_name_old),
+    common_name     = coalesce(common_name_old, worms_common_name, itis_common_name)) |> 
+  select(
+    sp_id, scientific_name, common_name, 
+    worms_id, itis_id,
+    scientific_name_worms = worms_scientific_name, common_name_worms = worms_common_name,
+    scientific_name_itis  = itis_scientific_name,  common_name_itis  = itis_common_name,
+    scientific_name_old, common_name_old, worms_id_old, itis_id_old)
+
+write_csv(d, species_csv)
+
+d |> 
+  mutate(
+    worms_id     = id2url(worms_id,     "worms"),
+    worms_id_old = id2url(worms_id_old, "worms"),
+    itis_id      = id2url(itis_id,      "itis"),
+    itis_id_old  = id2url(itis_id_old,  "itis")) |> 
+  showtable("calcofi_species_updated")
+```
+
+## Get full taxonomic hierarchy
+
+### Get parent taxa, 1 example
+
+- [USING KEY in Recursive CTEs – DuckDB](https://duckdb.org/2025/05/23/using-key.html)
+
+```{r tbl-taxon_parentage_1}
+#| tbl-cap: "CalCOFI taxonomic parentage example for anchovies _Clupeiformes_ (sp_id: 9)."
+#| eval: !expr is_ben_laptop
+
+d_species <- read_csv(species_csv)
+
+# f_i <- dbListFields(con_spp, "itis")
+# f_w <- dbListFields(con_spp, "worms")
+# setdiff(f_i, f_w) # "completeness"
+# setdiff(f_w, f_i) # "completeness"
+#  [1] "scientificNameID"      "namePublishedInID"     "acceptedNameUsage"    
+#  [4] "parentNameUsage"       "kingdom"               "phylum"               
+#  [7] "class"                 "order"                 "family"               
+# [10] "genus"                 "subgenus"              "specificEpithet"      
+# [13] "infraspecificEpithet"  "nomenclaturalCode"     "modified"             
+# [16] "bibliographicCitation" "references"            "license"              
+# [19] "rightsHolder"          "datasetName"           "institutionCode"      
+# [22] "datasetID"             "isMarine"              "isFreshwater"         
+# [25] "isTerrestrial"         "isExtinct"             "isBrackish"  
+# f_i |> setdiff("completeness")
+#  [1] "taxonID"                  "parentNameUsageID"        "acceptedNameUsageID"     
+#  [4] "scientificName"           "scientificNameAuthorship" "taxonRank"               
+#  [7] "taxonomicStatus"          "nomenclaturalStatus"      "namePublishedIn"         
+# [10] "namePublishedInYear"
+
+# Function to get taxon and all parent taxa using recursive CTE
+get_taxon_parentage <- function(taxonID, authority = "worms"){
+  
+  query_sql <- glue("
+    WITH RECURSIVE taxon_hierarchy AS (
+      -- Base case: find the initial taxon (and resolve to accepted if it's a synonym)
+      SELECT 
+        taxonID,
+        acceptedNameUsageID,
+        parentNameUsageID,
+        scientificName,
+        scientificNameAuthorship,
+        taxonRank,
+        taxonomicStatus,
+        nomenclaturalStatus,
+        namePublishedInYear,
+        0 as level
+      FROM {authority} 
+      WHERE taxonID = ?
+      
+      UNION ALL
+      
+      -- Recursive case: find parent taxa (using the accepted parent)
+      SELECT 
+        t.taxonID,
+        t.acceptedNameUsageID,
+        t.parentNameUsageID,
+        t.scientificName,
+        t.scientificNameAuthorship,
+        t.taxonRank,
+        t.taxonomicStatus,
+        t.nomenclaturalStatus,
+        t.namePublishedInYear,
+        th.level + 1 as level
+      FROM {authority} t
+      INNER JOIN taxon_hierarchy th ON t.taxonID = th.parentNameUsageID
+      -- Ensure we're getting the accepted version of the parent
+      WHERE t.taxonID = t.acceptedNameUsageID  -- Only accepted taxa (not synonyms)
+        AND th.level < 50  -- Safety limit
+    )
+    SELECT * FROM taxon_hierarchy
+    ORDER BY level, taxonRank")
+  
+  dbGetQuery(con_spp, query_sql, params = list(taxonID)) |> 
+    mutate(
+      authority           = !!authority,
+      namePublishedInYear = as.character(namePublishedInYear)) |> 
+    relocate(authority) |> 
+    tibble()
+}
+
+d_tp_ex <- d_species |> 
+  filter(common_name == "anchovies") |>  # sp_id: 9; scientific_name: Clupeiformes
+  pull(worms_id) |>
+  get_taxon_parentage("worms")
+
+d_tp_ex |> 
+  select(level, taxonID, parentNameUsageID, scientificName, taxonRank) |>
+  showtable("calcofi_taxon_parentage_example", pageLength = 10)
+```
+
+### Get parent taxa for all taxon
+
+```{r tbl-taxon_parentage_all}
+#| tbl-cap: "CalCOFI taxonomic parentage example for anchovies _Clupeiformes_ (sp_id: 9)."
+#| eval: !expr is_ben_laptop
+
+d_taxonomy <- d_species |>
+  select(worms_id) |>
+  filter(!is.na(worms_id)) |> 
+  mutate(
+    data = map(worms_id, get_taxon_parentage, "worms")) |> 
+  bind_rows(
+    d_species |>
+      select(itis_id) |> 
+      filter(!is.na(itis_id)) |> 
+      mutate(
+        data = map(itis_id, get_taxon_parentage, "itis") )) |> #  2,296
+  unnest(data) |>                                              # 15,702
+  select(-level, -worms_id, -itis_id) |> 
+  select(
+    authority, taxonID, acceptedNameUsageID, scientificName, taxonRank, 
+    parentNameUsageID, taxonomicStatus, nomenclaturalStatus, 
+    scientificNameAuthorship, namePublishedInYear) |> 
+  distinct()                                                   #  2,794
+
+stopifnot(duplicated(select(d_taxonomy, authority, taxonID)) |> sum() == 0)
+
+write_csv(d_taxonomy, taxonomy_csv)
+
+d_taxonomy |> 
+  showtable("calcofi_taxonomy")
+```
+
+### Get taxonomic ranks
+
+```{r tbl-taxon_rank}
+#| tbl-cap: "Taxonomic ranks in WoRMS and ITIS."
+#| eval: false
+
+tr_w <- tbl(con_spp, "worms") |>
+  distinct(taxonRank) |>
+  pull(taxonRank)
+tr_i <- tbl(con_spp, "itis") |>
+  distinct(taxonRank) |>
+  pull(taxonRank)
+
+taxa_ranks_chr <- c(
+  "Kingdom", "Subkingdom", "Infrakingdom",
+  "Superdivision", "Superphylum", "Division", "Phylum", "Phylum (Division)", 
+  "Subdivision", "Subphylum", "Subphylum (Subdivision)", "Infradivision", 
+  "Infraphylum", "Parvphylum",
+  "Gigaclass", "Megaclass", "Superclass", "Class", "Subterclass", 
+  "Subclass", "Infraclass",
+  "Superorder", "Order", "Suborder", "Infraorder", "Parvorder",
+  "Section", "Subsection",
+  "Superfamily", "Epifamily", "Family", "Subfamily",
+  "Supertribe", "Tribe", "Subtribe",
+  "Genus", "Subgenus",
+  "Series", "Subseries",
+  "Species", "Subspecies",
+  "Natio", "Mutatio",
+  "Form", "Forma", "Subform", "Subforma",
+  "Variety", "Subvariety",
+  "Coll. sp.", "Aggr.")
+stopifnot(length(setdiff(na.omit(tr_w), taxa_ranks_chr)) == 0)
+
+d_taxa_rank <- tibble(
+  taxonRank  = taxa_ranks_chr,
+  rank_order = 1:length(taxa_ranks_chr))
+
+write_csv(d_taxa_rank, taxon_rank_csv)
+
+showtable(d_taxa_rank, "calcofi_taxa_ranks")
+```
+
+## Write tables to calcofi db
+
+The following tables are written to the `calcofi` database on the server:
+
+- `species`
+- `taxonomy`
+- `taxon_rank`
+
 ```{r eval_f}
 knitr::opts_chunk$set(eval = F)
 ```
 
-## Get parent taxa
+```{r write_taxon_taxonomy_calcofidb}
+d_species    <- read_csv(species_csv)
+d_taxonomy   <- read_csv(taxonomy_csv)
+d_taxon_rank <- read_csv(taxon_rank_csv)
 
-- [USING KEY in Recursive CTEs – DuckDB](https://duckdb.org/2025/05/23/using-key.html)
-
-```{r get_taxon_parentage}
-# Function to get taxon and all parent taxa using recursive CTE
-get_taxon_parentage <- function(con_spp, scientific_name) {
+d_species <- d_species |> 
+  select(
+    sp_id, scientific_name, common_name, 
+    worms_id, itis_id)
+    # scientific_name_worms, common_name_worms,
+    # scientific_name_itis, common_name_itis,
+    # scientific_name_old, common_name_old,
+    # worms_id_old, itis_id_old) |>
+  mutate(
+    worms_id     = as.integer(worms_id),
+    itis_id      = as.integer(itis_id)) 
   
-  # Method 1: Using dbGetQuery with raw SQL (most efficient)
-  query_sql <- "
-    WITH RECURSIVE taxon_hierarchy AS (
-      -- Base case: find the initial taxon
-      SELECT 
-        taxonID,
-        scientificNameID,
-        acceptedNameUsageID,
-        parentNameUsageID,
-        scientificName,
-        acceptedNameUsage,
-        parentNameUsage,
-        taxonRank,
-        kingdom,
-        phylum,
-        class,
-        \"order\",
-        family,
-        genus,
-        taxonomicStatus,
-        0 as level
-      FROM worms 
-      WHERE scientificName = ?
-      
-      UNION ALL
-      
-      -- Recursive case: find parent taxa
-      SELECT 
-        w.taxonID,
-        w.scientificNameID,
-        w.acceptedNameUsageID,
-        w.parentNameUsageID,
-        w.scientificName,
-        w.acceptedNameUsage,
-        w.parentNameUsage,
-        w.taxonRank,
-        w.kingdom,
-        w.phylum,
-        w.class,
-        w.\"order\",
-        w.family,
-        w.genus,
-        w.taxonomicStatus,
-        th.level + 1 as level
-      FROM worms w
-      INNER JOIN taxon_hierarchy th ON w.taxonID = th.parentNameUsageID
-      WHERE w.taxonID IS NOT NULL
-    )
-    SELECT * FROM taxon_hierarchy
-    ORDER BY level, taxonRank
-  "
-  
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name))
-  return(as_tibble(result))
-}
-
-# Example usage:
-d_parentage <- get_taxon_parentage(con_spp, "Sebastes atrovirens")
-d_parentage
-
-# To see just the taxonomic path:
-d_parentage |>
-  select(taxonID, parentNameUsageID, scientificName, taxonRank, level) |> 
-  left_join(
-    tbl(con_spp, "worms_vernacular") |> 
-      filter(
-        taxonID %in% d_parentage$taxonID,
-        language == "ENG") |> 
-      select(taxonID, vernacularName, isPreferredName) |>
-      collect(),
-      by = "taxonID") |> 
-  arrange(level, taxonID, desc(isPreferredName))
+dbWriteTable(con_cc, "species",   d_species,    overwrite = T)
+dbWriteTable(con_cc, "taxonomy",  d_taxonomy,   overwrite = T)
+dbWriteTable(con_cc, "taxa_rank", d_taxon_rank, overwrite = T)
 ```
-
 
 ## Get taxonomic children
 
-```{r taxon_children}
-# Function to get all children (descendants) of a given taxon
-get_taxon_children <- function(con_spp, scientific_name) {
-  
-  query_sql <- "
-    WITH RECURSIVE taxon_children AS (
-      -- Base case: find the parent taxon
-      SELECT 
-        taxonID,
-        scientificNameID,
-        acceptedNameUsageID,
-        parentNameUsageID,
-        scientificName,
-        acceptedNameUsage,
-        parentNameUsage,
-        taxonRank,
-        kingdom,
-        phylum,
-        class,
-        \"order\",
-        family,
-        genus,
-        taxonomicStatus,
-        0 as depth_level
-      FROM worms 
-      WHERE scientificName = ?
-      
-      UNION ALL
-      
-      -- Recursive case: find children taxa
-      SELECT 
-        w.taxonID,
-        w.scientificNameID,
-        w.acceptedNameUsageID,
-        w.parentNameUsageID,
-        w.scientificName,
-        w.acceptedNameUsage,
-        w.parentNameUsage,
-        w.taxonRank,
-        w.kingdom,
-        w.phylum,
-        w.class,
-        w.\"order\",
-        w.family,
-        w.genus,
-        w.taxonomicStatus,
-        tc.depth_level + 1 as depth_level
-      FROM worms w
-      INNER JOIN taxon_children tc ON w.parentNameUsageID = tc.taxonID
-      WHERE w.parentNameUsageID IS NOT NULL
-    )
-    SELECT * FROM taxon_children
-    ORDER BY depth_level, 
-             CASE taxonRank 
-               WHEN 'kingdom' THEN 1
-               WHEN 'phylum' THEN 2  
-               WHEN 'class' THEN 3
-               WHEN 'order' THEN 4
-               WHEN 'family' THEN 5
-               WHEN 'genus' THEN 6
-               WHEN 'species' THEN 7
-               WHEN 'subspecies' THEN 8
-               WHEN 'variety' THEN 9
-               WHEN 'form' THEN 10
-               ELSE 11
-             END,
-             scientificName
-  "
-  
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name))
-  return(as_tibble(result))
-}
-
-# Get all descendants of a family
-d_children <- get_taxon_children(con_spp, "Sebastidae")
-d_children
-
-tbl(con_spp, "worms") |> 
-  pull(taxonRank) |> 
-  table()
-
-d_children |> 
-  select(depth_level, taxonRank) |> 
-  table()
-
-d_children |>
-  select(taxonID, parentNameUsageID, scientificName, taxonRank, depth_level) |> 
-  arrange(depth_level, taxonID)
-```
-
-
-```{r taxon_children_lookup}
-#| eval: false
-
-# Create taxonomic rank lookup table
-create_taxa_ranks_table <- function(con_spp) {
-  
-  taxa_ranks_chr <- c(
-      "Kingdom", "Subkingdom", "Infrakingdom",
-      "Superphylum", "Phylum", "Phylum (Division)", "Subphylum", 
-      "Subphylum (Subdivision)", "Infraphylum", "Parvphylum",
-      "Gigaclass", "Megaclass", "Superclass", "Class", "Subterclass", 
-      "Subclass", "Infraclass",
-      "Superorder", "Order", "Suborder", "Infraorder", "Parvorder",
-      "Section", "Subsection",
-      "Superfamily", "Epifamily", "Family", "Subfamily",
-      "Supertribe", "Tribe", "Subtribe",
-      "Genus", "Subgenus",
-      "Series", "Subseries",
-      "Species", "Subspecies",
-      "Natio", "Mutatio",
-      "Forma", "Subforma",
-      "Variety", "Subvariety",
-      "Coll. sp.", "Aggr.")
-  
-  # Define the taxonomic hierarchy with proper ordering
-  taxa_ranks <- data.frame(
-    taxonRank = ,
-    rank_order = 1:length(taxa_ranks_chr),
-    stringsAsFactors = FALSE
-  )
-  
-  # Create the table in DuckDB
-  dbWriteTable(con_spp, "taxa_ranks", taxa_ranks, overwrite = TRUE)
-  
-  return(taxa_ranks)
-}
+```{r tbl-taxon_children_1}
+#| tbl-cap: "CalCOFI taxonomic children example for rockfishes _Sebastes_ (sp_id: 683)."
 
 # Function to get all children (descendants) of a given taxon
-get_taxon_children <- function(con_spp, scientific_name) {
+get_taxon_children <- function(taxonID, authority = "worms") {
   
-  query_sql <- "
+  query_sql <- glue("
     WITH RECURSIVE taxon_children AS (
       -- Base case: find the parent taxon
       SELECT 
@@ -554,252 +642,45 @@ get_taxon_children <- function(con_spp, scientific_name) {
         acceptedNameUsageID,
         parentNameUsageID,
         scientificName,
-        acceptedNameUsage,
         parentNameUsage,
         taxonRank,
-        kingdom,
-        phylum,
-        class,
-        \"order\",
-        family,
-        genus,
         taxonomicStatus,
         0 as depth_level
-      FROM worms 
-      WHERE scientificName = ?
+      FROM taxonomy 
+      WHERE taxonID = ?
       
       UNION ALL
       
       -- Recursive case: find children taxa
       SELECT 
-        w.taxonID,
-        w.scientificNameID,
-        w.acceptedNameUsageID,
-        w.parentNameUsageID,
-        w.scientificName,
-        w.acceptedNameUsage,
-        w.parentNameUsage,
-        w.taxonRank,
-        w.kingdom,
-        w.phylum,
-        w.class,
-        w.\"order\",
-        w.family,
-        w.genus,
-        w.taxonomicStatus,
+        t.taxonID,
+        t.scientificNameID,
+        t.acceptedNameUsageID,
+        t.parentNameUsageID,
+        t.scientificName,
+        t.parentNameUsage,
+        t.taxonRank,
+        t.taxonomicStatus,
         tc.depth_level + 1 as depth_level
-      FROM worms w
-      INNER JOIN taxon_children tc ON w.parentNameUsageID = tc.taxonID
-      WHERE w.parentNameUsageID IS NOT NULL
+      FROM taxonomy t
+      INNER JOIN taxon_children tc ON t.parentNameUsageID = tc.taxonID
+      WHERE 
+        t.parentNameUsageID IS NOT NULL AND
+        t.authority = '{authority}'
     )
     SELECT tc.*, COALESCE(tr.rank_order, 99) as rank_order
     FROM taxon_children tc
-    LEFT JOIN taxa_ranks tr ON tc.taxonRank = tr.taxonRank
-    ORDER BY tc.depth_level, COALESCE(tr.rank_order, 99), tc.scientificName
-  "
+    LEFT JOIN taxa_rank tr ON tc.taxonRank = tr.taxonRank
+    ORDER BY tc.depth_level, COALESCE(tr.rank_order, 99), tc.scientificName")
   
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name))
-  return(as_tibble(result))
+  dbGetQuery(con_cc, query_sql, params = list(scientific_name)) |> 
+    tibble()
 }
 
-# Function to get only direct children (one level down)
-get_direct_children <- function(con_spp, scientific_name) {
-  
-  query_sql <- "
-    WITH parent_taxon AS (
-      SELECT taxonID 
-      FROM worms 
-      WHERE scientificName = ?
-    )
-    SELECT 
-      w.taxonID,
-      w.scientificNameID,
-      w.acceptedNameUsageID,
-      w.parentNameUsageID,
-      w.scientificName,
-      w.acceptedNameUsage,
-      w.parentNameUsage,
-      w.taxonRank,
-      w.kingdom,
-      w.phylum,
-      w.class,
-      w.\"order\",
-      w.family,
-      w.genus,
-      w.taxonomicStatus,
-      COALESCE(tr.rank_order, 99) as rank_order
-    FROM worms w
-    INNER JOIN parent_taxon pt ON w.parentNameUsageID = pt.taxonID
-    LEFT JOIN taxa_ranks tr ON w.taxonRank = tr.taxonRank
-    ORDER BY COALESCE(tr.rank_order, 99), w.scientificName
-  "
-  
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name))
-  return(as_tibble(result))
-}
-
-# Function to get children up to a specific depth level
-get_taxon_children_depth <- function(con_spp, scientific_name, max_depth = NULL) {
-  
-  # Build the depth condition
-  depth_condition <- if (!is.null(max_depth)) {
-    paste0("WHERE depth_level <= ", max_depth)
-  } else {
-    ""
-  }
-  
-  query_sql <- paste0("
-    WITH RECURSIVE taxon_children AS (
-      -- Base case: find the parent taxon
-      SELECT 
-        taxonID,
-        scientificNameID,
-        acceptedNameUsageID,
-        parentNameUsageID,
-        scientificName,
-        acceptedNameUsage,
-        parentNameUsage,
-        taxonRank,
-        kingdom,
-        phylum,
-        class,
-        \"order\",
-        family,
-        genus,
-        taxonomicStatus,
-        0 as depth_level
-      FROM worms 
-      WHERE scientificName = ?
-      
-      UNION ALL
-      
-      -- Recursive case: find children taxa
-      SELECT 
-        w.taxonID,
-        w.scientificNameID,
-        w.acceptedNameUsageID,
-        w.parentNameUsageID,
-        w.scientificName,
-        w.acceptedNameUsage,
-        w.parentNameUsage,
-        w.taxonRank,
-        w.kingdom,
-        w.phylum,
-        w.class,
-        w.\"order\",
-        w.family,
-        w.genus,
-        w.taxonomicStatus,
-        tc.depth_level + 1 as depth_level
-      FROM worms w
-      INNER JOIN taxon_children tc ON w.parentNameUsageID = tc.taxonID
-      WHERE w.parentNameUsageID IS NOT NULL", 
-      if (!is.null(max_depth)) paste0(" AND tc.depth_level < ", max_depth) else "", "
-    )
-    SELECT tc.*, COALESCE(tr.rank_order, 99) as rank_order
-    FROM taxon_children tc
-    LEFT JOIN taxa_ranks tr ON tc.taxonRank = tr.taxonRank
-    ", depth_condition, "
-    ORDER BY tc.depth_level, COALESCE(tr.rank_order, 99), tc.scientificName
-  ")
-  
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name))
-  return(as_tibble(result))
-}
-
-# Function to get children of a specific taxonomic rank
-get_children_by_rank <- function(con_spp, scientific_name, target_rank) {
-  
-  query_sql <- "
-    WITH RECURSIVE taxon_children AS (
-      -- Base case: find the parent taxon
-      SELECT 
-        taxonID,
-        scientificNameID,
-        acceptedNameUsageID,
-        parentNameUsageID,
-        scientificName,
-        acceptedNameUsage,
-        parentNameUsage,
-        taxonRank,
-        kingdom,
-        phylum,
-        class,
-        \"order\",
-        family,
-        genus,
-        taxonomicStatus,
-        0 as depth_level
-      FROM worms 
-      WHERE scientificName = ?
-      
-      UNION ALL
-      
-      -- Recursive case: find children taxa
-      SELECT 
-        w.taxonID,
-        w.scientificNameID,
-        w.acceptedNameUsageID,
-        w.parentNameUsageID,
-        w.scientificName,
-        w.acceptedNameUsage,
-        w.parentNameUsage,
-        w.taxonRank,
-        w.kingdom,
-        w.phylum,
-        w.class,
-        w.\"order\",
-        w.family,
-        w.genus,
-        w.taxonomicStatus,
-        tc.depth_level + 1 as depth_level
-      FROM worms w
-      INNER JOIN taxon_children tc ON w.parentNameUsageID = tc.taxonID
-      WHERE w.parentNameUsageID IS NOT NULL
-    )
-    SELECT tc.*, COALESCE(tr.rank_order, 99) as rank_order
-    FROM taxon_children tc
-    LEFT JOIN taxa_ranks tr ON tc.taxonRank = tr.taxonRank
-    WHERE tc.taxonRank = ?
-    ORDER BY tc.scientificName
-  "
-  
-  result <- dbGetQuery(con_spp, query_sql, params = list(scientific_name, target_rank))
-  return(as_tibble(result))
-}
-
-# Helper function to summarize children by taxonomic rank
-summarize_children_by_rank <- function(children_df) {
-  children_df |>
-    filter(depth_level > 0) |>  # Exclude the parent taxon itself
-    count(taxonRank, name = "count") |>
-    left_join(
-      data.frame(
-        taxonRank = c(
-          "Kingdom", "Subkingdom", "Infrakingdom",
-          "Superphylum", "Phylum", "Phylum (Division)", "Subphylum", 
-          "Subphylum (Subdivision)", "Infraphylum", "Parvphylum",
-          "Gigaclass", "Megaclass", "Superclass", "Class", "Subterclass", 
-          "Subclass", "Infraclass",
-          "Superorder", "Order", "Suborder", "Infraorder", "Parvorder",
-          "Section", "Subsection",
-          "Superfamily", "Epifamily", "Family", "Subfamily",
-          "Supertribe", "Tribe", "Subtribe",
-          "Genus", "Subgenus",
-          "Series", "Subseries",
-          "Species", "Subspecies",
-          "Natio", "Mutatio",
-          "Forma", "Subforma",
-          "Variety", "Subvariety",
-          "Coll. sp.", "Aggr."
-        ),
-        rank_order = 1:45,
-        stringsAsFactors = FALSE
-      ),
-      by = "taxonRank"
-    ) |>
-    arrange(rank_order)
-}
+# TODO: arguments or extra function to get:
+# - [ ] get_direct_children
+# - [ ] get_taxon_children_depth: children up to a specific depth level
+# - [ ] get_children_by_rank: get children of a specific taxonomic rank
 
 # Example usage:
 
@@ -817,12 +698,6 @@ summarize_children_by_rank <- function(children_df) {
 
 # Get all species within a genus
 # species_in_genus <- get_children_by_rank(con_spp, "Sebastes", "Species")
-
-# Summarize the taxonomic diversity
-# children <- get_taxon_children(con_spp, "Sebastidae")
-# summary <- summarize_children_by_rank(children)
-# print(summary)
-
 ```
 
 ## Close db connection(s)
