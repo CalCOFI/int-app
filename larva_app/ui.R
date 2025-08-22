@@ -7,7 +7,7 @@ ui <- page_sidebar(
     # Hidden container for shared inputs
     div(style = "display:none;",
         sliderInput("sel_hex_res", "Hexagon Resolution", 1, 10, 3, step = 1),
-        selectInput("sel_ts_res", "Temporal Resolution", ts_res_options, selected = "Year"),
+        selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = "Year"),
         selectInput("sel_ocean_stat", "Oceanographic Summary Statistic",
                     list("Average" = "mean", "Max" = "max", "Min" = "min", "St. Dev." = "sd"),
                     selected = "Average")

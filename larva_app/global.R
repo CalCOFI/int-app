@@ -5,7 +5,7 @@ if (!requireNamespace("librarian", quietly = TRUE)) {
 # libraries
 librarian::shelf(
   bslib, bsicons, DBI, data.table, dplyr, duckdb, dygraphs, ggplot2, glue, here,
-  htmlwidgets, leaflet.extras, lubridate, mapgl, plotly, purrr, sf, shiny, tibble,
+  htmlwidgets, leaflet.extras, lubridate, mapgl, mapview, plotly, purrr, sf, shiny, tibble,
   tidyr,
   quiet = T)
 

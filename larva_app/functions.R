@@ -106,7 +106,7 @@ map_ocean_hex <- function(ocean_data, res_range, ocean_stat) {
                     ][, tooltip := round(ocean.value, 2)]
 
   # split into list
-  ocean_hex_list <- group_split(sf_result, resolution)
+  ocean_hex_list <- group_split(ocean_hex, resolution)
 
   return(ocean_hex_list)
 }

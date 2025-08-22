@@ -1,11 +1,14 @@
 server <- function(input, output, session) {
 
+
+  # observe sel_data ----
   observeEvent(input$sel_data, {
     showModal(dataModal())
 
     updateSelectizeInput(session, 'sel_name', choices = names, server = TRUE)
   })
 
+  # observe submit ----
   # generate plots on submit
   observeEvent(input$submit, {
     # clear previous message
@@ -46,6 +49,7 @@ server <- function(input, output, session) {
       # create maps
       sp_map <- create_sp_map(sp_hex_list, sp_scale_list)
 
+      # map ----
       # spatial map output
       output$map <- renderMaplibreCompare({
 
@@ -69,6 +73,7 @@ server <- function(input, output, session) {
         map <- compare(sp_map, ocean_map)
       })
 
+      # sp_ts_plot ----
       # time series
       output$sp_ts_plot <- renderDygraph({
         sp_ts <- make_sp_ts(sp_data, input$sel_ts_res) |>
@@ -123,6 +128,7 @@ server <- function(input, output, session) {
         sp_ts_plot
       })
 
+      # ocean_ts_plot ----
       output$ocean_ts_plot <- renderDygraph({
         ocean_ts <- make_ocean_ts(ocean_data, input$sel_ts_res) |>
           select(time, avg, lwr, upr)
@@ -226,6 +232,7 @@ server <- function(input, output, session) {
     }
   })
 
+  # map_hex_res ----
   output$map_hex_res <- renderUI({
     tagList(
       sliderInput("sel_hex_res",
@@ -240,6 +247,7 @@ server <- function(input, output, session) {
     )
   })
 
+  # map_ocean_stat -----
   output$map_ocean_stat <- renderUI({
     selectInput("sel_ocean_stat",
                 label = tagList("Oceanographic Summary Statistic",
@@ -250,10 +258,12 @@ server <- function(input, output, session) {
     )
   })
 
+  # ts_res ----
   output$ts_res <- renderUI({
-    selectInput("sel_ts_res", "Temporal Resolution", ts_res_options, selected = input$sel_ts_res)
+    selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = input$sel_ts_res)
   })
 
+  # splot_hex_res ----
   output$splot_hex_res <- renderUI({
     tagList(
       sliderInput("sel_hex_res",
@@ -266,6 +276,7 @@ server <- function(input, output, session) {
     )
   })
 
+  # splot_ocean_stat ----
   output$splot_ocean_stat <- renderUI({
     selectInput("sel_ocean_stat",
                 label = tagList("Oceanographic Summary Statistic",
@@ -277,7 +288,7 @@ server <- function(input, output, session) {
   })
 
   output$splot_ts_res <- renderUI({
-    selectInput("sel_ts_res", "Temporal Resolution", ts_res_options, selected = input$sel_ts_res)
+    selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = input$sel_ts_res)
   })
 
   observe({
