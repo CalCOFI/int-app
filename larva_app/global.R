@@ -4,15 +4,10 @@ if (!requireNamespace("librarian", quietly = TRUE)) {
 
 # libraries
 librarian::shelf(
-  bslib, bsicons, DBI, data.table, dplyr, duckdb, dygraphs, ggplot2, glue, here,
-  htmlwidgets, leaflet.extras, lubridate, mapgl, mapview, plotly, purrr, sf, shiny, tibble,
-  tidyr,
+  bslib, bsicons, DBI, data.table, dplyr, duckdb, geosphere, ggplot2, glue, here,
+  highcharter, htmlwidgets, leaflet, lubridate, mapgl, plotly, purrr, readr, sf, shiny,
+  tibble, tidyr,
   quiet = T)
-
-# map options
-mapviewOptions(
-  basemaps       = "Esri.OceanBasemap",
-  vector.palette = \(n) hcl.colors(n, palette = "Spectral"))
 
 # set up db connection
 url_dk <- "https://file.calcofi.io/calcofi.duckdb"
@@ -24,15 +19,16 @@ res <- dbExecute(con, "INSTALL httpfs; LOAD httpfs;")
 res <- dbExecute(con, glue("ATTACH IF NOT EXISTS '{url_dk}' AS calcofi; USE calcofi"))
 
 # load ocean data
-ocean_subset <- readRDS(here("data/ocean_subset.RDS"))
-hex_geo_dt <- readRDS(here("data/hex_geo.RDS"))
+ocean_subset <- fread(here("data/ocean_subset.csv"))
+hex_geo_dt <- read_csv(here("data/hex_geo.csv"), show_col_types = FALSE) |>
+  st_as_sf(wkt = "geometry", crs = 4326) |>
+  as.data.table()
 
 # load functions
 source(here("larva_app/functions.R"))
 
 # extract species names
 names <- tbl(con, "species") |>
-  select(common_name, scientific_name) |>
   mutate(
     name = paste0(common_name, " (", scientific_name, ")"),
   ) |>

@@ -6,26 +6,26 @@ ui <- page_sidebar(
 
     # Hidden container for shared inputs
     div(style = "display:none;",
-        sliderInput("sel_hex_res", "Hexagon Resolution", 1, 10, 3, step = 1),
         selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = "Year"),
         selectInput("sel_ocean_stat", "Oceanographic Summary Statistic",
                     list("Average" = "mean", "Max" = "max", "Min" = "min", "St. Dev." = "sd"),
                     selected = "Average")
     ),
+
     conditionalPanel("input.outputPanel === 'Map'",
-                     uiOutput("map_ocean_stat")
-    ),
+                     uiOutput("map_ocean_stat")),
 
     conditionalPanel("input.outputPanel === 'Time Series'",
-                     uiOutput("ts_res")
-    ),
+                     uiOutput("ts_res")),
 
     conditionalPanel("input.outputPanel === 'Scatterplot'",
-                     uiOutput("splot_hex_res"),
-                     uiOutput("splot_ts_res"),
-                     uiOutput("splot_ocean_stat"),
-                     input_switch("sel_splot_err", "Display errorbars")
-    ),
+                     "Click on a point or use the box/lasso tool to select a group of points to see their location."),
+
+    conditionalPanel("input.outputPanel === 'Depth Profile'",
+                     "Draw a line on the map, then click 'Generate Profile' to create a cross-section. Use the buffer distance to set how far points can be from the line.",
+                     numericInput("sel_buffer_dist", "Buffer Distance (km)", 5, min = 0),
+                     actionButton("get_features", "Generate Profile")),
+
   ),
 
   # output panels
@@ -43,19 +43,17 @@ ui <- page_sidebar(
 
     nav_panel(
       "Time Series",
-      dygraphOutput("sp_ts_plot"),
-      dygraphOutput("ocean_ts_plot")
+      highchartOutput("ts_plot")
     ),
 
     nav_panel(
       "Scatterplot",
-      "Scatterplot",
-      if (FALSE) {plotlyOutput("splot")}
+      plotlyOutput("splot")
     ),
 
     nav_panel(
       "Depth Profile",
-      "Depth Profile"
+      maplibreOutput("dprof_map")
     )
   )
 )

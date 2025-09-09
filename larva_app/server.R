@@ -22,229 +22,279 @@ server <- function(input, output, session) {
     sel_depth <- input$sel_depth
     sel_qtr <- input$sel_qtr
     sel_date_range <- input$sel_date_range
+    sel_min_depth <- input$sel_min_depth
+    sel_max_depth <- input$sel_max_depth
 
     # pull species data from db
     sp_data <- sp_retrieve(sel_name, sel_qtr, sel_date_range)
 
     # pull ocean data
-    ocean_data <- ocean_retrieve(sel_ocean_var, sel_qtr, sel_date_range)
+    ocean_data <- ocean_retrieve(sel_ocean_var, sel_qtr, sel_date_range, sel_min_depth, sel_max_depth)
 
     # check if there are observations
     if (sp_data |> collect() |> nrow() == 0) {
-      showModal(dataModal(TRUE))
+      showNotification("No observations found for selected species.", type = "warning")
+      showModal(dataModal())
+      return(NULL)
     }
-    # if yes, remove data selection window plot
-    else {
+    # if yes, proceed to retrieving data and generating plots
 
-      # compute hexagons
-      sp_hex_list <- map_sp_hex(sp_data, res_range)
+    # compute hexagons
+    sp_hex_list <- map_sp_hex(sp_data, res_range)
 
-      # compute color scales
-      sp_scale_list <- lapply(sp_hex_list, interpolate_palette,
-                              column = "sp.value",
-                              palette = \(n) hcl.colors(n, palette = "Viridis"))
+    # compute color scales
+    sp_scale_list <- lapply(sp_hex_list, interpolate_palette,
+                            column = "sp.value",
+                            palette = \(n) hcl.colors(n, palette = "Viridis"))
 
-      ocean_label <- names(which(ocean_var_choices == sel_ocean_var))
+    ocean_var_label <- names(which(ocean_var_choices == sel_ocean_var))
 
-      # create maps
-      sp_map <- create_sp_map(sp_hex_list, sp_scale_list)
+    sp_map <- create_sp_map(sp_hex_list, sp_scale_list)
 
-      # map ----
-      # spatial map output
-      output$map <- renderMaplibreCompare({
+    # map ----
+    # spatial map output
+    output$map <- renderMaplibreCompare({
+      ocean_stat_label <- names(which(ocean_stat_choices == input$sel_ocean_stat))
 
-        ocean_stat_label <- names(which(ocean_stat_choices == input$sel_ocean_stat))
+      # create ocean map
+      ocean_hex_list <- map_ocean_hex(ocean_data, res_range, input$sel_ocean_stat)
+      ocean_scale_list <- lapply(ocean_hex_list, interpolate_palette,
+                                 column = "ocean.value",
+                                 palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
+      ocean_map <- create_ocean_map(ocean_hex_list, ocean_scale_list, ocean_stat_label, ocean_var_label)
 
-        ocean_hex_list <- map_ocean_hex(ocean_data, res_range, input$sel_ocean_stat)
-        ocean_scale_list <- lapply(ocean_hex_list, interpolate_palette,
-                                   column = "ocean.value",
-                                   palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
-        ocean_map <- create_ocean_map(ocean_hex_list, ocean_scale_list)
+      # create comparison map
+      compare(sp_map, ocean_map, elementId = "map")
+    })
 
-        # add legend to ocean map
-        ocean_map <- ocean_map |>
-          add_legend(paste(ocean_stat_label, ocean_label),
-                     values = signif(ocean_scale_list[[1]]$breaks, 2),
-                     colors = ocean_scale_list[[1]]$colors,
-                     type = "continuous",
-                     position = "bottom-right") |>
-          add_scale_control(position = "top-left", unit = "metric")
+    # time series
+    output$ts_plot <- renderHighchart({
+      # make species time-series
+      sp_ts <- make_sp_ts(sp_data, input$sel_ts_res) |> arrange(time) |> collect()
 
-        map <- compare(sp_map, ocean_map)
+      # make ocean time-series
+      ocean_ts <- make_ocean_ts(ocean_data, input$sel_ts_res)
+
+      # plot time-series
+      plot_ts(sp_ts, ocean_ts, input$sel_ts_res, sel_ocean_var)
+    })
+
+    splot_data <- splot_prep(sp_data, ocean_data, "mean")
+
+    # scatterplot
+    output$splot <- renderPlotly({
+      # plot scatterplot
+      splot <- plot_ly(
+        data = splot_data,
+        x = ~Qty,
+        y = ~std_tally,
+        color = ~name,
+        type = "scattergl",
+        mode = "markers",
+        marker = list(size = 10, opacity = 0.8),
+        # Store the row index for later use in click and selection events
+        customdata = ~1:nrow(splot_data),
+        source = "scatterPlotSource",
+        hoverinfo = "text",
+        text = ~paste0(
+          "<b>Date:</b> ", time_start,
+          "<br><b>Species:</b> ", name,
+          "<br><b>", ocean_var_label, ":</b> ", round(Qty, 2),
+          "<br><b>Abundance: </b>", round(std_tally, 2)
+        )) %>%
+        layout(
+          xaxis = list(title = ocean_var_label),
+          yaxis = list(title = "Species Abundance"),
+          legend = list(title = "Species"),
+          dragmode = "select") %>%
+        config(
+          displaylogo = FALSE, scrollZoom = TRUE,
+          modeBarButtonsToRemove = c("hoverClosestCartesian", "hoverCompareCartesian"))
+
+      splot
+    })
+
+    # Observe single-point click events
+    observeEvent(event_data("plotly_click", source = "scatterPlotSource"), {
+      click_data <- event_data("plotly_click", source = "scatterPlotSource")
+
+      # Ensure click data is not NULL
+      req(click_data)
+
+      # Get the row index of the clicked point from customdata
+      row_index <- click_data$customdata
+
+      # Get the data for the single clicked point
+      clicked_point <- splot_data[row_index]
+
+      # Show a modal dialog with a Leaflet map and the single marker
+      showModal(modalDialog(
+        title = "Location of Selected Point",
+        leafletOutput("modalMap"),
+        footer = modalButton("Close"),
+        size = "l"
+      ))
+
+      output$modalMap <- renderLeaflet({
+        leaflet() %>%
+          addProviderTiles(providers$Esri.OceanBasemap) %>%
+          # Set the view to the location of the clicked point
+          setView(
+            lng = clicked_point$sp_lon,
+            lat = clicked_point$sp_lat,
+            zoom = 14
+          ) %>%
+          addMarkers(
+            lng = clicked_point$sp_lon,
+            lat = clicked_point$sp_lat,
+            popup = paste0(
+              "<b>Date:</b> ", clicked_point$time_start,
+              "<br><b>Species:</b> ", clicked_point$name,
+              "<br><b>", ocean_var_label, ":</b> ", round(clicked_point$Qty, 2),
+              "<br><b>Abundance: </b>", round(clicked_point$std_tally, 2)))
       })
+    })
 
-      # sp_ts_plot ----
-      # time series
-      output$sp_ts_plot <- renderDygraph({
-        sp_ts <- make_sp_ts(sp_data, input$sel_ts_res) |>
-          select(time, avg, lwr, upr, name) |>
-          collect()
+    # Observe selection events (box/lasso)
+    observeEvent(event_data("plotly_selected", source = "scatterPlotSource"), {
+      selected_data <- event_data("plotly_selected", source = "scatterPlotSource")
 
-        sp_ts <- sp_ts |>
-          pivot_wider(
-            values_from = c(avg, lwr, upr),
-            names_from = name
+      # Ensure selected data is not NULL
+      req(selected_data)
+
+      # Get the row indices of the selected points from customdata
+      row_indices <- selected_data$customdata
+
+      # Get the data for the selected points
+      selected_points <- splot_data[row_indices]
+
+      # confirm that there are selected points and warn if not
+      if (nrow(selected_points) == 0) {
+        showNotification("No points located within selection.", type = "warning")
+        return(NULL)
+      }
+
+      # Show a modal dialog with a Leaflet map and the markers
+      showModal(modalDialog(
+        title = "Locations of Selected Points",
+        leafletOutput("modalMap"),
+        footer = modalButton("Close"),
+        size = "l"
+      ))
+
+      # Render the leaflet map within the modal
+      output$modalMap <- renderLeaflet({
+        leaflet() %>%
+          addProviderTiles(providers$Esri.OceanBasemap) %>%
+          # Set the view to the centroid of the selected points
+          setView(
+            lng = mean(selected_points$sp_lon),
+            lat = mean(selected_points$sp_lat),
+            zoom = 14
+          ) %>%
+          addMarkers(
+            lng = selected_points$sp_lon,
+            lat = selected_points$sp_lat,
+            popup = paste0(
+              "<b>Date:</b> ", selected_points$time_start,
+              "<br><b>Species:</b> ", selected_points$name,
+              "<br><b>", ocean_var_label, ":</b> ", round(selected_points$Qty, 2),
+              "<br><b>Abundance: </b>", round(selected_points$std_tally, 2)))
+      })
+    })
+
+    output$dprof_map <- renderMaplibre({
+      sp_map |>
+        add_draw_control(
+          position = "top-right",
+          displayControlsDefault = FALSE,
+          controls = list(
+            line_string = TRUE,
+            trash = TRUE
           )
+        )
+    })
 
-        sp_ts_plot <- sp_ts |>
-          dygraph(group = "time-series") |>
-          dyOptions(connectSeparatedPoints=TRUE) |>
-          dyAxis("y",  label = "Avg. Abundance (m^-2)")
+    observeEvent(input$get_features, {
+      features <- get_drawn_features(maplibre_proxy("dprof_map"))
 
-        for (sp in sel_name) {
-          sp_ts_plot <- sp_ts_plot |>
-            dySeries(
-              c(paste0("lwr_", sp), paste0("avg_", sp), paste0("upr_", sp)),
-              label = sp
-            )
-        }
+      if (is.null(features) || nrow(features) == 0) {
+        showNotification("No line drawn yet. Please draw a line on the map.", type = "warning")
+        return(NULL)
+      }
 
-        if (input$sel_ts_res == "quarter") {
-          sp_ts_plot <- sp_ts_plot |>
-            dyAxis(
-              "x",
-              valueFormatter = htmlwidgets::JS("
-                function(d) {
-                  var month = new Date(d).getUTCMonth();
-                  var quarter = Math.floor(month / 3) + 1;
-                  return 'Q' + quarter;
-                }
-              "),
-              axisLabelFormatter = htmlwidgets::JS("
-                function(d) {
-                  var month = d.getUTCMonth();
-                  var quarter = Math.floor(month / 3) + 1;
-                  // Only show label at first month of quarter
-                  if (month % 3 === 0) {
-                    return 'Q' + quarter;
-                  } else {
-                    return '';
-                  }
-                }
-              ")
-            )
-        }
+      # Use the last drawn feature if multiple exist
+      if (nrow(features) > 1) {
+        showNotification("Multiple lines detected; using the last one.", type = "message")
+        features <- features[nrow(features), ]
+      }
 
-        sp_ts_plot
+      # Extract coordinates
+      coords <- st_coordinates(features)
+
+      if (nrow(coords) > 2) {
+        showNotification("Multiple segments detected; using the last one.", type = "message")
+        coords <- coords[(nrow(coords)-1):nrow(coords), c("X", "Y")]
+      }
+
+      # create buffer
+      buffer_res <- create_buffer(coords, buffer_dist = input$sel_buffer_dist*1000)
+
+      # filter points
+      sp_sf <- st_as_sf(as.data.table(sp_data), coords = c("longitude", "latitude"), crs = 4326)
+      ocean_sf <- st_as_sf(ocean_data, coords = c("Lon_Dec", "Lat_Dec"), crs = 4326)
+      filt_sp_sf <- sp_sf[as.vector(st_intersects(sp_sf, buffer_res$buffer, sparse = FALSE)),]
+      filt_sp_data <- as.data.table(sp_data)[as.vector(st_intersects(sp_sf, buffer_res$buffer, sparse = FALSE)),]
+      filt_ocean_sf <- ocean_sf[as.vector(st_intersects(ocean_sf, buffer_res$buffer, sparse = FALSE)),]
+      filt_ocean_data <- ocean_data[as.vector(st_intersects(ocean_sf, buffer_res$buffer, sparse = FALSE)),]
+
+      # calculate distances
+      segment_sfc <- st_geometry(buffer_res$segment_utm)
+      sp_point_sfc <- st_transform(filt_sp_sf, buffer_res$utm_crs) |> st_geometry()
+      ocean_point_sfc <- st_transform(filt_ocean_sf, buffer_res$utm_crs) |> st_geometry()
+      segment_length <- st_length(buffer_res$segment_utm)/1000
+      filt_sp_data[, distance := st_line_project(segment_sfc, sp_point_sfc)/1000]
+      filt_ocean_data[, distance := st_line_project(segment_sfc, ocean_point_sfc)/1000]
+
+      # plot result
+      showModal(modalDialog(
+        title = "Depth Profile",
+        plotlyOutput("dprof"),
+        footer = modalButton("Close"),
+        size = "xl"
+      ))
+
+      output$dprof <- renderPlotly({
+        sp_plot <- plot_ly(
+          filt_sp_data,
+          x = ~distance,
+          y = ~std_tally,
+          type = "scattergl",
+          mode = "markers",
+          showlegend = FALSE
+        ) |>
+          layout(
+            yaxis = list(title = "Species Abundance"))
+        ocean_plot <- plot_ly(
+          filt_ocean_data,
+          x = ~distance,
+          y = ~Depthm,
+          type = "scattergl",
+          mode = "markers",
+          marker = list(color = ~Qty,
+                        colorbar = list(title = ocean_var_label)),
+          showlegend = FALSE) |>
+          layout(
+            xaxis = list(title = "Distance (km)", range = c(0, segment_length)),
+            yaxis = list(title = "Depth (m)", autorange = "reversed"))
+        subplot(sp_plot, ocean_plot, nrows = 2, shareX = TRUE, heights = c(0.33, 0.67)) |>
+          config(
+            displaylogo = FALSE, scrollZoom = TRUE,
+            modeBarButtonsToRemove = c("hoverClosestCartesian", "hoverCompareCartesian"))
       })
+    })
 
-      # ocean_ts_plot ----
-      output$ocean_ts_plot <- renderDygraph({
-        ocean_ts <- make_ocean_ts(ocean_data, input$sel_ts_res) |>
-          select(time, avg, lwr, upr)
-
-        ocean_label <- names(which(ocean_var_choices == sel_ocean_var))
-        ts_res_label <- names(which(ts_res_choices == input$sel_ts_res))
-
-        ocean_ts_plot <- ocean_ts |>
-          dygraph(group = "time-series") |>
-          dyOptions(connectSeparatedPoints = TRUE) |>
-          dyAxis("y", label = ocean_label) |>
-          dyAxis("x", label = ts_res_label) |>
-          dySeries(
-            c("lwr", "avg", "upr"),
-            label = ocean_label
-          )
-
-        if (input$sel_ts_res == "quarter") {
-          ocean_ts_plot <- ocean_ts_plot |>
-            dyAxis(
-              "x",
-              valueFormatter = htmlwidgets::JS("
-                function(d) {
-                  var month = new Date(d).getUTCMonth();
-                  var quarter = Math.floor(month / 3) + 1;
-                  return 'Q' + quarter;
-                }
-              "),
-              axisLabelFormatter = htmlwidgets::JS("
-                function(d) {
-                  var month = d.getUTCMonth();
-                  var quarter = Math.floor(month / 3) + 1;
-                  // Only show label at first month of quarter
-                  if (month % 3 === 0) {
-                    return 'Q' + quarter;
-                  } else {
-                    return '';
-                  }
-                }
-              ")
-            )
-        }
-
-        ocean_ts_plot
-      })
-
-      # scatterplot
-      if (FALSE) {
-      base_splot <- reactive({
-        sp_splot_data <- sp_splot_prep(sp_data, input$sel_hex_res, input$sel_ts_res) |> collect()
-        ocean_splot_data <- ocean_splot_prep(ocean_data, input$sel_hex_res, input$sel_ts_res, input$sel_ocean_stat)
-
-        splot_data <- inner_join(sp_splot_data, ocean_splot_data,
-                   by = join_by(time, hex_id),
-                   suffix = c(".sp", ".ocean")) |>
-          filter(!is.na(name))
-
-        ocean_label <- names(which(ocean_var_choices == sel_ocean_var))
-        ts_res_label <- names(which(ts_res_choices == input$sel_ts_res))
-        ocean_stat_label <- names(which(ocean_stat_choices == input$sel_ocean_stat))
-        time_label <- switch(input$sel_ts_res,
-               "year" = "{year(time)}",
-               "quarter" = "Q{quarter(time)}",
-               "year_quarter" = "{year(time)} Q{quarter(time)}")
-
-        # generate plot
-         splot_data |>
-          ggplot(aes(
-            x = value.ocean,
-            y = value.sp,
-            color = name,
-            text = glue(time_label, "<br>Species: {name}<br>Count: {round(value.sp, 2)}<br>{ocean_label}: {round(value.ocean,2)}")
-          )) +
-          geom_point() +
-          labs(
-            x = paste(ocean_stat_label, ocean_label),
-            y = "Count (km^-2)",
-            color = "Species"
-          ) +
-          theme_minimal()
-      })
-
-      splot_err <- reactive({
-        base_splot() +
-          geom_errorbar(aes(ymin = lwr.sp, ymax = upr.sp)) +
-          geom_errorbar(aes(xmin = lwr.ocean, xmax = upr.ocean))
-      })
-
-      output$splot <- renderPlotly({
-        if (input$sel_splot_err) {
-          splot <- splot_err()
-        } else {
-          splot <- base_splot()
-        }
-
-        ggplotly(splot, tooltip = "text") |>
-          config(displayModeBar = FALSE)
-      })}
-
-      removeModal()
-    }
-  })
-
-  # map_hex_res ----
-  output$map_hex_res <- renderUI({
-    tagList(
-      sliderInput("sel_hex_res",
-                  label = tagList("Hexagon Resolution",
-                                  popover(
-                                    bs_icon("info-circle", size = 14, class = "ms-1"),
-                                    HTML("Higher value = smaller hexagons.<br>
-                <a href='https://h3geo.org/docs/core-library/restable/#average-area-in-km2'
-                target='_blank'>More info</a>")
-                                  )),
-                  1, 10, input$sel_hex_res, step = 1)
-    )
+    removeModal()
   })
 
   # map_ocean_stat -----
@@ -263,19 +313,6 @@ server <- function(input, output, session) {
     selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = input$sel_ts_res)
   })
 
-  # splot_hex_res ----
-  output$splot_hex_res <- renderUI({
-    tagList(
-      sliderInput("sel_hex_res",
-                  label = tagList("Hexagon Resolution",
-                                  popover(
-                                    bs_icon("info-circle", size = 14, class = "ms-1"),
-                                    HTML("Higher value = smaller hexagons.")
-                                  )),
-                  1, 10, input$sel_hex_res, step = 1)
-    )
-  })
-
   # splot_ocean_stat ----
   output$splot_ocean_stat <- renderUI({
     selectInput("sel_ocean_stat",
@@ -289,12 +326,5 @@ server <- function(input, output, session) {
 
   output$splot_ts_res <- renderUI({
     selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = input$sel_ts_res)
-  })
-
-  observe({
-    # Wait for both plots to be rendered
-    session$onFlushed(function() {
-      session$sendCustomMessage(type = "syncDygraphs", message = list())
-    }, once = TRUE)
   })
 }
