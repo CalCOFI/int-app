@@ -1,59 +1,69 @@
 ui <- page_sidebar(
   title = "CalCOFI Larva App",
 
-  sidebar = sidebar(
-    actionButton("sel_data", "Data Selection"),
+  useBusyIndicators(spinners = TRUE, fade = TRUE),
 
-    # Hidden container for shared inputs
-    div(style = "display:none;",
-        selectInput("sel_ts_res", "Temporal Resolution", ts_res_choices, selected = "Year"),
-        selectInput("sel_ocean_stat", "Oceanographic Summary Statistic",
-                    list("Average" = "mean", "Max" = "max", "Min" = "min", "St. Dev." = "sd"),
-                    selected = "Average")
+  # Sidebar ----
+  sidebar = sidebar(
+    width = 300,
+
+    # Action buttons
+    actionButton("sel_data", "Data Selection", width = "100%", class = "mb-2"),
+    downloadButton("download_sp", "Download Species Data", class = "btn-secondary mb-2", style = "width: 100%;"),
+    downloadButton("download_ocean", "Download Ocean Data", class = "btn-secondary mb-2", style = "width: 100%;"),
+
+    # Conditional panels for tab-specific controls
+    conditionalPanel(
+      "input.outputPanel === 'Map'",
+      uiOutput("map_ocean_stat")
     ),
 
-    conditionalPanel("input.outputPanel === 'Map'",
-                     uiOutput("map_ocean_stat")),
+    conditionalPanel(
+      "input.outputPanel === 'Time Series'",
+      uiOutput("ts_res")
+    ),
 
-    conditionalPanel("input.outputPanel === 'Time Series'",
-                     uiOutput("ts_res")),
+    conditionalPanel(
+      "input.outputPanel === 'Scatterplot'",
+      p("Click on a point or use the box/lasso tool to select points to see their location.",
+        class = "small text-muted mt-2")
+    ),
 
-    conditionalPanel("input.outputPanel === 'Scatterplot'",
-                     "Click on a point or use the box/lasso tool to select a group of points to see their location."),
+    conditionalPanel(
+      "input.outputPanel === 'Depth Profile'",
+      actionButton("open_transect_modal", "Draw Transect",
+                   width = "100%", class = "mt-2")
+    ),
 
-    conditionalPanel("input.outputPanel === 'Depth Profile'",
-                     "Draw a line on the map, then click 'Generate Profile' to create a cross-section. Use the buffer distance to set how far points can be from the line.",
-                     numericInput("sel_buffer_dist", "Buffer Distance (km)", 5, min = 0),
-                     actionButton("get_features", "Generate Profile")),
-
+    # Filter summary accordion
+    uiOutput("filter_summary"),
   ),
 
-  # output panels
+  # Main content area ----
   navset_card_underline(
-
     id = "outputPanel",
-    full_screen = TRUE,
+    height = "100%",
 
     nav_spacer(),
 
     nav_panel(
       "Map",
-      maplibreCompareOutput("map")
+      uiOutput("map_content")
     ),
 
     nav_panel(
       "Time Series",
-      highchartOutput("ts_plot")
+      uiOutput("ts_content")
     ),
 
     nav_panel(
       "Scatterplot",
-      plotlyOutput("splot")
+      uiOutput("splot_content")
     ),
 
     nav_panel(
       "Depth Profile",
-      maplibreOutput("dprof_map")
+      uiOutput("dprof_content")
     )
   )
 )

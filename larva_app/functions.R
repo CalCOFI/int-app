@@ -1,4 +1,17 @@
-# modal dialog for data selection
+# Helper function for placeholder messages ----
+placeholder_message <- function(title, message) {
+  div(
+    class = "d-flex align-items-center justify-content-center",
+    style = "height: 80vh;",
+    div(
+      class = "text-center text-muted",
+      h4(title),
+      p(message)
+    )
+  )
+}
+
+# Modal dialog for data selection
 dataModal <- function() {
   modalDialog(
     title = "Data Selection",
@@ -19,35 +32,31 @@ dataModal <- function() {
         br(),
         selectInput(
           "sel_ocean_var",
-          "Oceanographic Variable",
+          "Variable",
           ocean_var_choices,
           selected = "Temperature"
         ),
-        numericInput(
-          "sel_min_depth",
-          "Min Depth (m)",
-          value = 0,
+
+        numericRangeInput(
+          "sel_depth_range",
+          "Depth Range (m)",
+          c(0,212),
+          width = NULL,
+          separator = " to ",
           min = 0,
           max = 512
         ),
-        numericInput(
-          "sel_max_depth",
-          "Max Depth (m)",
-          value = 512,
-          min = 0,
-          max = 512
-        )
       ),
       nav_panel(
         "Temporal",
         br(),
         selectInput(
           "sel_qtr",
-          "Season",
-          c(Winter = 1,
-            Spring = 2,
-            Summer = 3,
-            Fall   = 4),
+          "Quarter",
+          c(Q1 = 1,
+            Q2 = 2,
+            Q3 = 3,
+            Q4   = 4),
           selected = 1:4,
           multiple = T),
 
@@ -60,10 +69,12 @@ dataModal <- function() {
           min = min_max_date[1],
           max = min_max_date[2]),
       ),
-    ),
-    nav_panel(
-      "Spatial",
-      br()
+      nav_panel(
+        "Spatial",
+        br(),
+        "Draw a polygon to filter data by region, or leave blank to use all data.",
+        maplibreOutput("spatial_filter_map", height = "400px")
+      ),
     ),
 
     footer = tagList(
@@ -72,6 +83,31 @@ dataModal <- function() {
     ),
 
     size = "m",
+    fade = FALSE
+  )
+}
+
+# Depth profile modal dialog
+depthProfileModal <- function(sp_map) {
+  modalDialog(
+    title = "Create Depth Profile",
+
+    p("Draw a line segment on the map to define your transect."),
+
+    numericInput(
+      "modal_buffer_dist",
+      "Buffer Distance (km)",
+      value = 5
+    ),
+
+    maplibreOutput("transect_map", height = "500px"),
+
+    footer = tagList(
+      modalButton("Cancel"),
+      input_task_button("submit_transect", "Generate Profile")
+    ),
+
+    size = "l",
     fade = FALSE
   )
 }
@@ -107,6 +143,47 @@ sp_retrieve <- function(sp_name, qtr, date_range) {
     )
 
   return(sp_data)
+}
+
+# Helper: Build filter summary
+build_filter_summary <- function(sel_name, sel_ocean_var, sel_qtr, sel_date_range,
+                                 sel_depth_range, drawn_polygon) {
+  filter_list <- list()
+
+  # Species
+  if (!is.null(sel_name) && length(sel_name) > 0) {
+    filter_list <- c(filter_list,
+                     if (length(sel_name) <= 3) {
+                       paste0("**Species:** ", paste(sel_name, collapse = ", "))
+                     } else {
+                       paste0("**Species:** ", length(sel_name), " selected")
+                     }
+    )
+  }
+
+  # Variable
+  filter_list <- c(filter_list, paste0("**Variable:** ", names(which(ocean_var_choices == sel_ocean_var))))
+
+  # Quarters
+  quarter_names <- c("1" = "Q1", "2" = "Q2", "3" = "Q3", "4" = "Q4")
+  filter_list <- c(filter_list, paste0("**Quarters:** ", paste(quarter_names[as.character(sel_qtr)], collapse = ", ")))
+
+  # Date range
+  filter_list <- c(filter_list, paste0("**Date Range:** ",
+                                       format(sel_date_range[1], "%Y-%m-%d"), " to ",
+                                       format(sel_date_range[2], "%Y-%m-%d")))
+
+  # Depth range
+  filter_list <- c(filter_list, paste0("**Depth Range:** ", sel_depth_range[1], " - ", sel_depth_range[2], " m"))
+
+  # Spatial
+  if (!is.null(drawn_polygon) && nrow(drawn_polygon) > 0) {
+    filter_list <- c(filter_list, "**Spatial:** Custom region defined")
+  } else {
+    filter_list <- c(filter_list, "**Spatial:** All locations")
+  }
+
+  return(filter_list)
 }
 
 # oceanographic data retrieval
@@ -207,8 +284,8 @@ create_sp_map <- function(sp_hex_list, sp_scale_list) {
                      fill_color = sp_scale_list[[i]]$expression,
                      fill_outline_color = "white",
                      fill_opacity = 0.6,
-                     min_zoom = hex_res_breaks[i],
-                     max_zoom = hex_res_breaks[i+1],
+                     min_zoom = zoom_breaks[i],
+                     max_zoom = zoom_breaks[i+1],
                      tooltip = "tooltip")
   }
 
@@ -235,8 +312,8 @@ create_ocean_map <- function(ocean_hex_list, ocean_scale_list, ocean_stat_label,
                      fill_color = ocean_scale_list[[i]]$expression,
                      fill_outline_color = "white",
                      fill_opacity = 0.6,
-                     min_zoom = hex_res_breaks[i],
-                     max_zoom = hex_res_breaks[i+1],
+                     min_zoom = zoom_breaks[i],
+                     max_zoom = zoom_breaks[i+1],
                      tooltip = "ocean.value")
   }
 
@@ -280,8 +357,24 @@ make_sp_ts <- function(sp_data, ts_res) {
     ) |>
     mutate(
       upr = avg + std/n,
-      lwr = avg - std/n
-    )
+      lwr = avg - std/n,
+      std = std/n
+    ) |>
+    collect()
+
+  # Add rows to wrap dates for seasonal plot
+  if (ts_res == "quarter") {
+    sp_ts_data <- sp_ts_data |>
+      bind_rows(
+        sp_ts_data |>
+          filter(
+            time == as.Date("2000-01-01")
+          ) |>
+          mutate(
+            time = time + 366
+          )
+      )
+  }
 
   return(sp_ts_data)
 }
@@ -307,7 +400,21 @@ make_ocean_ts <- function(ocean_data, ts_res) {
                                     std = sd(Qty, na.rm = TRUE)/.N), by = .(time)
                                 # create upper and lower bounds
                                 ][, `:=`(upr = avg + std, lwr = avg - std)
-                                  ][, .(time, avg, lwr, upr)]
+                                  ][, .(time, avg, lwr, upr, std)]
+
+  # Add rows to wrap dates for seasonal plot
+  if (ts_res == "quarter") {
+    ocean_ts_data <- ocean_ts_data |>
+      bind_rows(
+        ocean_ts_data |>
+          filter(
+            time == as.POSIXct("2000-01-01", tz="UTC")
+          ) |>
+          mutate(
+            time = as.POSIXct("2001-01-01", tz="UTC")
+          )
+      )
+  }
 
   return(ocean_ts_data)
 }
@@ -331,6 +438,28 @@ plot_ts <- function(sp_ts, ocean_ts, ts_res, sel_ocean_var) {
   series_list <- combined_data |>
     distinct(name, panel_id)
 
+  # Define formatters based on temporal resolution
+  if (ts_res == "year") {
+    tooltip_date_format <- "function(timestamp) { return Highcharts.dateFormat('%Y', timestamp); }"
+    xaxis_label_format <- "{value:%Y}"
+  } else if (ts_res == "quarter") {
+    tooltip_date_format <- "function(timestamp) {
+      var quarter = Math.ceil((new Date(timestamp).getUTCMonth() + 1) / 3);
+      return 'Q' + quarter;
+    }"
+    xaxis_label_format <- NULL  # Use custom formatter
+  } else if (ts_res == "year_quarter") {
+    tooltip_date_format <- "function(timestamp) {
+      var quarter = Math.ceil((new Date(timestamp).getUTCMonth() + 1) / 3);
+      return Highcharts.dateFormat('%Y', timestamp) + ' Q' + quarter;
+    }"
+    xaxis_label_format <- NULL  # Use custom formatter
+  } else {
+    # Default for other resolutions
+    tooltip_date_format <- "function(timestamp) { return Highcharts.dateFormat('%b %e, %Y', timestamp); }"
+    xaxis_label_format <- "{value:%b %e, %Y}"
+  }
+
   # Initialize the chart with its layout
   hc <- highchart() |>
     hc_chart(zoomType = "x") |>
@@ -339,54 +468,71 @@ plot_ts <- function(sp_ts, ocean_ts, ts_res, sel_ocean_var) {
       buttons = list(
         contextButton = list(
           enabled = FALSE # Disables the default hamburger menu
-        ),
-        customButton = list(
-          text = "Reset Zoom",
-          onclick = JS("function() { this.xAxis[0].setExtremes(null, null); }"),
-          align = "left",
-          y = -3,
-          x = 20,
-          # --- Add this theme list to style the button ---
-          theme = list(
-            'stroke-width' = 0,
-            stroke = "#335cad",
-            r = 5,
-            style = list(
-              color = "#335cad",
-              size = 12
-            ),
-            states = list(
-              hover = list(
-                fill = '#ffffff'
-              ),
-              select = list(
-                fill = '#ffffff'
-              )
-            )
-          )
         )
       )
     ) |>
     hc_xAxis(type = "datetime", crosshair = TRUE) |>
     hc_yAxis_multiples(
-      list(title = list(text = "Species Abundance"), height = "47%", top = "0%", offset = 0),
-      list(title = list(text = names(which(ocean_var_choices == sel_ocean_var))), height = "47%", top = "53%", offset = 0)
-    ) |>
+      list(title = list(text = "Average Species Abundance"), height = "47%", top = "0%", offset = 0),
+      list(title = list(text = paste0("Average ", names(which(ocean_var_choices == sel_ocean_var)))), height = "47%", top = "53%", offset = 0)
+    )
+
+  # Configure xAxis based on resolution
+  if (ts_res == "quarter") {
+    hc <- hc |>
+      hc_xAxis(
+        type = "datetime",
+        crosshair = TRUE,
+        labels = list(
+          formatter = JS("function() {
+            var quarter = Math.ceil((new Date(this.value).getUTCMonth() + 1) / 3);
+            return 'Q' + quarter;
+          }")
+        )
+      )
+  } else if (ts_res == "year_quarter") {
+    hc <- hc |>
+      hc_xAxis(
+        type = "datetime",
+        crosshair = TRUE,
+        labels = list(
+          formatter = JS("function() {
+            var quarter = Math.ceil((new Date(this.value).getUTCMonth() + 1) / 3);
+            return Highcharts.dateFormat('%Y', this.value) + ' Q' + quarter;
+          }")
+        )
+      )
+  } else {
+    hc <- hc |>
+      hc_xAxis(
+        type = "datetime",
+        crosshair = TRUE,
+        labels = list(format = xaxis_label_format)
+      )
+  }
+
+  # Configure tooltip
+  hc <- hc |>
     hc_tooltip(
       shared = TRUE,
+      useHTML = TRUE,
       formatter = JS("
       function() {
-        var header = '<b>' + Highcharts.dateFormat('%b %e, %Y', this.x) + '</b><br/>';
+        var formatDate = ", tooltip_date_format, ";
+        var header = '<b>' + formatDate(this.x) + '</b><br/>';
         var pointLines = this.points.map(function(point) {
+          var stdText = '';
+          if (point.point && point.point.std !== undefined && point.point.std !== null) {
+            stdText = ' (±' + Highcharts.numberFormat(point.point.std, 2) + ')';
+          }
           return '<span style=\"color:' + point.color + '\">●</span> ' +
-                 point.series.name + ': <b>' + point.y.toFixed(2) + '</b>';
+                 point.series.name + ': <b>' + Highcharts.numberFormat(point.y, 2) + stdText + '</b>';
         }).join('<br/>');
         return header + pointLines;
       }
-    "),
-      useHTML = TRUE
+    ")
     ) |>
-    hc_rangeSelector(enabled = TRUE, buttons = list()) |>
+    hc_rangeSelector(enabled = FALSE) |>
     hc_plotOptions(
       series = list(
         marker = list(
@@ -414,7 +560,7 @@ plot_ts <- function(sp_ts, ocean_ts, ts_res, sel_ocean_var) {
       hc_add_series(
         data = series_data,
         type = "line",
-        hcaes(x = time_ts, y = avg),
+        hcaes(x = time_ts, y = avg, std = std),
         name = series_name,
         id = series_name,
         yAxis = panel_index
