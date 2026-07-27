@@ -184,7 +184,8 @@ touch /share/github/CalCOFI/db-viz-hex/app/restart.txt   # reloads only this app
 **When `calcofi4r` changes** (the app reads the DB *and* logs usage through it —
 `cc_ga_head()` / `cc_track()`, see [`analytics/README.md`](analytics/README.md)),
 reinstall it in the `rstudio` container *before* restarting the app; a version
-below 1.4.0 has no analytics functions and the app will fail to start:
+below 1.4.1 lacks the analytics functions `app/ui.R` calls and the app will fail
+to start:
 
 ```bash
 docker exec rstudio Rscript -e 'remotes::install_github("calcofi/calcofi4r")'

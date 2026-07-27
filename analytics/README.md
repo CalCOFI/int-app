@@ -12,7 +12,7 @@ The code lives in **`calcofi4r`** (`R/analytics.R`), not in this app, so every
 CalCOFI Shiny app logs the same shape and the Sheet, the Apps Script and the
 client payload cannot drift.
 
-- `app/ui.R` installs the snippet once: `calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION)`
+- `app/ui.R` installs the snippet once: `calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION, ip = calcofi4r::cc_client_ip(req))`
 - `app/server.R` sends server-side facts with `calcofi4r::cc_track()` /
   `cc_track_query()` — a websocket message on the session's already-open
   connection, **no HTTP request**
@@ -82,5 +82,13 @@ writeLines(calcofi4r::cc_apps_script(), "analytics/Code.gs")
 - Events are batched (10 events / 15 s / page-hide) and written with a single
   `setValues()` per batch, which is what keeps the Apps Script execution quota
   flat regardless of interaction rate.
-- `ip` and `session` cannot be read from JavaScript; the server pushes them once
-  per session via `cc_track_session()` and the client stamps them on every row.
+- `ip` and `session` cannot be read from JavaScript, and they come from
+  **different requests**. The session token is pushed over the websocket by
+  `cc_track_session()`. The client IP cannot be: shiny-server does not proxy the
+  websocket upgrade, it opens a *fresh localhost connection* to the R worker, so
+  `session$request` has no `X-Forwarded-For` and `REMOTE_ADDR` is always
+  `127.0.0.1` — no reverse-proxy configuration can change that (Caddy sets the
+  header correctly; it dies at the shiny-server hop). The page's HTTP request is
+  the only one that still carries it, which is why `ui` is a `function(req)` and
+  the IP is baked into the snippet there. `cc_track_session()`'s IP is applied
+  only as a fallback, so it can never overwrite the real one.
