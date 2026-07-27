@@ -1,4 +1,15 @@
-ui <- page_sidebar(
+# the About panel is the same on every page load — render the markdown once at
+# startup rather than per request, now that the UI is built per request
+about_html <- HTML(mark(here("app/about.md"), output = NA))
+
+# ui is a FUNCTION of the request, not a static object, for one reason: the
+# client IP. shiny-server does not proxy the websocket upgrade — it opens a
+# fresh localhost connection to the R worker — so the server session sees
+# REMOTE_ADDR 127.0.0.1 and no X-Forwarded-For (Caddy sets it correctly; it is
+# lost at the shiny-server hop). This page request is the only one that still
+# carries the real address, so it is captured here and baked into the analytics
+# snippet.
+ui <- function(req) page_sidebar(
   window_title = "CalCOFI.io Integrated Database Application",
   title = tagList(
     span(
@@ -17,7 +28,8 @@ ui <- page_sidebar(
     # performs network I/O — server-side facts reach it via calcofi4r::cc_track()
     # over the websocket the session already has open. The Sheet leg is a silent
     # no-op unless CALCOFI_LOG_URL is set (global.R), so local dev writes nothing.
-    calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION),
+    calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION,
+                          ip = calcofi4r::cc_client_ip(req)),
     tags$style(HTML("
     /* swap the logo variant based on the page's bslib theme — the
        original SVG has WHITE 'CalCOFI.io' text, hidden on light bg. */
@@ -329,5 +341,5 @@ ui <- page_sidebar(
 
     nav_panel(
       "About",
-      HTML(mark(here("app/about.md"), output = NA)) ))
+      about_html ))
 )
