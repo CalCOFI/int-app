@@ -116,9 +116,14 @@ if (!debug && !nzchar(Sys.getenv("CALCOFI_LOG_URL")))
 # code that produced it: the deployed commit, falling back to the release the
 # app's DuckDB was built from.
 APP_VERSION <- local({
+  # `-c safe.directory=*` is required, not optional: shiny-server runs the app
+  # as `shiny` while the deployed clone is owned by the user who pulled it, and
+  # git refuses to read a repo it considers "dubious ownership" — which silently
+  # dropped every logged app_version to the release-tag fallback ("latest").
   sha <- tryCatch(
     suppressWarnings(system2(
-      "git", c("-C", shQuote(here()), "rev-parse", "--short", "HEAD"),
+      "git", c("-c", "safe.directory=*", "-C", shQuote(here()),
+               "rev-parse", "--short", "HEAD"),
       stdout = TRUE, stderr = FALSE))[1],
     error = function(e) NA_character_)
   if (!is.null(sha) && !is.na(sha) && nzchar(sha)) sha
