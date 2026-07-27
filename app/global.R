@@ -100,8 +100,31 @@ pmtiles_base_url <- "https://storage.googleapis.com/calcofi-files-public/_spatia
 # load functions ----
 source(here("app/functions.R"))
 source(here("app/functions_h3t.R"))
-Sys.setenv(CALCOFI_LOG_URL = "https://script.google.com/macros/s/AKfycbz95X4Dlrc1ppd0TeT-5w4I7inkfXxngqZsxTvE_gcrPBv3rPK3lyJOcAJcfAaSjiqF/exec")
-source(here("app/logging.R"))   # query logging -> Google Sheet (CALCOFI_LOG_URL)
+
+# usage logging ----
+# GA4 + a batched beacon to the usage-log Sheet, both driven from the BROWSER
+# (calcofi4r::cc_ga_head() in ui.R; calcofi4r::cc_track*() in server.R) so no
+# reactive ever waits on a network request — see analytics/README.md.
+# .Renviron not working on the server, so setting manually. Empty => the Sheet
+# leg is a silent no-op and only GA4 receives events — which is what a local or
+# IDE session gets, so test clicks don't land in the production log Sheet (set
+# CALCOFI_LOG_URL yourself to exercise it).
+if (!debug && !nzchar(Sys.getenv("CALCOFI_LOG_URL")))
+  Sys.setenv(CALCOFI_LOG_URL = "https://script.google.com/macros/s/AKfycbz95X4Dlrc1ppd0TeT-5w4I7inkfXxngqZsxTvE_gcrPBv3rPK3lyJOcAJcfAaSjiqF/exec")
+
+# stamped on every logged event, so a Sheet row can be tied back to the exact
+# code that produced it: the deployed commit, falling back to the release the
+# app's DuckDB was built from.
+APP_VERSION <- local({
+  sha <- tryCatch(
+    suppressWarnings(system2(
+      "git", c("-C", shQuote(here()), "rev-parse", "--short", "HEAD"),
+      stdout = TRUE, stderr = FALSE))[1],
+    error = function(e) NA_character_)
+  if (!is.null(sha) && !is.na(sha) && nzchar(sha)) sha
+  else sub("^calcofi_(.*)\\.duckdb$", "\\1", basename(db_path))
+})
+message("APP_VERSION: ", APP_VERSION)
 
 # .Renviron not working, so setting manually.
 # H3T_USE ON: the h3t tile service (api-h3t-py) is migrated to the consolidated

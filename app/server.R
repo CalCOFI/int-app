@@ -3,6 +3,48 @@ server <- function(input, output, session) {
   # thematic for bslib theming ----
   thematic::thematic_shiny()
 
+  # usage tracking ----
+  # calcofi4r::cc_track() only pushes a message down the websocket the session
+  # already has open — it makes NO http request, so instrumenting a hot control
+  # cannot add latency to the query that follows. (The previous log_query() ran
+  # a synchronous httr2 POST to Apps Script on every submit and every download,
+  # stalling the reactive thread for the whole round-trip.)
+  # `ignoreInit = TRUE` on the observers below so app startup doesn't emit a
+  # burst of synthetic "selections" the user never made.
+  calcofi4r::cc_track_session(session)   # the ip + token JS cannot read itself
+  trk <- function(event, ...) calcofi4r::cc_track(session, event, ...)
+  trk("session_start", h3t = USE_H3T, release = H3T_RELEASE)
+
+  # rx$params is nested (map_params, ts_params, …) and carries Dates, which do
+  # not survive unlist(); flatten it to the readable scalars the Sheet wants, so
+  # every download row carries the filters that produced it.
+  trk_filters <- function(p) list(
+    taxa             = p$taxa,
+    n_taxa           = length(p$taxa),
+    env_var          = p$env_var,
+    quarters         = p$sel_qtr %||% p$quarters,
+    date_beg         = as.character(p$date_range[1]),
+    date_end         = as.character(p$date_range[2]),
+    depth_min        = p$depth_range[1],
+    depth_max        = p$depth_range[2],
+    include_children = p$ck_children %||% p$include_children,
+    zones            = p$zones,
+    time_window      = p$time_window,
+    dist_window      = p$dist_window)
+
+  # which tab users actually work in (the navset carries id = "outputPanel", so
+  # this covers About and Download as well as the four visualization panels)
+  observeEvent(input$outputPanel, trk("select_tab", tab = input$outputPanel),
+               ignoreInit = TRUE)
+  observeEvent(input$dark_toggle, trk("select_theme", theme = input$dark_toggle),
+               ignoreInit = TRUE)
+
+  # the two modals that gate everything else — a high open_filters count with
+  # few filter_submit rows means people are bouncing off the filter dialog.
+  observeEvent(input$sel_data,            trk("open_filters"),   ignoreInit = TRUE)
+  observeEvent(input$btn_layers,          trk("open_layers"),    ignoreInit = TRUE)
+  observeEvent(input$open_transect_modal, trk("open_transect"),  ignoreInit = TRUE)
+
   # tour ----
   # launch the guided tour on load, unless suppressed with ?tour=off in the URL
   # (also accepts false/0/no) — handy for clean screenshots; see the db-viz-hex
@@ -11,8 +53,10 @@ server <- function(input, output, session) {
     observeEvent(TRUE, {
       tour_q   <- getQueryString()[["tour"]]
       tour_off <- !is.null(tour_q) && tolower(tour_q) %in% c("off", "false", "0", "no")
-      if (!tour_off)
+      if (!tour_off) {
+        trk("start_tour")
         tour$init()$start()
+      }
     }, once = TRUE)
   }
 
@@ -345,6 +389,10 @@ server <- function(input, output, session) {
 
     rx$spatial_visible <- selected
 
+    # which reference layers people actually turn on — the full id list goes to
+    # the Sheet leg (GA4 would bucket a many-valued dimension into "(other)")
+    trk("select_layers", layers = selected, n_layers = length(selected))
+
     # toggle visibility on both sides of compare map
     polygon_layers <- d_spatial_layers |>
       filter(geom_type == "polygon") |>
@@ -673,13 +721,32 @@ server <- function(input, output, session) {
     drawn_polygon <- get_drawn_features(maplibre_proxy("spatial_filter_map"))
     if (debug) message("Spatial filter:", if (!is.null(drawn_polygon) && nrow(drawn_polygon) > 0) "custom polygon" else "none")
 
-    # retrieve data (lazy tables from database) — logged (species + env queries)
-    df_sp <- with_query_log(session, "map:get_sp",
-      list(taxa = sel_name, qtr = sel_qtr, date = as.character(sel_date_range), children = ck_children),
+    # THE headline signal: the whole filter set, in one row. The taxa names are
+    # exactly what makes the log readable, and are why this detail belongs in
+    # the Sheet leg — GA4 buckets a dimension this wide into "(other)".
+    trk("filter_submit",
+        taxa             = sel_name,
+        n_taxa           = length(sel_name),
+        env_var          = sel_env_var,
+        quarters         = sel_qtr,
+        date_beg         = sel_date_range[1],
+        date_end         = sel_date_range[2],
+        depth_min        = sel_depth_range[1],
+        depth_max        = sel_depth_range[2],
+        include_children = ck_children,
+        spatial          = if (!is.null(drawn_polygon) && nrow(drawn_polygon) > 0) "polygon"
+                           else if (length(rx$sel_zones) > 0) "zones" else "none",
+        zones            = rx$sel_zones)
+
+    # retrieve data (lazy tables from database) — timed + logged, non-blocking
+    df_sp <- calcofi4r::cc_track_query(session, "map_query_sp",
+      list(taxa = sel_name, quarters = sel_qtr, date_beg = sel_date_range[1],
+           date_end = sel_date_range[2], include_children = ck_children),
       get_sp(sel_name, sel_qtr, sel_date_range, ck_children))
-    df_env <- with_query_log(session, "map:get_env",
-      list(var = sel_env_var, qtr = sel_qtr, date = as.character(sel_date_range),
-           depth = sel_depth_range),
+    df_env <- calcofi4r::cc_track_query(session, "map_query_env",
+      list(env_var = sel_env_var, quarters = sel_qtr, date_beg = sel_date_range[1],
+           date_end = sel_date_range[2], depth_min = sel_depth_range[1],
+           depth_max = sel_depth_range[2]),
       get_env(sel_env_var, sel_qtr, sel_date_range, sel_depth_range[1], sel_depth_range[2]))
 
     # Apply spatial filter based on priority: drawn polygon > selected zones > all data
@@ -724,6 +791,12 @@ server <- function(input, output, session) {
     if (debug) message("Species data: found", n_sp, "rows\n")
 
     if (n_sp == 0) {
+      # a dead end the user hit — countable, so an empty combination that keeps
+      # recurring (a taxon with no observations in the chosen window) shows up
+      # instead of being invisible next to the successful submits
+      trk("filter_no_results", taxa = sel_name, env_var = sel_env_var,
+          quarters = sel_qtr, date_beg = sel_date_range[1],
+          date_end = sel_date_range[2], status = "empty")
       showNotification("No observations found for selected species.", type = "warning")
       showModal(modal_data())
       return(NULL)
@@ -868,10 +941,12 @@ server <- function(input, output, session) {
   # submit_transect -> ... ----
   observeEvent(input$submit_transect, {
     req(rx$df_sp, rx$df_env)
+    t_transect <- Sys.time()
 
     features <- get_drawn_features(maplibre_proxy("transect_map"))
 
     if (is.null(features) || nrow(features) == 0) {
+      trk("depth_profile_transect", status = "no_line")
       showNotification("No line drawn. Please draw a line on the map.", type = "warning")
       return(NULL)
     }
@@ -910,6 +985,16 @@ server <- function(input, output, session) {
         buffer_res$utm_crs) |> st_geometry()) / 1000
 
     segment_length <- st_length(buffer_res$segment_utm) / 1000
+
+    # the only step that collects BOTH full datasets into R and runs spatial
+    # intersects, so its duration is the one worth watching on this tab
+    trk("depth_profile_transect",
+        buffer_km   = input$modal_buffer_dist,
+        transect_km = round(as.numeric(segment_length), 1),
+        n_env       = nrow(filt_env_data),
+        n_rows      = nrow(filt_sp_data),
+        ms          = as.numeric(difftime(Sys.time(), t_transect, units = "secs")) * 1000,
+        status      = if (nrow(filt_sp_data) == 0) "empty" else "ok")
 
     dist_bin_size <- 5
     depth_bin_size <- 20
@@ -1068,6 +1153,10 @@ server <- function(input, output, session) {
       all_sel  <- c(raw_sel, proc_sel)
 
       if (length(all_sel) == 0) {
+        # tracked from inside content(), not on the button, so a click that
+        # never produces a file is counted as the dead end it is rather than
+        # as a download
+        trk("download_bundle", status = "no_selection")
         showNotification("Select at least one dataset.", type = "warning")
         return(NULL)
       }
@@ -1136,8 +1225,9 @@ server <- function(input, output, session) {
           bundle_paths <- tryCatch(
             build_download_bundle(zip_root, isolate(rx$params)),
             error = function(e) {
-              log_query(session, "download:integrated_bundle", isolate(rx$params),
-                        ms = .ms(), status = "error", error = conditionMessage(e))
+              do.call(trk, c(
+                list("download_integrated_bundle"), trk_filters(isolate(rx$params)),
+                list(ms = .ms(), status = "error", error = conditionMessage(e))))
               showNotification(
                 paste("Integrated data / SQL bundle failed:", conditionMessage(e)),
                 type = "error", duration = NULL)
@@ -1149,9 +1239,10 @@ server <- function(input, output, session) {
             .errmsg <- if (.over) sprintf(
               "integrated bundle build took %.0fs (> %.0fs budget); client likely disconnected before the zip streamed",
               .ms() / 1000, dl_budget_s) else ""
-            log_query(session, "download:integrated_bundle", isolate(rx$params),
-                      n_rows = length(bundle_paths), ms = .ms(),
-                      status = .status, error = .errmsg)
+            do.call(trk, c(
+              list("download_integrated_bundle"), trk_filters(isolate(rx$params)),
+              list(n_rows = length(bundle_paths), ms = .ms(),
+                   status = .status, error = .errmsg)))
             if (.over)
               showNotification(paste(
                 "The integrated data bundle took longer than expected to build,",
@@ -1294,20 +1385,22 @@ server <- function(input, output, session) {
       # error state) when the total server build exceeded the budget, since the
       # user almost certainly never received the zip. See dl_budget_s above.
       .dl_over   <- dl_elapsed() > dl_budget_s
-      log_query(session, "download:bundle",
-                list(products = all_sel, n_files = length(paths)),
-                n_rows = length(paths), ms = dl_elapsed() * 1000,
-                status = if (.dl_over) "timeout" else "ok",
-                error  = if (.dl_over) sprintf(
-                  "total download build %.0fs (> %.0fs budget); client likely disconnected",
-                  dl_elapsed(), dl_budget_s) else "")
+      do.call(trk, c(
+        list("download_bundle"), trk_filters(isolate(rx$params)),
+        list(products = all_sel, n_files = length(paths),
+             n_rows = length(paths), ms = dl_elapsed() * 1000,
+             status = if (.dl_over) "timeout" else "ok",
+             error  = if (.dl_over) sprintf(
+               "total download build %.0fs (> %.0fs budget); client likely disconnected",
+               dl_elapsed(), dl_budget_s) else "")))
       }, error = function(e) {
         emsg <- conditionMessage(e)
         if (!nzchar(emsg)) emsg <- "download aborted (a required input was not available)"
-        log_query(session, "download:bundle",
-                  list(products = all_sel, n_files = length(paths)),
-                  n_rows = length(paths), ms = dl_elapsed() * 1000,
-                  status = "error", error = emsg)
+        do.call(trk, c(
+          list("download_bundle"), trk_filters(isolate(rx$params)),
+          list(products = all_sel, n_files = length(paths),
+               n_rows = length(paths), ms = dl_elapsed() * 1000,
+               status = "error", error = emsg)))
         showNotification(paste("Download failed:", emsg), type = "error",
                          duration = NULL)
         stop(e)  # re-raise so the browser gets a clean error, not a partial zip

@@ -12,7 +12,12 @@ ui <- page_sidebar(
 
   tags$head(
     tags$link(rel = "icon", type = "image/svg+xml", href = "logo_calcofi.svg"),
-    includeHTML("google-analytics.html"),
+    # usage tracking: GA4 (aggregate) + a batched beacon to the usage-log Sheet
+    # (per-query detail). Both legs are sent by the BROWSER, so no reactive ever
+    # performs network I/O — server-side facts reach it via calcofi4r::cc_track()
+    # over the websocket the session already has open. The Sheet leg is a silent
+    # no-op unless CALCOFI_LOG_URL is set (global.R), so local dev writes nothing.
+    calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION),
     tags$style(HTML("
     /* swap the logo variant based on the page's bslib theme — the
        original SVG has WHITE 'CalCOFI.io' text, hidden on light bg. */
