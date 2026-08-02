@@ -37,7 +37,12 @@ hex_geo <- here("data/hex.geojson")
 #                        app's picker + taxa-tree queries want the legacy
 #                        `species` + WoRMS-hierarchy `taxon` shapes, so we derive
 #                        those (+ `taxa_rank`) locally from these below.
-keep_tables <- c("obs", "sample_measurement", "sample", "taxon", "dataset_taxon")
+#   measurement_type   — units + is_canonical, so a dataset with no gear-based
+#                        CPUE can still be shown honestly in its own units
+#   spatial/…_attribute — polygon layers (MPAs, counties, sanctuaries, …) for
+#                        summarizing within a boundary rather than within a hex
+keep_tables <- c("obs", "sample_measurement", "sample", "taxon", "dataset_taxon",
+                 "measurement_type", "spatial", "spatial_attribute")
 
 cat("fetching catalog for version:", db_version, "\n")
 info       <- cc_db_info(version = db_version)
@@ -80,14 +85,29 @@ dbExecute(con, "INSTALL spatial; LOAD spatial;")
 # and taxa-tree (functions.R::taxa_tree_builder / get_taxon_children) still expect
 # those legacy shapes, so derive them here — no app-code change needed.
 dbExecute(con, "ALTER TABLE taxon RENAME TO taxon_u")
-# legacy `species` (CalCOFI ichthyo list) + a taxon_key column so bio_obs joins obs
+# legacy `species` + a taxon_key column so bio_obs joins obs.
+#
+# Was restricted to dataset_key = 'swfsc_ichthyo', which is the main reason the
+# app could only see one of the nine bio datasets: any obs whose taxon was not in
+# the ichthyo vocabulary simply failed this join and vanished. Now every bio
+# dataset's vocabulary is included.
+#
+# ONE ROW PER taxon_key is load-bearing: a taxon appearing in two datasets
+# (Appendicularia is in both zoodb and zooscan) would otherwise fan the bio_obs
+# join out and double-count it. species_id is the ichthyo integer code where one
+# exists — QUALIFY prefers the row that has it, so the ichthyo tree keeps its ids.
 dbExecute(con, "
   CREATE OR REPLACE TABLE species AS
-  SELECT dt.taxon_key,
-         TRY_CAST(dt.ds_taxa_code AS INTEGER) AS species_id,
-         t.scientific_name, t.common_name, t.worms_id, t.itis_id
-  FROM dataset_taxon dt JOIN taxon_u t USING (taxon_key)
-  WHERE dt.dataset_key = 'swfsc_ichthyo'")
+  SELECT * EXCLUDE (rn) FROM (
+    SELECT dt.taxon_key,
+           TRY_CAST(dt.ds_taxa_code AS INTEGER) AS species_id,
+           t.scientific_name, t.common_name, t.worms_id, t.itis_id,
+           row_number() OVER (
+             PARTITION BY dt.taxon_key
+             ORDER BY (dt.dataset_key = 'swfsc_ichthyo') DESC,
+                      TRY_CAST(dt.ds_taxa_code AS INTEGER) IS NULL, dt.dataset_key) AS rn
+    FROM dataset_taxon dt JOIN taxon_u t USING (taxon_key)
+  ) WHERE rn = 1")
 # legacy WoRMS-hierarchy `taxon` (authority/taxonID/parentNameUsageID/…) from the
 # worms:-keyed rows; parentNameUsageID = the integer in the parent's taxon_key
 dbExecute(con, "
@@ -128,6 +148,7 @@ dbExecute(
   "
   CREATE OR REPLACE TABLE bio_obs AS
   SELECT
+    o.sample_key,
     o.life_stage        AS source,
     sp.scientific_name,
     sp.common_name,
@@ -139,14 +160,30 @@ dbExecute(
     shf.measurement_value AS std_haul_factor,
     ps.measurement_value  AS prop_sorted,
     vol.measurement_value AS volume_sampled,
+    -- CPUE where the gear supports it, the published value where it does not.
+    -- The two ichthyo net formulas below only mean anything for a net tow with a
+    -- standard haul factor; the other bio datasets publish their own densities
+    -- (euphausiids in numberPerMeterSquared, zooscan per m^2, …) and forcing them
+    -- through a haul-factor formula would invent a number. So: fall back to the
+    -- raw value AND carry its own unit, so the map never shows a quantity
+    -- labelled as something it is not.
     CASE
       WHEN smp.tow_type = 'MT'
         THEN o.measurement_value / NULLIF(ps.measurement_value, 0)
                / NULLIF(vol.measurement_value, 0) * 100
-      ELSE o.measurement_value * shf.measurement_value
+      WHEN smp.tow_type IS NOT NULL AND shf.measurement_value IS NOT NULL
+        THEN o.measurement_value * shf.measurement_value
                / NULLIF(ps.measurement_value, 0)
+      ELSE o.measurement_value
     END                 AS std_tally,
-    CASE WHEN smp.tow_type = 'MT' THEN 'count/100m3' ELSE 'count/10m2' END AS cpue_unit,
+    CASE
+      WHEN smp.tow_type = 'MT' THEN 'count/100m3'
+      WHEN smp.tow_type IS NOT NULL AND shf.measurement_value IS NOT NULL
+        THEN 'count/10m2'
+      ELSE COALESCE(mt.units, o.measurement_type)
+    END                 AS cpue_unit,
+    o.dataset_key,
+    o.measurement_type,
     o.datetime          AS time_start,
     o.longitude,
     o.latitude,
@@ -168,9 +205,13 @@ dbExecute(
   -- obs.sample_key is the net sample_key, which sample denormalizes tow_type onto.
   LEFT JOIN sample smp
     ON o.sample_key = smp.sample_key
-  WHERE o.realm            = 'bio'
-    AND o.dataset_key      = 'swfsc_ichthyo'
-    AND o.measurement_type = 'abundance'
+  LEFT JOIN measurement_type mt
+    ON mt.measurement_type = o.measurement_type
+  -- was: dataset_key = 'swfsc_ichthyo' AND measurement_type = 'abundance', which
+  -- hid eight of the nine bio datasets (cufes, phytoplankton, zooscan,
+  -- euphausiids, bird-mammal, zoodb, phyllosoma, mesopelagic-fish). The realm is
+  -- the only restriction that is actually about what this table means.
+  WHERE o.realm = 'bio'
     AND o.measurement_value IS NOT NULL
   ORDER BY sp.scientific_name, o.datetime"
 )
@@ -198,20 +239,70 @@ dbExecute(
     o.depth_min_m       AS depth_m,
     o.measurement_type,
     o.measurement_value AS qty,
+    o.dataset_key,
+    mt.units,
     o.hex_id
   FROM obs o
-  WHERE o.realm       = 'env'
-    AND o.dataset_key = 'calcofi_bottle'
-    AND o.measurement_type IN (
-      'temperature', 'salinity', 'oxygen_umol_kg', 'phosphate', 'silicate',
-      'nitrite', 'nitrate', 'chlorophyll_a', 'phaeopigment', 'dynamic_height',
-      'sigma_theta', 'pressure', 'par', 'ph', 'ammonia')
+  LEFT JOIN measurement_type mt
+    ON mt.measurement_type = o.measurement_type
+  -- was: dataset_key = 'calcofi_bottle' AND a literal list of 15 types, which
+  -- excluded the entire 7.3M-row CTD series plus METS, DIC and picoplankton —
+  -- together the largest single omission in the app. The type list is now driven
+  -- by the registry's own `is_canonical` flag rather than restated here, so a
+  -- newly-canonical type appears without editing this file.
+  WHERE o.realm = 'env'
     AND o.measurement_value IS NOT NULL
+    AND COALESCE(mt.is_canonical, TRUE)
   ORDER BY o.measurement_type, o.datetime"
 )
 
 env_n <- dbGetQuery(con, "SELECT COUNT(*) AS n FROM env_obs")$n
 cat("  env_obs:", format(env_n, big.mark = ","), "rows\n")
+
+# step C2: sample_spatial — which polygons each sampling event falls in ----
+# Lets the app summarize within a boundary (MPA, county, sanctuary, EEZ, …)
+# rather than only within an H3 hexagon.
+#
+# Joined at the SAMPLE level, not at obs: 1.5M sample rows against 20M obs rows
+# is a ~13x smaller point-in-polygon join for exactly the same answer, because an
+# observation's position IS its sample's position. bio_obs/env_obs both carry
+# sample_key, so the app reaches a polygon through one join.
+#
+# Deliberately many-to-many: layers overlap (a station can sit inside a county, a
+# sanctuary and an MPA at once) and every one of those memberships is true.
+#
+# The alternative — crosswalking hexes to polygons — is cheaper but wrong at
+# every boundary, and we have exact geometry, so there is no reason to approximate.
+cat("building sample_spatial...\n")
+dbExecute(
+  con,
+  "
+  CREATE OR REPLACE TABLE sample_spatial AS
+  SELECT s.sample_key,
+         sp.spatial_key,
+         sp.layer,
+         sp.name AS spatial_name
+  FROM sample s
+  JOIN spatial sp
+    -- The two geometry columns carry DIFFERENT CRS tags for the same coordinate
+    -- system, and DuckDB refuses to intersect across them:
+    --   sample.geom   OGC:CRS84  (minted by append_sample() via ST_Point(lon, lat))
+    --   spatial.geom  EPSG:4326  (from ST_Read() over GeoJSON in ingest_spatial)
+    -- ST_SetCRS relabels WITHOUT transforming, which is what is wanted here: both
+    -- are already lon/lat. If anything the EPSG:4326 tag is the wrong one, since
+    -- EPSG:4326 formally declares lat/lon axis order while GeoJSON is always
+    -- lon/lat — so OGC:CRS84 is the honest label for both. Fixing it at source in
+    -- ingest_spatial.qmd is the real repair; this keeps the join correct meanwhile.
+    ON ST_Intersects(ST_SetCRS(sp.geom, 'OGC:CRS84'), s.geom)
+  WHERE s.geom IS NOT NULL"
+)
+ss_n <- dbGetQuery(con, "SELECT COUNT(*) AS n FROM sample_spatial")$n
+ss_s <- dbGetQuery(con, "SELECT COUNT(DISTINCT sample_key) AS n FROM sample_spatial")$n
+cat("  sample_spatial:", format(ss_n, big.mark = ","), "memberships across",
+    format(ss_s, big.mark = ","), "samples\n")
+print(dbGetQuery(con, "
+  SELECT layer, COUNT(*) AS memberships, COUNT(DISTINCT sample_key) AS samples
+  FROM sample_spatial GROUP BY 1 ORDER BY 2 DESC LIMIT 10"))
 
 # step D: generate hex.geojson ----
 # geometries for every H3 cell referenced by bio_obs / env_obs, at each
@@ -262,6 +353,11 @@ drop_obj <- function(con, name) {
 }
 drop_obj(con, "obs")
 drop_obj(con, "sample_measurement")
+# `sample` and `spatial_attribute` are build inputs for sample_spatial; `spatial`
+# STAYS, because the app needs the polygon geometry to draw and label a boundary
+# summary. `sample` goes: bio_obs/env_obs carry everything the app reads from it.
+drop_obj(con, "sample")
+drop_obj(con, "spatial_attribute")
 dbExecute(con, "DROP TABLE IF EXISTS hex_base")
 
 # summary ----
