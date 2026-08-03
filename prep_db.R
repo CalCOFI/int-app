@@ -284,16 +284,18 @@ dbExecute(
          sp.name AS spatial_name
   FROM sample s
   JOIN spatial sp
-    -- The two geometry columns carry DIFFERENT CRS tags for the same coordinate
-    -- system, and DuckDB refuses to intersect across them:
-    --   sample.geom   OGC:CRS84  (minted by append_sample() via ST_Point(lon, lat))
-    --   spatial.geom  EPSG:4326  (from ST_Read() over GeoJSON in ingest_spatial)
-    -- ST_SetCRS relabels WITHOUT transforming, which is what is wanted here: both
-    -- are already lon/lat. If anything the EPSG:4326 tag is the wrong one, since
-    -- EPSG:4326 formally declares lat/lon axis order while GeoJSON is always
-    -- lon/lat — so OGC:CRS84 is the honest label for both. Fixing it at source in
-    -- ingest_spatial.qmd is the real repair; this keeps the join correct meanwhile.
-    ON ST_Intersects(ST_SetCRS(sp.geom, 'OGC:CRS84'), s.geom)
+    -- Relabel BOTH sides to the same CRS rather than coercing one to match the
+    -- other. DuckDB refuses ST_Intersects across differing CRS tags, and which
+    -- tag each side carries depends on the release:
+    --   up to v2026.08.02  sample.geom OGC:CRS84 (ST_Point) vs spatial.geom
+    --                      EPSG:4326 (ST_Read over GeoJSON) -> the join ERRORED
+    --   from v2026.08.03   both EPSG:4326, normalized at release time
+    -- Forcing sp.geom to OGC:CRS84 fixed the first case and would BREAK the
+    -- second, recreating the very mismatch it was added for. Setting both makes
+    -- this work against either release. ST_SetCRS relabels without transforming;
+    -- every one of these is WGS 84 lon/lat regardless of the label.
+    ON ST_Intersects(ST_SetCRS(sp.geom, 'EPSG:4326'),
+                     ST_SetCRS(s.geom,  'EPSG:4326'))
   -- `geom IS NOT NULL` is NOT sufficient. Release v2026.08.02 shipped 1,590 rows
   -- with NaN coordinates, and ST_Point(NaN, NaN) is a real non-NULL GEOMETRY, so
   -- they pass that check — and they do not merely add junk rows, they CORRUPT the
