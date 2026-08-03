@@ -294,7 +294,22 @@ dbExecute(
     -- lon/lat — so OGC:CRS84 is the honest label for both. Fixing it at source in
     -- ingest_spatial.qmd is the real repair; this keeps the join correct meanwhile.
     ON ST_Intersects(ST_SetCRS(sp.geom, 'OGC:CRS84'), s.geom)
-  WHERE s.geom IS NOT NULL"
+  -- `geom IS NOT NULL` is NOT sufficient. Release v2026.08.02 shipped 1,590 rows
+  -- with NaN coordinates, and ST_Point(NaN, NaN) is a real non-NULL GEOMETRY, so
+  -- they pass that check — and they do not merely add junk rows, they CORRUPT the
+  -- whole result: with them present this join returns a different number of
+  -- matches at different thread counts, dropping valid unrelated pairs. Measured
+  -- on one county polygon:
+  --      NaN points in : 17,937 (1 thread) / 17,771 (2) / 20,070 (8)
+  --      NaN points out: 20,101 / 20,101 / 20,101
+  -- The correct answer is higher than any corrupted one, so this was silently
+  -- UNDER-counting, and differently on every machine — which is how it was found
+  -- (laptop 2,300,433 memberships vs server 2,131,201 on identical inputs).
+  -- calcofi4db 3.4.2 stops such geometries being minted; this keeps the join
+  -- correct against releases already published without it.
+  WHERE s.geom IS NOT NULL
+    AND NOT isnan(s.latitude)  AND NOT isinf(s.latitude)
+    AND NOT isnan(s.longitude) AND NOT isinf(s.longitude)"
 )
 ss_n <- dbGetQuery(con, "SELECT COUNT(*) AS n FROM sample_spatial")$n
 ss_s <- dbGetQuery(con, "SELECT COUNT(DISTINCT sample_key) AS n FROM sample_spatial")$n
