@@ -177,10 +177,35 @@ message("APP_VERSION: ", APP_VERSION)
 # core schema — it reads the v2026.07.15 db (bio_obs/env_obs carry hex_id) and
 # serves tiles from h3_cell_to_parent(hex_id, {{res}}) (functions_h3t.R). If the
 # service regresses, set FALSE to fall back to local hexagon rendering.
+
+# H3T_RELEASE is DERIVED from the database this app opens, never hardcoded.
+#
+# It is the cache-buster baked into every tile URL, and the h3t API reads the
+# SAME `calcofi_latest.duckdb` symlink that `db_path` above resolves — the one
+# prep_db.R advances on every release. Hardcoded, it drifted: the symlink reached
+# v2026.08.04 while this still said v2026.07.16, so Varnish (which keys on URL)
+# kept serving tiles computed from the OLD release under an unchanged URL.
+# Nothing errored, no request failed — the map was just quietly out of date.
+#
+# Deriving it from the symlink target means the tag and the data cannot disagree,
+# and a release needs no edit here at all. CALCOFI_H3T_RELEASE still overrides,
+# for pinning during an investigation.
+h3t_release_of <- function(path) {
+  tgt <- Sys.readlink(path)
+  if (!nzchar(tgt)) tgt <- path          # not a symlink: read the filename itself
+  m <- regmatches(basename(tgt),
+                  regexpr("v[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}", basename(tgt)))
+  if (length(m)) m else ""
+}
+h3t_release <- Sys.getenv("CALCOFI_H3T_RELEASE", h3t_release_of(db_path))
+if (!nzchar(h3t_release))
+  warning("could not derive H3T_RELEASE from ", db_path,
+          " — tile URLs will not be release-tagged, so Varnish may serve stale tiles")
+
 Sys.setenv(
   H3T_USE      = TRUE,
   H3T_BASE_URL = "https://h3t.calcofi.io/h3t",
-  H3T_RELEASE  = "v2026.07.16")
+  H3T_RELEASE  = h3t_release)
 
 # h3t feature flag — when TRUE, the app skips the 10-resolution sf preload and
 # reads hex data on-demand from the h3t tile API (see api-h3t/). default off.
