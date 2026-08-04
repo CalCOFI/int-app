@@ -227,6 +227,12 @@ server <- function(input, output, session) {
       message("ERROR in default data initialization: ", conditionMessage(e))
       traceback()
     })
+
+    # Release the map render, once, now that everything it reads exists. This
+    # sits OUTSIDE the tryCatch on purpose: if the preload fails, the map should
+    # still be renderable once a Submit provides data, rather than stay disabled
+    # for the life of the session.
+    map_ready(TRUE)
   })
 
   # ts_content ----
@@ -270,11 +276,36 @@ server <- function(input, output, session) {
     }
   })
 
+  # plotly registers a source's events only when the plot is RENDERED, and the
+  # Scatterplot tab is hidden at startup (Shiny suspends hidden outputs), so
+  # calling event_data() before then warns once per event per flush:
+  #   "The 'plotly_click' event tied a source ID of 'scatterPlotSource' is not
+  #    registered."
+  # This gates the two listeners on the plot existing. event_register() on the
+  # plot covers the other half — without it plotly never wires the JS handlers
+  # up at all, so a click would silently deliver nothing.
+  splot_ready <- reactiveVal(FALSE)
+
   # map ----
-  # defer rendering until after the first Shiny flush cycle so the
-  # maplibreCompareOutput DOM element is fully initialized on the client
+  # This render has EXACTLY TWO reactive dependencies, by design: map_ready()
+  # and map_rebuild(). Everything else it touches is isolated.
+  #
+  # It used to depend on rx$df_env, rx$map_sp, rx$env_tile_url, rx$env_var,
+  # rx$lbl_env_var and rx$env_scale_single. The preload observer sets all six in
+  # sequence and `session$onFlushed` flipped map_ready independently, so the
+  # widget was invalidated repeatedly while an earlier render was still in
+  # flight — rebuilding an expensive compare widget several times per startup
+  # and producing three client errors on every page load:
+  #   "sent a progress message for map, but the output is in an unexpected
+  #    state of: running" / "'map' is recalculating, but ... 'idle'" /
+  #   "'map' has been recalculated, but ... 'idle'"
+  # Those were Shiny's output state machine reporting overlapping recalculation
+  # cycles for one output, which is exactly what was happening.
+  #
+  # map_ready is now flipped by the preload itself, once, AFTER everything the
+  # render reads exists — so the render runs once at startup and once per
+  # explicit rebuild, and there is no window where it can run half-fed.
   map_ready <- reactiveVal(FALSE)
-  session$onFlushed(function() map_ready(TRUE), once = TRUE)
 
   # Explicit trigger for a FULL widget rebuild. `input$sel_env_stat` used to be a
   # direct dependency of this render, which meant a polygon summary could be
@@ -285,7 +316,11 @@ server <- function(input, output, session) {
 
   output$map <- renderMaplibreCompare({
     map_rebuild()
-    req(map_ready(), rx$df_env, rx$map_sp)
+    req(map_ready())
+
+    isolate({
+
+    req(rx$df_env, rx$map_sp)
 
     if (debug) message("renderMaplibreCompare: generating environmental map...\n")
 
@@ -331,6 +366,7 @@ server <- function(input, output, session) {
       return(compare(rx$map_sp, map_env_obj, elementId = "map"))
     }
 
+
     # classic path
     if (!is.null(rx$env_hex_list) && env_stat == "mean") {
       env_hex_list    <- rx$env_hex_list
@@ -361,6 +397,8 @@ server <- function(input, output, session) {
     }
 
     compare(rx$map_sp, map_env_obj, elementId = "map")
+
+    })  # isolate
   })
 
   # summarize within polygons ----
@@ -840,13 +878,24 @@ server <- function(input, output, session) {
         color = "Species")
 
     # convert to plotly with bslib theme support
-    ggplotly(p, tooltip = "text", source = "scatterPlotSource") |>
+    p_out <- ggplotly(p, tooltip = "text", source = "scatterPlotSource") |>
       layout(dragmode = "select") |>
       config(
         displaylogo            = FALSE,
         scrollZoom             = TRUE,
         modeBarButtonsToRemove = c("hoverClosestCartesian", "hoverCompareCartesian") ) |>
+      # Declare the events the observers below consume. Two observers call
+      # event_data("plotly_click" / "plotly_selected", source =
+      # "scatterPlotSource"), and plotly warns once per unregistered event on
+      # every render because it only wires up the JS handlers for events the
+      # plot has registered — without these, clicking a point could silently
+      # deliver nothing.
+      event_register("plotly_click") |>
+      event_register("plotly_selected") |>
       toWebGL() # for performance
+
+    splot_ready(TRUE)
+    p_out
   })
 
   # sel_data -> modal_data(), spatial_filter_map ----
@@ -1182,6 +1231,10 @@ server <- function(input, output, session) {
     rx$sp_layer_ids <- paste0("sp", res_range)
     if (debug) message("Species map generated and stored in rx$map_sp\n")
 
+    # output$map no longer depends on rx$map_sp (it isolates everything but its
+    # two triggers), so a new selection has to ask for the rebuild explicitly.
+    map_rebuild(map_rebuild() + 1)
+
     # prepare scatterplot data
     df_splot <- prep_splot(df_sp, df_env, "mean")
     rx$df_splot <- df_splot
@@ -1193,7 +1246,11 @@ server <- function(input, output, session) {
   })
 
   # plotly_click -> ... ----
-  observeEvent(event_data("plotly_click", source = "scatterPlotSource"), {
+  observeEvent(
+    {
+      req(splot_ready())
+      event_data("plotly_click", source = "scatterPlotSource")
+    }, {
     click_data <- event_data("plotly_click", source = "scatterPlotSource")
     req(click_data, rx$df_splot)
 
@@ -1223,7 +1280,11 @@ server <- function(input, output, session) {
     })
   })
 
-  observeEvent(event_data("plotly_selected", source = "scatterPlotSource"), {
+  observeEvent(
+    {
+      req(splot_ready())
+      event_data("plotly_selected", source = "scatterPlotSource")
+    }, {
     selected_data <- event_data("plotly_selected", source = "scatterPlotSource")
     req(selected_data, rx$df_splot)
 
