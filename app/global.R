@@ -366,24 +366,33 @@ local({
          " — add one to ENV_HEADLINE_TYPES in global.R")
 })
 
-# env datasets, most data first, labelled with how much they carry
+# Datasets are listed ALPHABETICALLY by display name, not by volume: these are
+# pick-lists, so a dataset should sit where its name puts it rather than move
+# as the counts change between releases. The order set here drives both the
+# checkbox groups and the optgroup order in env_var_choices().
+#
+# Sorted on the LOWERCASED name. dplyr's arrange() uses the C locale, which
+# orders every uppercase letter before every lowercase one — that puts
+# "CCE-LTER" ahead of "CalCOFI", which is not what alphabetical means to a
+# reader. Lowercasing first is also locale-independent, so the order does not
+# depend on the LC_COLLATE of whatever machine serves the app.
 d_env_datasets <- d_env_vars |>
   group_by(dataset_key) |>
   summarize(n_obs = sum(n_obs), n_types = n(), .groups = "drop") |>
-  arrange(desc(n_obs)) |>
+  mutate(ds_name = dataset_label(dataset_key)) |>
+  arrange(tolower(ds_name)) |>
   mutate(label = sprintf("%s — %s obs, %d variables",
-                         dataset_label(dataset_key),
-                         format(n_obs, big.mark = ","), n_types))
+                         ds_name, format(n_obs, big.mark = ","), n_types))
 
 d_bio_datasets <- dbGetQuery(
   con,
   "SELECT dataset_key, COUNT(*) AS n_obs,
           COUNT(DISTINCT scientific_name) AS n_taxa
      FROM bio_obs GROUP BY 1") |>
-  arrange(desc(n_obs)) |>
+  mutate(ds_name = dataset_label(dataset_key)) |>
+  arrange(tolower(ds_name)) |>
   mutate(label = sprintf("%s — %s obs, %d taxa",
-                         dataset_label(dataset_key),
-                         format(n_obs, big.mark = ","), n_taxa))
+                         ds_name, format(n_obs, big.mark = ","), n_taxa))
 
 #' Grouped choices for the Environmental Variable picker
 #'
