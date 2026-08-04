@@ -137,21 +137,33 @@ ui <- function(req) page_sidebar(
       gap: 0.4rem;
     }
 
-    /* The <optgroup> label naming each dataset in the Variable picker is drawn
-       by the browser in a muted gray that is close to unreadable on the dark
-       theme — and it is the only thing distinguishing `nitrite` (Bottle) from
-       `btl_nitrite` (CTD Cast), so it has to be legible. */
+    /* The dataset heading in the Variable picker is the only thing
+       distinguishing `nitrite` (Bottle) from `btl_nitrite` (CTD Cast), so it
+       has to be legible — it renders muted gray by default.
+
+       selectInput() is selectize = TRUE by default, so this is a
+       div.optgroup-header inside .selectize-dropdown, NOT an <optgroup>
+       element. Styling `select optgroup` had no effect on it whatsoever; that
+       rule is kept only for any genuinely native select. */
+    .selectize-dropdown .optgroup-header,
     select optgroup {
-      font-weight: 600;
+      font-weight: 600 !important;
       font-style: normal;
+      opacity: 1;
     }
+    [data-bs-theme='dark'] .selectize-dropdown .optgroup-header,
     [data-bs-theme='dark'] select optgroup {
-      color: #dee2e6;
-      background-color: #2b3035;
+      color: #f8f9fa !important;
+      background-color: #343a40 !important;
     }
+    [data-bs-theme='light'] .selectize-dropdown .optgroup-header,
     [data-bs-theme='light'] select optgroup {
-      color: #212529;
-      background-color: #f1f3f5;
+      color: #212529 !important;
+      background-color: #e9ecef !important;
+    }
+    /* separate one dataset's variables from the next */
+    .selectize-dropdown .optgroup + .optgroup .optgroup-header {
+      border-top: 1px solid rgba(128, 128, 128, 0.4);
     }
 
     /* darken maplibre tooltip and popup text for readability */
