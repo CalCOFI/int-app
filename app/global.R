@@ -190,9 +190,13 @@ H3T_RELEASE <- Sys.getenv("H3T_RELEASE", "")  # baked into tile URLs
 message("USE_H3T: ", USE_H3T)
 message("H3T_RELEASE: ", H3T_RELEASE)
 
-# extract species names and date range ----
-# all species (ichthyo + invert) are in the species table with WoRMS taxonomy
-sp_names <- tbl(con, "species") |>
+# taxa, and which datasets they come from ----
+# `species` carries every taxon in the release; `bio_obs` says which of them a
+# given dataset actually observed. Both are needed: the picker still lists
+# everything by default, but the Dataset filter narrows it to what that dataset
+# holds. 80 of 993 taxa appear in MORE than one dataset (Appendicularia is in
+# both zoodb and zooscan), so this is a filter, not a partition.
+d_sp <- tbl(con, "species") |>
   left_join(
     tbl(con, "taxon") |>
       filter(authority == "WoRMS"),
@@ -209,8 +213,21 @@ sp_names <- tbl(con, "species") |>
       paste0(common_name, " ")),
     name = paste0(name_part, "(", rank_part, scientific_name, ")")
   ) |>
-  pull(name) |>
-  sort()
+  select(scientific_name, name) |>
+  collect() |>
+  distinct(scientific_name, .keep_all = TRUE)
+
+sp_names <- sort(d_sp$name)
+
+# Which dataset(s) observed each taxon, keyed on scientific_name and NOT on
+# worms_id: seabirds and marine mammals resolve to ITIS, so `farallon_bird-mammal`
+# carries a NULL worms_id on 59,858 of its 64,956 rows (123 taxa, only 33 with a
+# WoRMS id). Joining on worms_id would have dropped 92% of that dataset from the
+# filter without a word.
+d_taxa_ds <- dbGetQuery(
+  con,
+  "SELECT DISTINCT dataset_key, scientific_name FROM bio_obs
+    WHERE scientific_name IS NOT NULL")
 
 bio_date_rng <- tbl(con, "bio_obs") |>
   summarize(
@@ -244,23 +261,166 @@ ts_res_choices <- list(
   "Year, Quarter" = "year_quarter"
 )
 
-env_var_choices <- list(
-  "Temperature (\u00baC)" = "temperature",
-  "Salinity (PSS-78)" = "salinity",
-  "Oxygen (\u00b5mol/kg)" = "oxygen_umol_kg",
-  "Phosphate (\u00b5mol/L)" = "phosphate",
-  "Silicate (\u00b5mol/L)" = "silicate",
-  "Nitrite (\u00b5mol/L)" = "nitrite",
-  "Nitrate (\u00b5mol/L)" = "nitrate",
-  "Chlorophyll-a (\u00b5g/L)" = "chlorophyll_a",
-  "Phaeopigment (\u00b5g/L)" = "phaeopigment",
-  "Dynamic Height (m)" = "dynamic_height",
-  "Sigma-theta (kg/m\u00b3)" = "sigma_theta",
-  "Pressure (dbar)" = "pressure",
-  "PAR (\u00b5E/m\u00b2/s)" = "par",
-  "pH" = "ph",
-  "Ammonia (\u00b5mol/L)" = "ammonia"
-)
+# environmental variables + contributing datasets ----
+# Was a hardcoded list of 15. `env_obs` holds 78 measurement types across 5
+# datasets, so that list exposed 19% of the data and silently spanned two
+# sources (the nutrients are Bottle; pressure/par/ph are CTD Cast).
+#
+# Every env measurement_type belongs to EXACTLY ONE dataset (verified: 0 of 78
+# span more than one), which is what makes grouping the picker by dataset work:
+# each entry appears once, and the group heading disambiguates the families that
+# collide on a pretty label — `nitrite` (Bottle) and `btl_nitrite` (bottle
+# sample drawn on a CTD cast) are otherwise both "Nitrite (umol/L)".
+DATASET_LABELS <- c(
+  "calcofi_bottle"                 = "CalCOFI: Bottle",
+  "calcofi_ctd-cast"               = "CalCOFI: CTD Cast",
+  "calcofi_mets"                   = "CalCOFI: METS (underway)",
+  "calcofi_dic"                    = "CalCOFI: DIC (carbon)",
+  "cce-lter_picoplankton-bacteria" = "CCE-LTER: Picoplankton & bacteria",
+  "swfsc_ichthyo"                  = "SWFSC: Ichthyoplankton",
+  "swfsc_cufes"                    = "SWFSC: CUFES (egg pump)",
+  "calcofi_phytoplankton"          = "CalCOFI: Phytoplankton",
+  "cce-lter_zooscan"               = "CCE-LTER: ZooScan",
+  "cce-lter_euphausiids"           = "CCE-LTER: Euphausiids",
+  "cce-lter_zoodb"                 = "CCE-LTER: ZooDB",
+  "farallon_bird-mammal"           = "Farallon: Seabirds & mammals",
+  "calcofi_phyllosoma"             = "CalCOFI: Phyllosoma",
+  "sio_mesopelagic-fish"           = "SIO: Mesopelagic fish")
+
+# falls back to the raw key rather than NA, so a newly ingested dataset shows up
+# looking unpolished instead of vanishing (cf. the provider.csv lesson)
+dataset_label <- function(key) {
+  lbl <- unname(DATASET_LABELS[key])
+  ifelse(is.na(lbl), key, lbl)
+}
+
+# the registry stores units ASCII-safe ("umol/L", "degC", "kg/m3"); render them
+# the way the old hand-written list did, so the picker reads like a data sheet
+pretty_units <- function(u) {
+  u |>
+    str_replace_all("\\bumol\\b", "\u00b5mol") |>
+    str_replace_all("\\bug\\b",   "\u00b5g") |>
+    str_replace_all("\\buE\\b",   "\u00b5E") |>
+    str_replace_all("\\bdeg_?C\\b", "\u00b0C") |>
+    str_replace_all("m3", "m\u00b3") |>
+    str_replace_all("m2", "m\u00b2")
+}
+
+d_env_vars <- dbGetQuery(
+  con,
+  "SELECT dataset_key, measurement_type, ANY_VALUE(units) AS units, COUNT(*) AS n_obs
+     FROM env_obs GROUP BY 1, 2") |>
+  left_join(
+    tbl(con, "measurement_type") |>
+      select(measurement_type, description) |>
+      collect(),
+    by = "measurement_type") |>
+  mutate(
+    # the registry's `description` IS the short human name ("Bottle nitrite",
+    # "Water temperature (QC'd)"); anything after a ";" is a caveat, not a name
+    var_name = str_squish(str_remove(description, ";.*$")),
+    var_name = ifelse(
+      is.na(var_name) | var_name == "",
+      str_to_sentence(str_replace_all(measurement_type, "_", " ")),
+      var_name),
+    label = ifelse(
+      is.na(units) | units == "" | units == "NA",
+      var_name, paste0(var_name, " (", pretty_units(units), ")"))) |>
+  arrange(dataset_key, var_name)
+
+# a label must be unique WITHIN its dataset or the two entries are
+# indistinguishable in the dropdown; disambiguate with the slug if it happens
+d_env_vars <- d_env_vars |>
+  group_by(dataset_key, label) |>
+  mutate(label = if (n() > 1) paste0(label, " [", measurement_type, "]") else label) |>
+  ungroup()
+
+# Headline variables: the ones people actually plot. Everything else — the
+# instrument channels (isus_v, spar, transmissometer), the pre-QC `r_*` reports,
+# and the averaged/corrected/per-replicate variants — stays behind "Show all",
+# which keeps the common path short without hiding anything.
+ENV_HEADLINE_TYPES <- c(
+  # calcofi_bottle
+  "temperature", "salinity", "oxygen_umol_kg", "oxygen_ml_l", "oxygen_saturation",
+  "phosphate", "silicate", "nitrate", "nitrite", "ammonia",
+  "chlorophyll_a", "phaeopigment", "sigma_theta", "c14_mean",
+  # calcofi_ctd-cast
+  "temperature_ave", "salinity_ave_corr", "oxygen_umol_kg_ave_sta_corr",
+  "pressure", "par", "ph", "dynamic_height", "fluorescence_v",
+  # calcofi_dic
+  "dic", "alkalinity",
+  # calcofi_mets
+  "sst_c", "sss_psu", "wind_speed_ms", "air_temp_c", "chl_fluor",
+  # cce-lter_picoplankton-bacteria
+  "prochlorococcus", "synechococcus", "het_bacteria", "picoeukaryotes")
+
+# A dataset with no headline variable would appear in the Dataset filter with an
+# empty Variable list — a dead end that looks like a bug. Fail loudly at startup
+# instead, so adding a dataset forces a decision about what it leads with.
+local({
+  missing <- setdiff(
+    unique(d_env_vars$dataset_key),
+    unique(d_env_vars$dataset_key[d_env_vars$measurement_type %in% ENV_HEADLINE_TYPES]))
+  if (length(missing) > 0)
+    stop("no headline env variable for: ", paste(missing, collapse = ", "),
+         " — add one to ENV_HEADLINE_TYPES in global.R")
+})
+
+# env datasets, most data first, labelled with how much they carry
+d_env_datasets <- d_env_vars |>
+  group_by(dataset_key) |>
+  summarize(n_obs = sum(n_obs), n_types = n(), .groups = "drop") |>
+  arrange(desc(n_obs)) |>
+  mutate(label = sprintf("%s — %s obs, %d variables",
+                         dataset_label(dataset_key),
+                         format(n_obs, big.mark = ","), n_types))
+
+d_bio_datasets <- dbGetQuery(
+  con,
+  "SELECT dataset_key, COUNT(*) AS n_obs,
+          COUNT(DISTINCT scientific_name) AS n_taxa
+     FROM bio_obs GROUP BY 1") |>
+  arrange(desc(n_obs)) |>
+  mutate(label = sprintf("%s — %s obs, %d taxa",
+                         dataset_label(dataset_key),
+                         format(n_obs, big.mark = ","), n_taxa))
+
+#' Grouped choices for the Environmental Variable picker
+#'
+#' @param datasets character vector of dataset_key to include (NULL = all)
+#' @param show_all include every measurement type, not just the headline set
+#' @return named list of named lists, one group per dataset (selectInput optgroups)
+env_var_choices <- function(datasets = NULL, show_all = FALSE) {
+  d <- d_env_vars
+  if (!is.null(datasets) && length(datasets) > 0)
+    d <- d[d$dataset_key %in% datasets, ]
+  if (!isTRUE(show_all))
+    d <- d[d$measurement_type %in% ENV_HEADLINE_TYPES, ]
+  if (nrow(d) == 0) return(list())
+
+  # keep dataset groups in the same order as the Dataset checkboxes
+  ds <- d_env_datasets$dataset_key[d_env_datasets$dataset_key %in% d$dataset_key]
+  out <- lapply(ds, function(k) {
+    x <- d[d$dataset_key == k, ]
+    setNames(as.list(x$measurement_type), x$label)
+  })
+  setNames(out, dataset_label(ds))
+}
+
+#' Display label for one measurement type, e.g. "Nitrite concentration (umol/L)"
+#' Replaces `names(which(env_var_choices == mt))`, which cannot survive two
+#' types sharing a label.
+env_var_label <- function(mt) {
+  i <- match(mt, d_env_vars$measurement_type)
+  ifelse(is.na(i), mt, d_env_vars$label[i])
+}
+
+#' Taxa names for the picker, optionally restricted to the datasets that hold them
+sp_names_for <- function(datasets = NULL) {
+  if (is.null(datasets) || length(datasets) == 0) return(sp_names)
+  sci <- d_taxa_ds$scientific_name[d_taxa_ds$dataset_key %in% datasets]
+  sort(d_sp$name[d_sp$scientific_name %in% sci])
+}
 
 env_stat_choices <- list(
   "Avg." = "mean",

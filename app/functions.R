@@ -152,7 +152,7 @@ get_taxon_parentage <- function(taxonID, con, authority = "WoRMS"){
 #' @importFrom lubridate quarter
 #'
 #' @export
-get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE) {
+get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE, datasets = NULL) {
   if (debug)
     message(
       "get_sp: sp_name = ", paste(sp_name, collapse = ", "),
@@ -177,24 +177,46 @@ get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE) {
         paste0(common_name, " ")),
       name = paste0(name_part, "(", rank_part, scientific_name, ")"))
 
+  sel <- sp_taxon |>
+    filter(name %in% sp_name) |>
+    select(name, scientific_name, worms_id) |>
+    collect()
+
   if (ck_children) {
-    df_sel <- sp_taxon |>
-      filter(name %in% sp_name) |>
-      select(name, worms_id) |>
-      collect() |>
+    # the children walk is a WoRMS hierarchy, so it only applies to taxa that
+    # have a WoRMS id
+    df_sel <- sel |>
+      filter(!is.na(worms_id)) |>
       mutate(children = map(worms_id, get_taxon_children, con = con)) |>
       unnest(children)
     worms_ids <- unique(df_sel$acceptedNameUsageID)
   } else {
-    worms_ids <- sp_taxon |>
-      filter(name %in% sp_name) |>
-      pull(worms_id)
+    worms_ids <- unique(sel$worms_id[!is.na(sel$worms_id)])
+  }
+  # Taxa that resolve to ITIS rather than WoRMS — the seabirds and marine
+  # mammals — carry NO worms_id, so matching on it alone returned ZERO rows for
+  # every one of them: all 123 taxa and 64,956 observations of
+  # farallon_bird-mammal were unreachable from the picker. Fall back to the
+  # scientific name for those.
+  sci_names <- unique(sel$scientific_name[is.na(sel$worms_id)])
+
+  df_sp <- tbl(con, "bio_obs")
+  df_sp <- if (length(worms_ids) > 0 && length(sci_names) > 0) {
+    df_sp |> filter(worms_id %in% worms_ids | scientific_name %in% sci_names)
+  } else if (length(worms_ids) > 0) {
+    df_sp |> filter(worms_id %in% worms_ids)
+  } else if (length(sci_names) > 0) {
+    df_sp |> filter(scientific_name %in% sci_names)
+  } else {
+    df_sp |> filter(FALSE)   # nothing selected resolves; an empty IN () is a SQL error
   }
 
-  # query bio_obs (pre-joined ichthyo + invert with H3, std_tally, quarter)
-  df_sp <- tbl(con, "bio_obs") |>
+  # a taxon sampled by two programs keeps only the datasets asked for
+  if (!is.null(datasets) && length(datasets) > 0)
+    df_sp <- df_sp |> filter(dataset_key %in% datasets)
+
+  df_sp <- df_sp |>
     filter(
-      worms_id %in% worms_ids,
       between(time_start, !!date_range[1], !!date_range[2]),
       quarter %in% qtr) |>
     mutate(
@@ -1076,8 +1098,20 @@ prep_splot <- function(df_sp, df_env, env_stat, method = "nearest_time",
 #' @export
 prep_filter_summary <- function(sel_name, sel_env_var, sel_qtr, sel_date_range,
                                 sel_depth_range, drawn_polygon, selected_grid_zones,
-                                ck_children) {
+                                ck_children, bio_datasets = NULL) {
   filter_list <- list()
+
+  # Which datasets the numbers came from. The app reads all 9 bio and 5 env
+  # datasets, and nothing on screen used to say so — a CPUE could be ichthyo
+  # net tows, CUFES egg-pump counts, or both, with no way to tell.
+  n_bio_all <- nrow(d_bio_datasets)
+  if (is.null(bio_datasets) || length(bio_datasets) == 0 ||
+      length(bio_datasets) == n_bio_all) {
+    bio_txt <- paste0("all ", n_bio_all)
+  } else {
+    bio_txt <- paste(dataset_label(bio_datasets), collapse = ", ")
+  }
+  filter_list <- c(filter_list, paste0("**Taxa datasets:** ", bio_txt))
 
   # species
   if (!is.null(sel_name) && length(sel_name) > 0) {
@@ -1091,7 +1125,10 @@ prep_filter_summary <- function(sel_name, sel_env_var, sel_qtr, sel_date_range,
   }
 
   # variable
-  filter_list <- c(filter_list, paste0("**Variable:** ", names(which(env_var_choices == sel_env_var))))
+  env_ds <- d_env_vars$dataset_key[match(sel_env_var, d_env_vars$measurement_type)]
+  filter_list <- c(filter_list, paste0(
+    "**Variable:** ", env_var_label(sel_env_var),
+    if (!is.na(env_ds)) paste0(" \u2014 ", dataset_label(env_ds)) else ""))
 
   # quarters
   quarter_names <- c("1" = "Q1", "2" = "Q2", "3" = "Q3", "4" = "Q4")
@@ -1751,7 +1788,7 @@ plot_ts <- function(sp_ts, env_ts, ts_res, sel_env_var, is_dark = T) {
 
   env_ts_mod <- env_ts |>
     mutate(
-      name     = names(which(env_var_choices == sel_env_var)),
+      name     = env_var_label(sel_env_var),
       panel_id = 1) # assign to the second (bottom) panel
 
   # combine into a single data frame
@@ -1808,7 +1845,7 @@ plot_ts <- function(sp_ts, env_ts, ts_res, sel_env_var, is_dark = T) {
         labels = list(style = list(color = text_color)),
         gridLineColor = ifelse(is_dark, "#424242", "#e6e6e6")),
       list(
-        title = list(text = paste0("Average ", names(which(env_var_choices == sel_env_var))),
+        title = list(text = paste0("Average ", env_var_label(sel_env_var)),
                      style = list(color = text_color)),
         height = "47%", top = "53%", offset = 0,
         labels = list(style = list(color = text_color)),
@@ -1955,13 +1992,32 @@ plot_ts <- function(sp_ts, env_ts, ts_res, sel_env_var, is_dark = T) {
 #' @importFrom maplibre maplibreOutput
 #'
 #' @export
-modal_data <- function() {
+#' @param env_var currently selected environmental measurement_type, so
+#'   reopening the modal does not silently reset it
+modal_data <- function(env_var = "temperature") {
   modalDialog(
     title = "Data Selection",
     navset_tab(
 
       nav_panel(
         "Taxa", br(),
+        # Which datasets contribute, and a way to work in just one. The app
+        # reads all 9 bio datasets (it used to be ichthyo alone), so without
+        # this the taxa list is 1,377 names with no indication of where any of
+        # them came from. 80 taxa appear in more than one dataset, so this
+        # filters observations too, not only the picker.
+        checkboxGroupInput(
+          "sel_bio_ds",
+          tagList(
+            "Dataset",
+            popover(
+              bs_icon("question-circle"),
+              "Which biological datasets to draw taxa and observations from.
+               Unchecking a dataset removes both its taxa from the list below
+               and its observations from the results \u2014 a taxon sampled by
+               two programs keeps only the selected one.")),
+          choices  = setNames(d_bio_datasets$dataset_key, d_bio_datasets$label),
+          selected = d_bio_datasets$dataset_key),
         selectizeInput(
           "sel_name",
           "Taxa",
@@ -1981,11 +2037,36 @@ modal_data <- function() {
 
       nav_panel(
         "Environmental", br(),
+        checkboxGroupInput(
+          "sel_env_ds",
+          tagList(
+            "Dataset",
+            popover(
+              bs_icon("question-circle"),
+              "Which environmental datasets to offer variables from. Every
+               measurement type belongs to exactly one dataset, so this both
+               shortens the list and says where each variable comes from.")),
+          choices  = setNames(d_env_datasets$dataset_key, d_env_datasets$label),
+          selected = d_env_datasets$dataset_key),
         selectInput(
           "sel_env_var",
           "Variable",
-          env_var_choices,
-          selected = "Temperature"),
+          # grouped by dataset; `selected` is a measurement_type, not a label —
+          # it used to be "Temperature", which matched nothing and silently fell
+          # through to whatever happened to be first
+          choices  = env_var_choices(),
+          selected = env_var),
+        checkboxInput(
+          "sel_env_all_vars",
+          tagList(
+            sprintf("Show all %d variables", nrow(d_env_vars)),
+            popover(
+              bs_icon("question-circle"),
+              "Off, the list shows the headline variables people usually plot.
+               On, it adds the instrument channels (transmissometer, ISUS
+               voltage, PAR reference), the pre-QC reported series, and the
+               averaged / corrected / per-replicate variants.")),
+          value = FALSE),
         numericRangeInput(
           "sel_depth_range",
           "Depth Range (m)",

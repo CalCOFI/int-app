@@ -208,7 +208,7 @@ server <- function(input, output, session) {
       rx$df_sp       <- df_sp
       rx$df_env      <- df_env
       rx$env_var     <- sel_env_var
-      rx$lbl_env_var <- names(which(env_var_choices == sel_env_var))
+      rx$lbl_env_var <- env_var_label(sel_env_var)
       rx$params$taxa        <- sel_name
       rx$params$env_var     <- sel_env_var
       rx$params$sel_qtr     <- sel_qtr
@@ -851,8 +851,12 @@ server <- function(input, output, session) {
 
   # sel_data -> modal_data(), spatial_filter_map ----
   observeEvent(input$sel_data, {
-    showModal(modal_data())
-    updateSelectizeInput(session, 'sel_name', choices = sp_names, server = TRUE)
+    showModal(modal_data(env_var = rx$env_var %||% "temperature"))
+    updateSelectizeInput(
+      session, "sel_name",
+      choices  = sp_names_for(isolate(input$sel_bio_ds)),
+      selected = isolate(rx$params$taxa),
+      server   = TRUE)
 
     output$spatial_filter_map <- renderMaplibre({
       if (input$sel_places_cat == "Custom") {
@@ -913,6 +917,29 @@ server <- function(input, output, session) {
         select(name)
     })
   })
+
+  # dataset -> taxa list ----
+  # Narrowing the datasets narrows the taxa offered. The current selection is
+  # carried over where it survives, so unchecking an unrelated dataset does not
+  # silently clear what the user already picked.
+  observeEvent(input$sel_bio_ds, {
+    keep <- intersect(input$sel_name, sp_names_for(input$sel_bio_ds))
+    updateSelectizeInput(
+      session, "sel_name",
+      choices  = sp_names_for(input$sel_bio_ds),
+      selected = keep,
+      server   = TRUE)
+  }, ignoreNULL = FALSE, ignoreInit = TRUE)
+
+  # dataset / show-all -> environmental variable list ----
+  observeEvent(list(input$sel_env_ds, input$sel_env_all_vars), {
+    ch  <- env_var_choices(input$sel_env_ds, isTRUE(input$sel_env_all_vars))
+    cur <- input$sel_env_var
+    # keep the current variable if its dataset is still checked, else fall back
+    # to the first on offer rather than leaving a value the list no longer has
+    sel <- if (!is.null(cur) && cur %in% unlist(ch)) cur else unlist(ch)[1]
+    updateSelectInput(session, "sel_env_var", choices = ch, selected = sel)
+  }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
   # Observe clicks on the grid layer of spatial filter map
   observeEvent(input$spatial_filter_map_feature_click, {
@@ -1043,7 +1070,8 @@ server <- function(input, output, session) {
     df_sp <- calcofi4r::cc_track_query(session, "map_query_sp",
       list(taxa = sel_name, quarters = sel_qtr, date_beg = sel_date_range[1],
            date_end = sel_date_range[2], include_children = ck_children),
-      get_sp(sel_name, sel_qtr, sel_date_range, ck_children))
+      get_sp(sel_name, sel_qtr, sel_date_range, ck_children,
+             datasets = input$sel_bio_ds))
     df_env <- calcofi4r::cc_track_query(session, "map_query_env",
       list(env_var = sel_env_var, quarters = sel_qtr, date_beg = sel_date_range[1],
            date_end = sel_date_range[2], depth_min = sel_depth_range[1],
@@ -1107,7 +1135,7 @@ server <- function(input, output, session) {
     rx$df_sp       <- df_sp
     rx$df_env      <- df_env
     rx$env_var     <- sel_env_var
-    rx$lbl_env_var <- names(which(env_var_choices == sel_env_var))
+    rx$lbl_env_var <- env_var_label(sel_env_var)
 
     rx$params$taxa        <- sel_name
     rx$params$env_var     <- sel_env_var
@@ -1116,6 +1144,9 @@ server <- function(input, output, session) {
     rx$params$depth_range <- sel_depth_range
     rx$params$zones       <- rx$zones
     rx$params$ck_children <- ck_children
+    # so the download README and the usage log record which datasets the
+    # numbers came from, not just which taxa
+    rx$params$bio_datasets <- input$sel_bio_ds
     if (debug) message("Stored reactive data: df_sp, df_env, lbl_env_var =", rx$lbl_env_var)
 
     # build filter summary
@@ -1127,7 +1158,8 @@ server <- function(input, output, session) {
       sel_depth_range,
       drawn_polygon,
       rx$sel_zones,
-      ck_children)
+      ck_children,
+      bio_datasets = input$sel_bio_ds)
 
     # build summary stats
     rx$summary_stats <- prep_summary_stats(
