@@ -88,10 +88,17 @@ dbExecute(con, "INSTALL spatial; LOAD spatial;")
 # crosses the line is sample_spatial below: a deliberately many-to-many spatial
 # join whose hash table is far larger than its ~2.3M output rows.
 #
-# With an explicit limit DuckDB spills to temp_directory instead of to swap. That
-# is slower, but it is BOUNDED and the machine stays reachable — swapping is
-# neither. Keep temp_directory on /ssd (where db_dir lives), not on the 40 GB
-# boot disk.
+# These settings help, but NOT the way they were first described here, and the
+# difference matters: `memory_limit` bounds DuckDB's BUFFER MANAGER, and the
+# spatial join operator is not spillable — it allocates straight past the limit.
+# On the rebuild the R process still reached 9.6 GB RSS with 261 MB free and no
+# spill directory was ever created. What actually kept the box alive was
+# `threads = 3`, which held swap near 46% instead of 100%.
+#
+# So treat this as mitigation, not containment. The thing that actually bounds
+# the spatial join is batching it — see sample_spatial below. Keep temp_directory
+# on /ssd (where db_dir lives) rather than the 40 GB boot disk regardless, since
+# other operators here DO spill.
 dbExecute(con, "SET memory_limit = '8GB'")
 dbExecute(con, "SET threads = 3")  # leave a core for the other containers
 dbExecute(con, glue("SET temp_directory = '{file.path(db_dir, 'duckdb_tmp')}'"))
@@ -291,46 +298,121 @@ cat("  env_obs:", format(env_n, big.mark = ","), "rows\n")
 #
 # The alternative — crosswalking hexes to polygons — is cheaper but wrong at
 # every boundary, and we have exact geometry, so there is no reason to approximate.
+# BUILT IN BOUNDED PIECES, and that is not premature optimization: the
+# single-statement version wedged the server on 2026-08-04. DuckDB's spatial join
+# is NOT spillable — it allocates past `memory_limit` rather than spilling — so
+# the cap above cannot contain it. The R process reached 9.6 GB RSS with 261 MB
+# free on a 16 GB box running 11 containers, swap hit 100%, userspace stopped
+# responding (the kernel still answered ICMP and TCP, so it *looked* down), and
+# the VM needed a hard reset. `SET preserve_insertion_order=false` was tried and
+# does NOT fix it either.
+#
+# Three things together bound it, each measured against the v2026.08.04 release
+# under a deliberately tight 4 GB limit; all three are needed:
+#
+#   1. bbox pre-filter — plain arithmetic on lon/lat runs before ST_Intersects,
+#      so geometry work only happens for candidates that can possibly match.
+#      Alone: BOEM's 9,833 polygons went from the dominant cost to 0.1 min.
+#   2. ST_Dump — DuckDB has no ST_Subdivide (that is PostGIS), but the expensive
+#      layers are MULTIpolygons whose overall bbox spans the whole coast, so
+#      per-feature bboxes filter nothing. Dumping to parts costs 0.2 s, turns
+#      13,206 features into 13,655 parts and collapses MEOW from a hotspot to
+#      0.03 min. Parts of a valid multipolygon are disjoint, so this cannot
+#      duplicate a membership — verified: 0 duplicate (sample, polygon) pairs.
+#   3. sample bucketing — neither of the above helps when a SINGLE part is huge
+#      and complex (CDFW Regions has one with ~134k vertices), because its bbox
+#      legitimately covers nearly every sample. Splitting the point side is the
+#      only thing that bounds that case.
+#
+# Result: 2,786,030 memberships across 1,332,621 samples in ~7 min, identical to
+# the unbounded version, inside 4 GB.
+#
+# Remaining hotspot: CDFW Regions is ~70% of the runtime. If that ever matters,
+# the fix is true subdivision — clip each oversized part against a coarse grid so
+# no piece exceeds N vertices — not a bigger machine.
+SPATIAL_BATCH   <- as.integer(Sys.getenv("CC_SPATIAL_BATCH", "500"))
+SPATIAL_BUCKETS <- as.integer(Sys.getenv("CC_SPATIAL_BUCKETS", "8"))
+dbExecute(con, "SET preserve_insertion_order = false")
+
+# Sample side, filtered ONCE and bucketed. Keeping raw lon/lat makes the bbox
+# pre-filter pure arithmetic.
+#
+# `geom IS NOT NULL` is NOT sufficient. Release v2026.08.02 shipped 1,590 rows
+# with NaN coordinates, and ST_Point(NaN, NaN) is a real non-NULL GEOMETRY, so
+# they pass that check — and they do not merely add junk rows, they CORRUPT the
+# result: with them present this join returns a different number of matches at
+# different thread counts, dropping valid unrelated pairs. Measured on one county
+# polygon:
+#      NaN points in : 17,937 (1 thread) / 17,771 (2) / 20,070 (8)
+#      NaN points out: 20,101 / 20,101 / 20,101
+# The correct answer is higher than any corrupted one, so this silently
+# UNDER-counted, differently on every machine — which is how it was found (laptop
+# 2,300,433 memberships vs server 2,131,201 on identical inputs). calcofi4db
+# 3.4.2 stops such geometries being minted; this keeps the join correct against
+# releases already published without it.
+#
+# Relabel BOTH sides to the same CRS rather than coercing one to match the other.
+# DuckDB refuses ST_Intersects across differing CRS tags, and which tag each side
+# carries depends on the release:
+#   up to v2026.08.02  sample.geom OGC:CRS84 (ST_Point) vs spatial.geom
+#                      EPSG:4326 (ST_Read over GeoJSON) -> the join ERRORED
+#   from v2026.08.03   both EPSG:4326, normalized at release time
+# Forcing sp.geom to OGC:CRS84 fixed the first case and would BREAK the second.
+# Setting both works against either release; ST_SetCRS relabels without
+# transforming, and every one of these is WGS 84 lon/lat regardless of label.
 cat("building sample_spatial...\n")
-dbExecute(
-  con,
-  "
-  CREATE OR REPLACE TABLE sample_spatial AS
-  SELECT s.sample_key,
-         sp.spatial_key,
-         sp.layer,
-         sp.name AS spatial_name
-  FROM sample s
-  JOIN spatial sp
-    -- Relabel BOTH sides to the same CRS rather than coercing one to match the
-    -- other. DuckDB refuses ST_Intersects across differing CRS tags, and which
-    -- tag each side carries depends on the release:
-    --   up to v2026.08.02  sample.geom OGC:CRS84 (ST_Point) vs spatial.geom
-    --                      EPSG:4326 (ST_Read over GeoJSON) -> the join ERRORED
-    --   from v2026.08.03   both EPSG:4326, normalized at release time
-    -- Forcing sp.geom to OGC:CRS84 fixed the first case and would BREAK the
-    -- second, recreating the very mismatch it was added for. Setting both makes
-    -- this work against either release. ST_SetCRS relabels without transforming;
-    -- every one of these is WGS 84 lon/lat regardless of the label.
-    ON ST_Intersects(ST_SetCRS(sp.geom, 'EPSG:4326'),
-                     ST_SetCRS(s.geom,  'EPSG:4326'))
-  -- `geom IS NOT NULL` is NOT sufficient. Release v2026.08.02 shipped 1,590 rows
-  -- with NaN coordinates, and ST_Point(NaN, NaN) is a real non-NULL GEOMETRY, so
-  -- they pass that check — and they do not merely add junk rows, they CORRUPT the
-  -- whole result: with them present this join returns a different number of
-  -- matches at different thread counts, dropping valid unrelated pairs. Measured
-  -- on one county polygon:
-  --      NaN points in : 17,937 (1 thread) / 17,771 (2) / 20,070 (8)
-  --      NaN points out: 20,101 / 20,101 / 20,101
-  -- The correct answer is higher than any corrupted one, so this was silently
-  -- UNDER-counting, and differently on every machine — which is how it was found
-  -- (laptop 2,300,433 memberships vs server 2,131,201 on identical inputs).
-  -- calcofi4db 3.4.2 stops such geometries being minted; this keeps the join
-  -- correct against releases already published without it.
-  WHERE s.geom IS NOT NULL
-    AND NOT isnan(s.latitude)  AND NOT isinf(s.latitude)
-    AND NOT isnan(s.longitude) AND NOT isinf(s.longitude)"
-)
+dbExecute(con, glue("
+  CREATE OR REPLACE TEMP TABLE _sample_ok AS
+  SELECT sample_key, longitude, latitude,
+         ST_SetCRS(geom, 'EPSG:4326') AS geom,
+         (hash(sample_key) % {SPATIAL_BUCKETS}) AS bkt
+  FROM sample
+  WHERE geom IS NOT NULL
+    AND NOT isnan(latitude)  AND NOT isinf(latitude)
+    AND NOT isnan(longitude) AND NOT isinf(longitude)"))
+
+dbExecute(con, "
+  CREATE OR REPLACE TEMP TABLE _poly AS
+  SELECT spatial_key, layer, name, part_geom AS geom,
+         ST_XMin(part_geom) AS xmin, ST_XMax(part_geom) AS xmax,
+         ST_YMin(part_geom) AS ymin, ST_YMax(part_geom) AS ymax
+  FROM (SELECT spatial_key, layer, name,
+               UNNEST(ST_Dump(ST_SetCRS(geom, 'EPSG:4326'))).geom AS part_geom
+        FROM spatial)")
+
+dbExecute(con, "
+  CREATE OR REPLACE TABLE sample_spatial (
+    sample_key   VARCHAR,
+    spatial_key  VARCHAR,
+    layer        VARCHAR,
+    spatial_name VARCHAR)")
+
+sp_layers <- dbGetQuery(con, "SELECT layer, COUNT(*) AS n FROM _poly GROUP BY 1 ORDER BY 1")
+for (i in seq_len(nrow(sp_layers))) {
+  lyr <- sp_layers$layer[i]
+  t_i <- Sys.time()
+  for (off in seq(0, sp_layers$n[i] - 1, by = SPATIAL_BATCH)) {
+    for (k in seq_len(SPATIAL_BUCKETS) - 1L) {
+      # DISTINCT guards against a source layer whose multipolygon parts overlap;
+      # valid ones do not, and a duplicated membership would double-count in the app.
+      dbExecute(con, glue("
+        INSERT INTO sample_spatial
+        SELECT DISTINCT s.sample_key, p.spatial_key, p.layer, p.name
+        FROM (SELECT * FROM _poly WHERE layer = {dbQuoteString(con, lyr)}
+              ORDER BY spatial_key LIMIT {SPATIAL_BATCH} OFFSET {off}) p
+        JOIN _sample_ok s
+          ON s.bkt = {k}
+         AND s.longitude BETWEEN p.xmin AND p.xmax
+         AND s.latitude  BETWEEN p.ymin AND p.ymax
+         AND ST_Intersects(p.geom, s.geom)"))
+    }
+  }
+  cat(sprintf("  %-32s %5d parts  %.2f min\n", lyr, sp_layers$n[i],
+              as.numeric(difftime(Sys.time(), t_i, units = "mins"))))
+}
+dbExecute(con, "DROP TABLE IF EXISTS _sample_ok")
+dbExecute(con, "DROP TABLE IF EXISTS _poly")
+
 ss_n <- dbGetQuery(con, "SELECT COUNT(*) AS n FROM sample_spatial")$n
 ss_s <- dbGetQuery(con, "SELECT COUNT(DISTINCT sample_key) AS n FROM sample_spatial")$n
 cat("  sample_spatial:", format(ss_n, big.mark = ","), "memberships across",
