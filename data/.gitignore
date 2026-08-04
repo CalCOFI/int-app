@@ -11,3 +11,8 @@ catalog_v*.json
 latest.txt
 parquet/
 calcofi_latest.duckdb
+
+# staging dir for prep_db.R build-aside-and-swap
+.build/
+hex.geojson.new
+calcofi_latest.duckdb.swap

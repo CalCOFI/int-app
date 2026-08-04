@@ -61,15 +61,40 @@ db_version_resolved <- if (db_version == "latest") {
     warn = FALSE)[1])
 } else db_version
 db_file <- file.path(db_dir, paste0("calcofi_", db_version_resolved, ".duckdb"))
-if (file.exists(db_file)) {
-  cat("removing stale db:", db_file, "\n")
-  file.remove(db_file)
+
+# BUILD ASIDE, THEN SWAP. Never write the file the app is serving.
+#
+# This script rebuilds `calcofi_<version>.duckdb`, and `calcofi_latest.duckdb`
+# points at it — so re-running against an UNCHANGED version used to delete and
+# re-create the exact file the running app has open, then hold a read-write lock
+# on it for the whole build. DuckDB's lock blocks even read-only connections, so
+# every Shiny worker died at the `dbConnect` below (global.R). It took the live
+# app down twice on 2026-08-04, the second time purely from this.
+#
+# Building into `data/.build/` and renaming at the end fixes it, because POSIX
+# rename() only swaps the directory entry: workers already holding the old file
+# keep reading a complete, valid database from the old inode, and workers started
+# after the swap open the new one. There is no moment where the served path is
+# missing, locked, or half-written. The app keeps serving the previous release
+# right up to the swap, and prep_db.R becomes safe to run at any time.
+#
+# The parquet cache is symlinked in rather than re-downloaded — it is the
+# expensive part, and the whole point of `cache_dir` being persistent.
+build_dir <- file.path(db_dir, ".build")
+dir.create(build_dir, showWarnings = FALSE, recursive = TRUE)
+for (share in c("parquet", "latest.txt")) {
+  src <- file.path(db_dir, share); lnk <- file.path(build_dir, share)
+  if (file.exists(src) && !file.exists(lnk) && is.na(Sys.readlink(lnk)))
+    file.symlink(src, lnk)
 }
+build_file <- file.path(build_dir, paste0("calcofi_", db_version_resolved, ".duckdb"))
+for (f in c(build_file, paste0(build_file, ".wal"))) if (file.exists(f)) file.remove(f)
+cat("building into:", build_file, "\n")
 
 con <- cc_get_db(
   version = db_version,
   local_data = TRUE,
-  cache_dir = db_dir,
+  cache_dir = build_dir,
   tables = keep_tables,
   refresh = TRUE
 )
@@ -454,7 +479,15 @@ hex_list <- map(1:10, function(res) {
     st_set_geometry("geometry")
 })
 sf_hex <- bind_rows(hex_list)
-st_write(sf_hex, hex_geo, delete_dsn = TRUE, quiet = TRUE)
+# Same build-aside-and-swap as the database, for the same reason: the app reads
+# this file, and `delete_dsn = TRUE` unlinks it and then writes ~430k features
+# over several seconds. A worker starting in that window gets a missing or
+# truncated GeoJSON. Write beside it and rename, which is atomic.
+hex_tmp <- paste0(hex_geo, ".new")
+if (file.exists(hex_tmp)) file.remove(hex_tmp)
+st_write(sf_hex, hex_tmp, delete_dsn = TRUE, quiet = TRUE)
+if (!file.rename(hex_tmp, hex_geo))
+  stop("could not swap ", hex_tmp, " -> ", hex_geo)
 cat("  hex.geojson:", nrow(sf_hex), "hexagons across 10 resolutions\n")
 
 # step E: drop build-only objects (keep species/taxon/taxa_rank + bio_obs/env_obs) ----
@@ -480,19 +513,47 @@ dbExecute(con, "DROP TABLE IF EXISTS hex_base")
 # summary ----
 final_tables <- dbListTables(con) |> sort()
 cat("\nfinal tables:", paste(final_tables, collapse = ", "), "\n")
-cat(
-  "done. app database ready at:",
-  file.path(db_dir, list.files(db_dir, "calcofi_.*\\.duckdb")),
-  "\n"
-)
-
 dbDisconnect(con, shutdown = TRUE)
+
+# swap the finished build into place ----
+# Disconnect FIRST: the rename must move a cleanly-closed database, or the app
+# inherits an unflushed WAL. A leftover .wal beside the build means the shutdown
+# did not checkpoint, so refuse rather than publish a database that recovers on
+# first open (in a read-only worker, that fails).
+build_wal <- paste0(build_file, ".wal")
+if (file.exists(build_wal))
+  stop("build left a WAL beside ", basename(build_file),
+       " — shutdown did not checkpoint; refusing to swap an unflushed database")
+if (!file.exists(build_file))
+  stop("build produced no database at ", build_file)
+
+# rename() within the same filesystem is atomic and does NOT disturb readers:
+# workers holding the old inode keep serving a complete database until they exit.
+if (!file.rename(build_file, db_file))
+  stop("could not swap ", build_file, " -> ", db_file)
+cat("swapped into place:", db_file,
+    sprintf("(%.0f MB)\n", file.size(db_file) / 1024^2))
 
 # repoint the `calcofi_latest.duckdb` symlink at the db we just built, so the app
 # (global.R defaults to data/calcofi_latest.duckdb) serves this version without a
 # manual step. relative target keeps the link valid regardless of mount path.
+#
+# Symlink replacement is NOT atomic via unlink+symlink — there is a window where
+# the link is missing — so build the new link under a temp name and rename it
+# over the old one, which is.
 latest_link <- file.path(db_dir, "calcofi_latest.duckdb")
-if (file.exists(latest_link) || !is.na(Sys.readlink(latest_link)))
-  unlink(latest_link)
-file.symlink(basename(db_file), latest_link)
+tmp_link    <- paste0(latest_link, ".swap")
+if (file.exists(tmp_link) || !is.na(Sys.readlink(tmp_link))) unlink(tmp_link)
+file.symlink(basename(db_file), tmp_link)
+if (!file.rename(tmp_link, latest_link))
+  stop("could not repoint calcofi_latest.duckdb -> ", basename(db_file))
 cat("symlinked calcofi_latest.duckdb ->", basename(db_file), "\n")
+
+# The h3t API holds this file OPEN and will keep serving the previous release
+# until its container is restarted — that is not something this script can do,
+# and it is silent (nothing errors, /h3t/health just reports the old db_mtime).
+# scripts/deploy_consumers.sh in CalCOFI/workflows handles it.
+cat("NOTE: restart the h3t API to pick this up ",
+    "(CalCOFI/workflows: scripts/deploy_consumers.sh)\n", sep = "")
+
+cat("\ndone. app database ready at:", db_file, "\n")
