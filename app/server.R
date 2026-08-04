@@ -931,9 +931,11 @@ server <- function(input, output, session) {
       server   = TRUE)
   }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
-  # dataset / show-all -> environmental variable list ----
-  observeEvent(list(input$sel_env_ds, input$sel_env_all_vars), {
-    ch  <- env_var_choices(input$sel_env_ds, isTRUE(input$sel_env_all_vars))
+  # show-all -> environmental variable list ----
+  # No dataset filter on this tab: every measurement type belongs to exactly one
+  # dataset, so the grouped list already carries that information.
+  observeEvent(input$sel_env_all_vars, {
+    ch  <- env_var_choices(show_all = isTRUE(input$sel_env_all_vars))
     cur <- input$sel_env_var
     # keep the current variable if its dataset is still checked, else fall back
     # to the first on offer rather than leaving a value the list no longer has

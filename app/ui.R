@@ -120,6 +120,40 @@ ui <- function(req) page_sidebar(
       /* color: #000; */
     }
 
+    /* --- Data Selection modal ---------------------------------------- */
+    /* Shiny gives .shiny-input-container a fixed 300px width, which in a wide
+       modal wrapped every dataset checkbox onto a second line and left the
+       Taxa box a narrow stub in a mostly empty dialog. Let the controls use
+       the width the modal already has. */
+    .modal .shiny-input-container {
+      width: 100%;
+      max-width: 100%;
+    }
+    /* one dataset per line, with the checkbox aligned to the first line of a
+       label that may still wrap on a narrow window */
+    .modal .shiny-input-checkboxgroup .checkbox label {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
+    /* The <optgroup> label naming each dataset in the Variable picker is drawn
+       by the browser in a muted gray that is close to unreadable on the dark
+       theme — and it is the only thing distinguishing `nitrite` (Bottle) from
+       `btl_nitrite` (CTD Cast), so it has to be legible. */
+    select optgroup {
+      font-weight: 600;
+      font-style: normal;
+    }
+    [data-bs-theme='dark'] select optgroup {
+      color: #dee2e6;
+      background-color: #2b3035;
+    }
+    [data-bs-theme='light'] select optgroup {
+      color: #212529;
+      background-color: #f1f3f5;
+    }
+
     /* darken maplibre tooltip and popup text for readability */
     .maplibregl-popup-content,
     .mapboxgl-popup-content {

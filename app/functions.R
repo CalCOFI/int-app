@@ -2017,12 +2017,14 @@ modal_data <- function(env_var = "temperature") {
                and its observations from the results \u2014 a taxon sampled by
                two programs keeps only the selected one.")),
           choices  = setNames(d_bio_datasets$dataset_key, d_bio_datasets$label),
-          selected = d_bio_datasets$dataset_key),
+          selected = d_bio_datasets$dataset_key,
+          width    = "100%"),
         selectizeInput(
           "sel_name",
           "Taxa",
-          choices = NULL,
-          multiple = TRUE ),
+          choices  = NULL,
+          multiple = TRUE,
+          width    = "100%" ),
         checkboxInput(
           "ck_children",
           value = TRUE,
@@ -2037,17 +2039,17 @@ modal_data <- function(env_var = "temperature") {
 
       nav_panel(
         "Environmental", br(),
-        checkboxGroupInput(
-          "sel_env_ds",
-          tagList(
-            "Dataset",
-            popover(
-              bs_icon("question-circle"),
-              "Which environmental datasets to offer variables from. Every
-               measurement type belongs to exactly one dataset, so this both
-               shortens the list and says where each variable comes from.")),
-          choices  = setNames(d_env_datasets$dataset_key, d_env_datasets$label),
-          selected = d_env_datasets$dataset_key),
+        # No dataset picker here, deliberately: every environmental measurement
+        # type belongs to exactly one dataset, so the Variable list below is
+        # already grouped by source and a separate filter would say the same
+        # thing twice.
+        div(
+          class = "small text-muted mb-2",
+          sprintf(paste(
+            "Variables are grouped by the dataset they come from \u2014 %s.",
+            "Each measurement type belongs to exactly one, so choosing a",
+            "variable chooses its dataset."),
+            paste(dataset_label(d_env_datasets$dataset_key), collapse = ", "))),
         selectInput(
           "sel_env_var",
           "Variable",
@@ -2055,7 +2057,8 @@ modal_data <- function(env_var = "temperature") {
           # it used to be "Temperature", which matched nothing and silently fell
           # through to whatever happened to be first
           choices  = env_var_choices(),
-          selected = env_var),
+          selected = env_var,
+          width    = "100%"),
         checkboxInput(
           "sel_env_all_vars",
           tagList(
@@ -2071,7 +2074,7 @@ modal_data <- function(env_var = "temperature") {
           "sel_depth_range",
           "Depth Range (m)",
           c(0, 212), # TODO: pull from data
-          width = NULL,
+          width = "100%",
           separator = " to ",
           min = 0,
           max = 512 )),
