@@ -78,6 +78,24 @@ con <- cc_get_db(
 dbExecute(con, "INSTALL h3 FROM community; LOAD h3;")
 dbExecute(con, "INSTALL spatial; LOAD spatial;")
 
+# bound DuckDB's footprint ----
+# The server is a 16 GB n2-standard-4 shared with ~11 containers (postgis, erddap,
+# plumber, varnish, rstudio, …) that already hold several GB at rest, so DuckDB's
+# default limit of ~80% of TOTAL RAM sizes it against memory it does not actually
+# have. Building v2026.08.04 overcommitted, filled the 7 GB swapfile, and thrashed
+# the box until it had to be power-cycled — sshd could not complete a banner
+# exchange for 20 minutes, and every hosted app went down with it. The step that
+# crosses the line is sample_spatial below: a deliberately many-to-many spatial
+# join whose hash table is far larger than its ~2.3M output rows.
+#
+# With an explicit limit DuckDB spills to temp_directory instead of to swap. That
+# is slower, but it is BOUNDED and the machine stays reachable — swapping is
+# neither. Keep temp_directory on /ssd (where db_dir lives), not on the 40 GB
+# boot disk.
+dbExecute(con, "SET memory_limit = '8GB'")
+dbExecute(con, "SET threads = 3")  # leave a core for the other containers
+dbExecute(con, glue("SET temp_directory = '{file.path(db_dir, 'duckdb_tmp')}'"))
+
 # step A2: legacy taxon shims from the unified refs ----
 # The release now ships a single unified `taxon` (keyed by taxon_key = worms:<id>
 # / itis:<id>) + a `dataset_taxon` crosswalk, replacing the old per-dataset
