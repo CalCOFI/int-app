@@ -36,6 +36,11 @@ server <- function(input, output, session) {
   # this covers About and Download as well as the four visualization panels)
   observeEvent(input$outputPanel, trk("select_tab", tab = input$outputPanel),
                ignoreInit = TRUE)
+  # hexagons vs a named boundary layer — which layers people actually summarize
+  # within is the signal for whether more are worth adding to the registry
+  observeEvent(input$sel_agg_unit,
+               trk("select_agg_unit", agg_unit = input$sel_agg_unit),
+               ignoreInit = TRUE)
   observeEvent(input$dark_toggle, trk("select_theme", theme = input$dark_toggle),
                ignoreInit = TRUE)
 
@@ -76,6 +81,15 @@ server <- function(input, output, session) {
     filter_summary = NULL,
     summary_stats  = NULL,
     plot_depth     = NULL,
+    # Map-view bookkeeping lives HERE and not in rx$params, deliberately.
+    # reactiveValues dependencies are per NAME: output$map reads
+    # rx$params$sel_qtr, so it depends on `params` as a whole, and any write to
+    # rx$params$map_params$* re-renders the compare widget. That is what made
+    # the polygon summary vanish the instant it was drawn — apply_poly() added
+    # the layers by proxy, then set rx$params$map_params$agg_unit, which
+    # rebuilt the widget in hex mode on the same flush.
+    agg_unit       = "hex",
+    env_stat       = "mean",
     params = list( # filter/analysis params
       taxa             = default_sp_name,
       env_var          = "temperature",
@@ -142,6 +156,7 @@ server <- function(input, output, session) {
         env_tile_url <- h3t_tile_url(env_sql, H3T_RELEASE)
 
         rx$map_sp      <- map_sp_h3t(sp_tile_url,  sp_scale)
+        rx$sp_layer_ids <- "sp"
         rx$env_tile_url <- env_tile_url
         rx$env_scale_single <- env_scale
 
@@ -184,6 +199,7 @@ server <- function(input, output, session) {
           column  = "sp.value",
           palette = \(n) hcl.colors(n, palette = "Viridis"))
         rx$map_sp       <- map_sp(sp_hex_list, sp_scale_list)
+        rx$sp_layer_ids <- paste0("sp", res_range)
         rx$sp_scale     <- sp_scale_list
         rx$env_hex_list <- env_hex_list
       }
@@ -260,21 +276,40 @@ server <- function(input, output, session) {
   map_ready <- reactiveVal(FALSE)
   session$onFlushed(function() map_ready(TRUE), once = TRUE)
 
+  # Explicit trigger for a FULL widget rebuild. `input$sel_env_stat` used to be a
+  # direct dependency of this render, which meant a polygon summary could be
+  # wiped out by an env-stat change re-rendering the widget underneath it. Now
+  # the env-stat observer decides: rebuild in hex mode (unchanged behavior), or
+  # go through the proxy in polygon mode.
+  map_rebuild <- reactiveVal(0)
+
   output$map <- renderMaplibreCompare({
+    map_rebuild()
     req(map_ready(), rx$df_env, rx$map_sp)
 
     if (debug) message("renderMaplibreCompare: generating environmental map...\n")
 
-    env_stat       <- input$sel_env_stat %||% "mean"
+    env_stat       <- isolate(input$sel_env_stat) %||% "mean"
     env_stat_label <- names(which(env_stat_choices == env_stat))
+
+    # The aggregation unit is read WITHOUT taking a reactive dependency: the
+    # polygon summary is applied to the live maps by `apply_poly()` below,
+    # through the compare proxy, never by re-rendering this widget. See the
+    # comment on apply_poly() for why re-rendering is not an option.
+    rx$agg_unit <- isolate(input$sel_agg_unit) %||% "hex"
+
+    # the map averages across net types, so the legend names the measure without
+    # committing to a single unit (the polygon path picks one and names it)
+    rx$lbl_sp_value <- "Avg. CPUE (density)"
 
     if (USE_H3T) {
       # h3t path: reuse the tile_url + scale computed in the preload block.
       # if env_stat changes from the default, we rebuild the URL/scale here.
       if (is.null(rx$env_tile_url) || env_stat != "mean") {
         env_sql <- build_env_sql(
-          rx$env_var, rx$params$sel_qtr, rx$params$date_range,
-          rx$params$depth_range, stat = env_stat)
+          rx$env_var,
+          isolate(rx$params$sel_qtr), isolate(rx$params$date_range),
+          isolate(rx$params$depth_range), stat = env_stat)
         env_stats <- fetch_h3t_stats(env_sql, H3T_RELEASE)
         env_scale <- build_h3t_scale(env_stats,
           palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
@@ -288,6 +323,11 @@ server <- function(input, output, session) {
       map_env_obj <- map_env_h3t(env_tile_url, env_scale,
                                  env_stat_label, rx$lbl_env_var)
       rx$params$map_params$env_stat <- env_stat
+      rx$env_stat <- env_stat
+      # the hex layer IDs actually on the map, so the polygon switch can hide
+      # exactly those and no others — set_layout_property is NOT guarded against
+      # a missing layer on the client, it throws
+      rx$env_layer_ids <- "env"
       return(compare(rx$map_sp, map_env_obj, elementId = "map"))
     }
 
@@ -311,6 +351,8 @@ server <- function(input, output, session) {
 
     rx$env_scale <- env_scale_list
     rx$params$map_params$env_stat <- env_stat
+    rx$env_stat <- env_stat
+    rx$env_layer_ids <- paste0("env", res_range)
 
     if (debug) {
       message("renderMaplibreCompare: creating comparison map")
@@ -320,6 +362,223 @@ server <- function(input, output, session) {
 
     compare(rx$map_sp, map_env_obj, elementId = "map")
   })
+
+  # summarize within polygons ----
+  # The polygon summary is applied to the LIVE maps through the compare proxy
+  # rather than by re-rendering `output$map`.
+  #
+  # Re-rendering does work — but it rebuilds both maps from scratch, which
+  # throws away the viewport and every layer toggle the user has set, for what
+  # is a change of one overlay. The proxy touches only the layers that change.
+  #
+  # Two traps cost a lot of time here and are both load-bearing:
+  #   * over the proxy, a layer's source must be registered with add_source()
+  #     FIRST and referenced by id — see add_poly_side();
+  #   * nothing in this block may write to rx$params — see the note on the
+  #     rx$agg_unit / rx$env_stat fields.
+  # Each produced the same symptom, an empty map with no error anywhere.
+  POLY_IDS <- list(
+    before = c("sp_poly",  "sp_poly_nodata",  "sp_poly_nodata_hit"),
+    after  = c("env_poly", "env_poly_nodata", "env_poly_nodata_hit"))
+
+  hex_ids_for <- function(side)
+    if (side == "before") rx$sp_layer_ids else rx$env_layer_ids
+
+  # Layer removal, not visibility: mapgl's own layers control decides what is
+  # listed, so a layer that is not on the map simply stops being offered.
+  # `clear_layer()` on a compare proxy was a no-op until the fix in
+  # bbest/mapgl (the R side sends `layer`, both compare handlers read
+  # `message.layer_id`), which is why the hexagons stayed put underneath the
+  # first polygon summary and a second switch would have thrown "Layer with id
+  # sp_poly already exists". Needs mapgl >= that commit.
+  remove_layers <- function(side, ids) {
+    p <- maplibre_compare_proxy("map", map_side = side)
+    for (id in ids) p <- p |> clear_layer(id)
+    invisible(p)
+  }
+
+  clear_poly_layers <- function() {
+    for (side in c("before", "after")) remove_layers(side, POLY_IDS[[side]])
+  }
+
+  # Remove the hex layers rather than setting visibility "none": on the client
+  # `clear_layer` is wrapped in `if (map.getLayer(id))` but `set_layout_property`
+  # is NOT, so hiding a layer that failed to add throws and takes the rest of the
+  # proxy message batch with it. That is not hypothetical — the h3t tile layers
+  # are absent whenever the tile service or its custom protocol is unavailable,
+  # which is exactly when we would be reaching for them blind.
+  clear_hex_layers <- function() {
+    for (side in c("before", "after")) {
+      ids <- hex_ids_for(side)
+      if (!is.null(ids)) remove_layers(side, ids)
+    }
+  }
+
+  # Add one side's polygon layers: outline + hoverable wash for the unsampled
+  # polygons, fill for the summarized ones.
+  #
+  # The source is registered with add_source() FIRST and referenced by id, rather
+  # than passing the sf straight to add_*_layer(). Over the compare proxy those
+  # are not equivalent: add_source() serializes the sf to a GeoJSON string that
+  # the client's "add_source" handler understands, while add_layer() forwards
+  # `source` to map.addLayer() untouched — so an inline sf arrives as
+  # `{geojson: …}`, maplibre accepts it as a geojson source spec, and the layer
+  # renders NOTHING with no error (verified: querySourceFeatures() == 0 while the
+  # layer itself was present on both maps).
+  #
+  # Each layer gets its OWN source under the same id because clear_layer()
+  # removes the layer and the identically-named source together; two layers
+  # sharing one source id would leave the second pointing at nothing.
+  add_poly_side <- function(side, sf_poly, d_val, scale, is_dark) {
+    ids    <- POLY_IDS[[side]]
+    sf_all <- sf_poly |> left_join(d_val |> select(-spatial_name), by = "spatial_key")
+    # only what the tooltip and the colour expression read: POSIXct columns have
+    # no GeoJSON representation and the dates are already in the tooltip string
+    keep   <- \(x) x |> select(any_of(c("spatial_key", "spatial_name", "value",
+                                        "n", "tooltip")))
+    sf_dat <- sf_all |> filter(!is.na(value)) |> keep()
+    sf_nul <- sf_all |>
+      filter(is.na(value)) |>
+      mutate(tooltip = paste0("<strong>", spatial_name, "</strong><br>no data")) |>
+      keep()
+    p <- \() maplibre_compare_proxy("map", map_side = side)
+
+    if (nrow(sf_nul) > 0) {
+      p() |> add_source(id = ids[3], data = sf_nul)
+      p() |> add_fill_layer(
+        id            = ids[3],
+        source        = ids[3],
+        fill_color    = ifelse(is_dark, "#9e9e9e", "#616161"),
+        fill_opacity  = 0.08,
+        tooltip       = "tooltip",
+        hover_options = list(fill_opacity = 0.25))
+      p() |> add_source(id = ids[2], data = sf_nul)
+      p() |> add_line_layer(
+        id            = ids[2],
+        source        = ids[2],
+        line_color    = ifelse(is_dark, "#9e9e9e", "#616161"),
+        line_width    = 1,
+        line_opacity  = 0.6,
+        hover_options = list(line_color = "#ffeb3b", line_opacity = 1))
+    }
+    if (nrow(sf_dat) > 0 && !is.null(scale)) {
+      p() |> add_source(id = ids[1], data = sf_dat)
+      p() |> add_fill_layer(
+        id                 = ids[1],
+        source             = ids[1],
+        fill_color         = scale$expression,
+        fill_outline_color = "white",
+        fill_opacity       = 0.65,
+        tooltip            = "tooltip",
+        hover_options      = list(fill_outline_color = "#ffeb3b",
+                                  fill_opacity       = 0.85))
+    }
+    nrow(sf_dat)
+  }
+
+  apply_poly <- function(agg_unit, env_stat) {
+    req(rx$df_sp, rx$df_env)
+    is_dark <- (input$dark_toggle %||% "dark") == "dark"
+
+    sf_poly <- get_layer_sf(agg_unit)
+    if (is.null(sf_poly)) {
+      showNotification(paste0("No geometry available for '", agg_unit, "'."),
+                       type = "error")
+      updateSelectInput(session, "sel_agg_unit", selected = "hex")
+      return(invisible(NULL))
+    }
+
+    sp_poly  <- calcofi4r::cc_track_query(session, "map_query_sp_poly",
+      list(layer = agg_unit, taxa = rx$params$taxa),
+      prep_sp_poly(rx$df_sp, agg_unit))
+    env_poly <- calcofi4r::cc_track_query(session, "map_query_env_poly",
+      list(layer = agg_unit, env_var = rx$env_var, env_stat = env_stat),
+      prep_env_poly(rx$df_env, agg_unit, env_stat))
+
+    rx$df_sp_poly  <- sp_poly
+    rx$df_env_poly <- env_poly
+    rx$n_poly      <- nrow(sf_poly)
+
+    sp_scale  <- poly_scale(sp_poly$data,
+      palette = \(n) hcl.colors(n, palette = "Viridis"))
+    env_scale <- poly_scale(env_poly,
+      palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
+
+    if (is.null(sp_scale) && is.null(env_scale))
+      showNotification(paste0(
+        "No observations fall within any polygon of '", agg_unit,
+        "' for the current filters."), type = "warning")
+
+    clear_poly_layers()
+    clear_hex_layers()
+    add_poly_side("before", sf_poly, sp_poly$data, sp_scale,  is_dark)
+    add_poly_side("after",  sf_poly, env_poly,     env_scale, is_dark)
+
+    # Rebuild the floating layers control so it lists what is actually on the
+    # map: the boundary layer being summarized (named after itself, not
+    # "Polygon Summary"), and no "Hexagon Data" entry, because the hexagons are
+    # gone. Each side gets only its own ids — a control cannot reach the other
+    # map, and the ui.R mirror script handles the cross-map half.
+    for (side in c("before", "after")) {
+      ctrl <- build_layers_control(
+        rx$spatial_visible, d_spatial_layers, POLY_IDS[[side]],
+        label = agg_unit)
+      maplibre_compare_proxy("map", map_side = side) |>
+        clear_controls(controls = "layers") |>
+        add_layers_control(
+          position     = "top-right",
+          layers       = ctrl,
+          collapsible  = TRUE,
+          margin_right = 45)
+    }
+
+    # a polygon summary has no zoom-dependent scale, so hand the legend observer
+    # the same one at every level (the h3t path does the same)
+    rx$sp_scale     <- rep(list(sp_scale),  length(res_range))
+    rx$env_scale    <- rep(list(env_scale), length(res_range))
+    rx$lbl_sp_value <- if (!is.na(sp_poly$unit))
+      paste0("Avg. CPUE (", sp_poly$unit, ")") else "Avg. CPUE"
+    rx$agg_unit <- agg_unit
+    rx$env_stat <- env_stat
+
+    # fit to the polygons that HAVE data, so switching unit lands where the
+    # observations are rather than at the full extent of a statewide layer. This
+    # also fires the moveend the legend observer listens for.
+    sf_dat <- sf_poly |>
+      inner_join(sp_poly$data |> select(spatial_key), by = "spatial_key")
+    if (nrow(sf_dat) == 0) sf_dat <- sf_poly
+    for (side in c("before", "after"))
+      maplibre_compare_proxy("map", map_side = side) |> fit_bounds(bbox = sf_dat)
+
+    invisible(NULL)
+  }
+
+  # Returning to hexagons drops the polygon layers and rebuilds the widget, which
+  # is the only path that knows how to reconstruct BOTH hex paths (h3t tile
+  # source, or ten sf resolution layers) — apply_poly() removed them outright
+  # rather than hiding them, for the reason given on clear_hex_layers().
+  restore_hex <- function() {
+    clear_poly_layers()
+    rx$lbl_sp_value <- "Avg. CPUE (density)"
+    rx$agg_unit <- "hex"
+    map_rebuild(map_rebuild() + 1)
+  }
+
+  observeEvent(input$sel_agg_unit, {
+    agg_unit <- input$sel_agg_unit %||% "hex"
+    if (debug) message("sel_agg_unit -> ", agg_unit)
+    if (agg_unit == "hex") restore_hex()
+    else apply_poly(agg_unit, input$sel_env_stat %||% "mean")
+  }, ignoreInit = TRUE)
+
+  # env_stat: in polygon mode recompute through the proxy; in hex mode rebuild
+  # the widget, which is exactly what this control did before.
+  observeEvent(input$sel_env_stat, {
+    agg_unit <- input$sel_agg_unit %||% "hex"
+    if (agg_unit == "hex") map_rebuild(map_rebuild() + 1)
+    else apply_poly(agg_unit, input$sel_env_stat %||% "mean")
+  }, ignoreInit = TRUE)
+
   # dark_toggle -> map.style ----
   observeEvent(input$dark_toggle, {
     style  <- ifelse(
@@ -412,11 +671,18 @@ server <- function(input, output, session) {
       }
     }
 
-    # rebuild layers control on both sides with only selected layers
-    hex_ids <- c(paste0("sp", res_range), paste0("env", res_range))
-    ctrl    <- build_layers_control(selected, d_spatial_layers, hex_ids)
-
+    # Rebuild the layers control on both sides, each with only ITS OWN data
+    # layer ids. Handing every side both sides' ids is why the data toggle only
+    # worked one way: the control lists e.g. "env" on the species map, where no
+    # such layer exists, and the client's set_layout_property is NOT guarded by
+    # `if (map.getLayer(id))` — so switching the group back ON throws and the
+    # toggle dies half-applied. The ids come from what was actually added to
+    # each map (h3t: "sp"/"env"; classic: sp1..sp10 / env1..env10), not from a
+    # hardcoded classic-path guess.
     for (side in c("before", "after")) {
+      ctrl <- build_layers_control(
+        selected, d_spatial_layers,
+        if (side == "before") rx$sp_layer_ids else rx$env_layer_ids)
       maplibre_compare_proxy("map", map_side = side) |>
         clear_controls(controls = "layers") |>
         add_layers_control(
@@ -449,35 +715,70 @@ server <- function(input, output, session) {
     lbl_env_stat <- names(which(env_stat_choices == env_stat))
 
     # Species legend (left / before)
-    maplibre_compare_proxy("map", map_side = "before") |>
-      add_legend(
-        # CPUE (density): count/10m² for oblique/vertical tows, count/100m³ for
-        # manta — the map value averages across net types, so the legend names
-        # the measure without a single unit (per-tow unit is in the download).
-        legend_title = "Avg. CPUE (density)",
-        values       = round(sp_scale$breaks, 2),
-        colors       = sp_scale$colors,
-        type         = "continuous",
-        position     = "bottom-left",
-        width        = "275px",
-        target       = "compare",
-        style        = legend_style(background_opacity = 0.5),
-        add          = FALSE
-      )
+    # In hex mode the title is unit-free: CPUE is count/10m² for oblique and
+    # vertical tows but count/100m³ for manta, and the hexagon value averages
+    # across net types (per-tow unit is in the download). The polygon path picks
+    # ONE cpue_unit and names it here instead — rx$lbl_sp_value carries whichever
+    # applies. A NULL scale means nothing was summarizable, so draw no legend
+    # rather than an empty one.
+    if (!is.null(sp_scale)) {
+      maplibre_compare_proxy("map", map_side = "before") |>
+        add_legend(
+          legend_title = rx$lbl_sp_value %||% "Avg. CPUE (density)",
+          values       = round(sp_scale$breaks, 2),
+          colors       = sp_scale$colors,
+          type         = "continuous",
+          position     = "bottom-left",
+          width        = "275px",
+          target       = "compare",
+          style        = legend_style(background_opacity = 0.5),
+          add          = FALSE
+        )
+    }
 
     # Environmental legend (right / after)
-    maplibre_compare_proxy("map", map_side = "after") |>
-      add_legend(
-        legend_title = paste(lbl_env_stat, rx$lbl_env_var),
-        values       = signif(env_scale$breaks, 4),
-        colors       = env_scale$colors,
-        type         = "continuous",
-        position     = "bottom-right",
-        width        = "275px",
-        target       = "compare",
-        style        = legend_style(background_opacity = 0.5),
-        add         = TRUE
-      )
+    if (!is.null(env_scale)) {
+      maplibre_compare_proxy("map", map_side = "after") |>
+        add_legend(
+          legend_title = paste(lbl_env_stat, rx$lbl_env_var),
+          values       = signif(env_scale$breaks, 4),
+          colors       = env_scale$colors,
+          type         = "continuous",
+          position     = "bottom-right",
+          width        = "275px",
+          target       = "compare",
+          style        = legend_style(background_opacity = 0.5),
+          add         = TRUE
+        )
+    }
+  })
+
+  # poly_note ----
+  # What the polygon summary actually covers: how many of the layer's polygons
+  # carry data, which cpue_unit the species side settled on, and how many
+  # observations that excluded. The unit choice is not cosmetic — std_tally is a
+  # gear-standardized density only where a net tow supports it — so it is stated
+  # in the sidebar rather than left to be inferred from the legend.
+  output$poly_note <- renderUI({
+    agg_unit <- input$sel_agg_unit %||% "hex"
+    if (agg_unit == "hex") return(NULL)
+    req(rx$df_sp_poly)
+
+    sp_poly <- rx$df_sp_poly
+    n_with  <- nrow(sp_poly$data)
+    n_tot   <- rx$n_poly %||% n_with
+
+    div(
+      class = "small text-muted mb-3",
+      div(sprintf("%s of %s polygons contain observations; the rest are drawn as outlines marked “no data”.",
+                  format(n_with, big.mark = ","), format(n_tot, big.mark = ","))),
+      if (!is.na(sp_poly$unit)) div(
+        class = "mt-1",
+        sprintf("Species values are averaged in %s.", sp_poly$unit),
+        if (sp_poly$n_excluded > 0) sprintf(
+          " %s observation(s) in %d other unit(s) are excluded — averaging across units is not a quantity.",
+          format(sp_poly$n_excluded, big.mark = ","), nrow(sp_poly$units) - 1L))
+    )
   })
 
   # ts_plot ----
@@ -844,6 +1145,7 @@ server <- function(input, output, session) {
       column  = "sp.value",
       palette = \(n) hcl.colors(n, palette = "Viridis"))
     rx$map_sp     <- map_sp(sp_hex_list, sp_scale_list, is_dark = is_dark)
+    rx$sp_layer_ids <- paste0("sp", res_range)
     if (debug) message("Species map generated and stored in rx$map_sp\n")
 
     # prepare scatterplot data
@@ -1255,13 +1557,41 @@ server <- function(input, output, session) {
         } else if (i == "map") {
           req(rx$df_sp, rx$df_env)
           if (is.null(rx$params$map_params$env_stat)) {rx$params$map_params$env_stat <- "mean"}
-          sp_hex  <- prep_sp_hex(rx$df_sp, res_range) |> bind_rows() |> select(-tooltip)
-          env_hex <- prep_env_hex(rx$df_env, res_range,
-                                  rx$params$map_params$env_stat) |>
-            bind_rows() |> select(-tooltip)
+          env_stat <- rx$env_stat %||% rx$params$map_params$env_stat
+          agg_unit <- rx$agg_unit %||% "hex"
 
-          write_data(sp_hex , "data/summarized/map/species_map.csv")
-          write_data(env_hex, "data/summarized/map/env_map.csv")
+          if (agg_unit != "hex") {
+            # "Map data" must be the data the map is showing. Recomputed rather
+            # than lifted from rx so the CSV cannot lag a filter change, and it
+            # is cheap (~0.05s) next to everything else in this bundle.
+            sp_poly  <- prep_sp_poly(rx$df_sp, agg_unit)
+            env_poly <- prep_env_poly(rx$df_env, agg_unit, env_stat)
+
+            write_data(
+              sp_poly$data |>
+                select(-tooltip) |>
+                mutate(layer = agg_unit, cpue_unit = sp_poly$unit),
+              "data/summarized/map/species_polygon.csv")
+            write_data(
+              env_poly |>
+                select(-tooltip) |>
+                mutate(layer = agg_unit, env_stat = env_stat),
+              "data/summarized/map/env_polygon.csv")
+
+            # the units this summary had to leave out, so the CSV is not the
+            # only record that a choice was made
+            write_data(
+              sp_poly$units |> mutate(summarized = cpue_unit == sp_poly$unit),
+              "data/summarized/map/species_polygon_units.csv")
+
+          } else {
+            sp_hex  <- prep_sp_hex(rx$df_sp, res_range) |> bind_rows() |> select(-tooltip)
+            env_hex <- prep_env_hex(rx$df_env, res_range, env_stat) |>
+              bind_rows() |> select(-tooltip)
+
+            write_data(sp_hex , "data/summarized/map/species_map.csv")
+            write_data(env_hex, "data/summarized/map/env_map.csv")
+          }
 
         } else if (i == "ts") {
           req(rx$df_sp, rx$df_env)

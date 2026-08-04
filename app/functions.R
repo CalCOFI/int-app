@@ -502,6 +502,255 @@ prep_env_hex <- function(df_env, res_range, env_stat) {
 }
 
 
+# spatial polygon summaries ----
+# The hex path bins observations into H3 cells; this path bins them into the
+# polygons of a named boundary layer (an MPA, a county, an ecoregion) instead,
+# and reports one value per polygon.
+#
+# The join is `sample_spatial`, materialized by prep_db.R at the SAMPLE grain —
+# an observation's position IS its sample's position, so a 1.5M-row
+# point-in-polygon join answers the same question as a 20M-row one. bio_obs
+# carries `sample_key`; env_obs carries the same key named `cast_id`.
+#
+# ONE layer at a time, deliberately: the layers overlap (a station sits inside a
+# county AND an ecoregion AND an MPA, and every one of those is true), so a
+# summary spanning layers would count the same observation more than once. The
+# UI picker is single-select for exactly this reason — see `agg_unit_choices`
+# in global.R.
+
+# boundary geometry, keyed "{layer}@{tolerance}". Read once per R process rather
+# than per switch: the summary query is ~0.05s but the geometry is up to ~900 KB
+# of GeoJSON, and users toggle back and forth between layers.
+poly_geom_cache <- new.env(parent = emptyenv())
+
+
+#' Summarize Species Observations Within a Spatial Layer's Polygons
+#'
+#' Aggregates species CPUE into the polygons of one boundary layer (e.g.
+#' "Marine Protected Areas"), the polygon counterpart of \code{\link{prep_sp_hex}}.
+#'
+#' @param df_sp dbplyr lazy table from \code{\link{get_sp}} (carries
+#'   \code{sample_key}, \code{std_tally}, \code{cpue_unit}, \code{time_start})
+#' @param sel_layer Character name of the spatial layer, matching
+#'   \code{sample_spatial.layer} (e.g. "CA Counties")
+#'
+#' @return List with:
+#'   \itemize{
+#'     \item \code{data} - tibble of \code{spatial_key}, \code{spatial_name},
+#'       \code{value} (mean CPUE), \code{n}, date range, \code{tooltip}
+#'     \item \code{unit} - the single \code{cpue_unit} summarized
+#'     \item \code{n_excluded} - observations dropped because they carry a
+#'       different unit
+#'     \item \code{units} - the full unit mix, most-represented first
+#'   }
+#'
+#' @details
+#' \strong{One unit, named.} \code{std_tally} is a gear-standardized density only
+#' where a net tow supports it; elsewhere it is the value the source published,
+#' in its own \code{cpue_unit}. A mean over a mix of units is not a quantity —
+#' and the mix is not hypothetical: \emph{Sardinops sagax} alone spans
+#' \code{count/10m2} (oblique/vertical tows), \code{count/100m3} (manta) and a
+#' bare \code{count} from \code{swfsc_cufes}, the last outnumbering the others
+#' 4:1. So this summarizes the most-represented unit only, returns that unit for
+#' the legend to name, and returns how many observations that excluded.
+#'
+#' @seealso \code{\link{map_poly}} for visualization
+#' @seealso \code{\link{prep_sp_hex}} for the hexagon equivalent
+#'
+#' @importFrom dplyr filter inner_join select count group_by summarize collect mutate arrange desc
+#'
+#' @export
+prep_sp_poly <- function(df_sp, sel_layer) {
+  if (debug)
+    message("prep_sp_poly: summarizing species within '", sel_layer, "'")
+
+  d <- df_sp |>
+    filter(!is.na(std_tally), !is.na(cpue_unit)) |>
+    inner_join(
+      tbl(con, "sample_spatial") |>
+        filter(layer == !!sel_layer) |>
+        select(sample_key, spatial_key, spatial_name),
+      by = "sample_key")
+
+  # unit mix first, so the summary below is over a single unit
+  d_units <- d |>
+    count(cpue_unit) |>
+    collect() |>
+    arrange(desc(n))
+
+  if (nrow(d_units) == 0) {
+    if (debug) message("prep_sp_poly: no observations fall in this layer")
+    # SHAPED empty, not tibble(): map_poly() joins this onto the layer geometry
+    # by name, so a zero-COLUMN tibble errors where a zero-ROW one draws every
+    # polygon as "no data" — which is the honest answer here.
+    return(list(
+      data = tibble(
+        spatial_key  = character(), spatial_name = character(),
+        value        = numeric(),   n            = integer(),
+        min_dtime    = as.POSIXct(character()),
+        max_dtime    = as.POSIXct(character()),
+        tooltip      = character()),
+      unit = NA_character_, n_excluded = 0, units = d_units))
+  }
+
+  unit       <- d_units$cpue_unit[1]
+  n_excluded <- sum(d_units$n[-1])
+
+  d_sum <- d |>
+    filter(cpue_unit == !!unit) |>
+    group_by(spatial_key, spatial_name) |>
+    summarize(
+      value     = mean(std_tally, na.rm = TRUE),
+      n         = n(),
+      min_dtime = min(time_start, na.rm = TRUE),
+      max_dtime = max(time_start, na.rm = TRUE),
+      .groups   = "drop") |>
+    collect() |>
+    mutate(
+      tooltip = paste0(
+        "<strong>", spatial_name, "</strong>",
+        "<br>Avg. CPUE (", unit, "): ", round(value, 2),
+        "<br>Num. Obs.: ", n,
+        "<br>Date Range: ", as.Date(min_dtime), " to ", as.Date(max_dtime)))
+
+  if (debug)
+    message("prep_sp_poly: ", nrow(d_sum), " polygons with data, unit = ", unit,
+            ", ", n_excluded, " obs excluded in ", nrow(d_units) - 1,
+            " other unit(s)")
+
+  list(data = d_sum, unit = unit, n_excluded = n_excluded, units = d_units)
+}
+
+
+#' Summarize Environmental Observations Within a Spatial Layer's Polygons
+#'
+#' Aggregates an environmental variable into the polygons of one boundary layer,
+#' the polygon counterpart of \code{\link{prep_env_hex}}.
+#'
+#' @param df_env dbplyr lazy table from \code{\link{get_env}} (carries
+#'   \code{cast_id}, \code{qty}, \code{dtime})
+#' @param sel_layer Character name of the spatial layer
+#' @param env_stat Character aggregation: "mean", "median", "min", "max", "sd"
+#'
+#' @return tibble of \code{spatial_key}, \code{spatial_name}, \code{value},
+#'   \code{n}, date range and \code{tooltip}
+#'
+#' @details
+#' \code{env_obs} carries the sample key as \code{cast_id}, so the join to
+#' \code{sample_spatial} is \code{cast_id = sample_key}.
+#'
+#' @seealso \code{\link{map_poly}} for visualization
+#'
+#' @importFrom dplyr filter inner_join select group_by summarize collect mutate case_when join_by
+#'
+#' @export
+prep_env_poly <- function(df_env, sel_layer, env_stat) {
+  if (debug)
+    message("prep_env_poly: summarizing ", env_stat, " within '", sel_layer, "'")
+
+  d_sum <- df_env |>
+    filter(!is.na(qty)) |>
+    inner_join(
+      tbl(con, "sample_spatial") |>
+        filter(layer == !!sel_layer) |>
+        select(sample_key, spatial_key, spatial_name),
+      by = join_by(cast_id == sample_key)) |>
+    group_by(spatial_key, spatial_name) |>
+    summarize(
+      value = case_when(
+        env_stat == "mean"   ~ mean(qty, na.rm = TRUE),
+        env_stat == "median" ~ median(qty, na.rm = TRUE),
+        env_stat == "min"    ~ min(qty, na.rm = TRUE),
+        env_stat == "max"    ~ max(qty, na.rm = TRUE),
+        env_stat == "sd"     ~ sd(qty, na.rm = TRUE),
+        TRUE                 ~ mean(qty, na.rm = TRUE)),
+      n         = n(),
+      min_dtime = min(dtime, na.rm = TRUE),
+      max_dtime = max(dtime, na.rm = TRUE),
+      .groups   = "drop") |>
+    collect() |>
+    mutate(
+      tooltip = paste0(
+        "<strong>", spatial_name, "</strong>",
+        "<br>Value: ", round(value, 2),
+        "<br>Num. Obs.: ", n,
+        "<br>Date Range: ", as.Date(min_dtime), " to ", as.Date(max_dtime)))
+
+  if (debug)
+    message("prep_env_poly: ", nrow(d_sum), " polygons with data")
+
+  d_sum
+}
+
+
+#' Read a Spatial Layer's Polygon Geometry
+#'
+#' Reads the boundary geometry for one layer out of the app's local DuckDB
+#' \code{spatial} table, simplified for the browser, and caches it for the life
+#' of the R process.
+#'
+#' @param sel_layer Character name of the spatial layer
+#' @param tolerance Numeric simplification tolerance in degrees
+#'   (\code{POLY_SIMPLIFY_DEG})
+#'
+#' @return sf data frame with \code{spatial_key}, \code{spatial_name}, geometry
+#'
+#' @details
+#' The geometry comes from the DB rather than the PMTiles overlay so the join to
+#' the summary is the exact \code{spatial_key} — the PMTiles carry only a
+#' per-file \code{id}, which equals \code{spatial.id} for single-layer groups but
+#' NOT for a multi-layer group like \code{noaa_maritime_boundaries}.
+#' \code{ST_SimplifyPreserveTopology} keeps a MULTIPOLYGON's parts, and at the
+#' default tolerance (\code{POLY_SIMPLIFY_DEG}, ~11 m) stays finer than the
+#' smallest hexagon the map draws.
+#'
+#' \code{NOT ST_IsEmpty(geom)} is not paranoia: releases up to and including
+#' v2026.08.02 ship National Marine Sanctuaries, CA Watersheds (HUC8) and Ocean
+#' Disposal Sites as \code{GEOMETRYCOLLECTION EMPTY} — the ingest bound the
+#' per-layer sf objects together by column name, so any source whose geometry
+#' column was not called \code{geometry} lost its shape. Fixed in
+#' \code{workflows/ingest_spatial.qmd} (\code{normalize_geom_col()}); this guard
+#' keeps the app honest against a release built before that.
+#'
+#' @importFrom glue glue_sql
+#' @importFrom sf st_as_sf st_set_geometry
+#'
+#' @export
+get_layer_sf <- function(sel_layer, tolerance = POLY_SIMPLIFY_DEG) {
+  key <- paste0(sel_layer, "@", tolerance)
+  if (!is.null(poly_geom_cache[[key]])) {
+    if (debug) message("get_layer_sf: cache hit for '", sel_layer, "'")
+    return(poly_geom_cache[[key]])
+  }
+
+  q <- glue_sql(
+    "SELECT spatial_key,
+            COALESCE(name, spatial_key) AS spatial_name,
+            ST_AsText(ST_SimplifyPreserveTopology(geom, {tolerance})) AS geom_wkt
+       FROM spatial
+      WHERE layer = {sel_layer}
+        AND geom IS NOT NULL
+        AND NOT ST_IsEmpty(geom)",
+    .con = con)
+
+  d <- dbGetQuery(con, q)
+  if (nrow(d) == 0) {
+    if (debug) message("get_layer_sf: no geometry for '", sel_layer, "'")
+    return(NULL)
+  }
+
+  sf_poly <- d |>
+    st_as_sf(wkt = "geom_wkt", crs = 4326) |>
+    st_set_geometry("geometry")
+
+  if (debug)
+    message("get_layer_sf: ", nrow(sf_poly), " polygons for '", sel_layer, "'")
+
+  poly_geom_cache[[key]] <- sf_poly
+  sf_poly
+}
+
+
 # cache helpers ----
 
 #' compute cache key from default parameters and database modification time
@@ -1108,10 +1357,14 @@ add_spatial_layers <- function(map, d_layers, visible_ids = NULL, is_dark = TRUE
 #'
 #' @param visible_ids Character vector of currently visible spatial layer IDs
 #' @param d_layers Full spatial layers registry data frame
-#' @param hex_layer_ids Character vector of hexagon layer IDs (both sp + env)
+#' @param hex_layer_ids Character vector of data layer IDs (both sp + env)
+#' @param label Character name for the data-layer entry. Defaults to
+#'   "Hexagon Data"; the polygon-summary path passes its own so the control
+#'   names what is actually drawn.
 #'
 #' @return Named list suitable for \code{add_layers_control(layers = ...)}
-build_layers_control <- function(visible_ids, d_layers, hex_layer_ids) {
+build_layers_control <- function(visible_ids, d_layers, hex_layer_ids,
+                                 label = "Hexagon Data") {
   visible <- d_layers |> filter(dataset_id %in% visible_ids)
 
   # each layer is its own toggle entry; polygons pair fill + outline
@@ -1123,8 +1376,8 @@ build_layers_control <- function(visible_ids, d_layers, hex_layer_ids) {
     setNames(list(ids), row$layer)
   })
 
-  # combine hex data (BOTH sp + env IDs) + individual layer entries
-  c(list("Hexagon Data" = hex_layer_ids),
+  # combine data layers (BOTH sp + env IDs) + individual layer entries
+  c(setNames(list(hex_layer_ids), label),
     unlist(layer_entries, recursive = FALSE))
 }
 
@@ -1194,9 +1447,12 @@ map_sp <- function(sp_hex_list, sp_scale_list, is_dark = T) {
           fill_opacity       = 0.85))
   }
 
-  # add layers control with hexagons + visible spatial layers
-  hex_ids <- c(paste0("sp", res_range), paste0("env", res_range))
-  ctrl    <- build_layers_control(vis_ids, d_spatial_layers, hex_ids)
+  # add layers control with hexagons + visible spatial layers. Only THIS map's
+  # own layer ids: a control listing the other side's ids cannot toggle them
+  # (different map) and throws on the way back ON, because the client does not
+  # guard set_layout_property against a missing layer.
+  ctrl    <- build_layers_control(vis_ids, d_spatial_layers,
+                                  paste0("sp", res_range))
   sp_map  <- sp_map |>
     add_layers_control(
       position     = "top-right",
@@ -1274,9 +1530,10 @@ map_env <- function(env_hex_list, env_scale_list, env_stat_label, env_var_label,
           fill_opacity       = 0.85))
   }
 
-  # add layers control with hexagons + visible spatial layers
-  hex_ids <- c(paste0("sp", res_range), paste0("env", res_range))
-  ctrl    <- build_layers_control(vis_ids, d_spatial_layers, hex_ids)
+  # add layers control with hexagons + visible spatial layers (this map's ids
+  # only — see the note in map_sp())
+  ctrl    <- build_layers_control(vis_ids, d_spatial_layers,
+                                  paste0("env", res_range))
   env_map <- env_map |>
     add_layers_control(
       position     = "top-right",
@@ -1285,6 +1542,173 @@ map_env <- function(env_hex_list, env_scale_list, env_stat_label, env_var_label,
       margin_right = 45)
 
   return(env_map)
+}
+
+
+#' Build a Colour Scale for a Polygon Summary
+#'
+#' \code{interpolate_palette} wrapper that survives the two degenerate cases a
+#' polygon summary hits routinely: no polygon has data, and every polygon that
+#' does has the same value (one sampled MPA, say). MapLibre rejects an
+#' \code{interpolate} expression whose stops are not strictly ascending, so the
+#' single-value case returns a flat colour instead — the same shape
+#' \code{build_h3t_scale} returns.
+#'
+#' @param d tibble with a numeric \code{value} column
+#' @param palette Function of n returning n colours
+#' @param n_stops Integer number of colour stops
+#'
+#' @return List with \code{breaks}, \code{colors}, \code{expression}, or NULL
+#'   when there is nothing to scale
+#'
+#' @export
+poly_scale <- function(d, palette, n_stops = 5L) {
+  if (is.null(d) || nrow(d) == 0) return(NULL)
+  v <- d$value[is.finite(d$value)]
+  if (length(v) == 0) return(NULL)
+
+  if (min(v) == max(v)) {
+    cols <- palette(2)
+    return(list(breaks = c(min(v), max(v)), colors = cols, expression = cols[1]))
+  }
+
+  interpolate_palette(d, column = "value", palette = palette, n = n_stops)
+}
+
+
+#' Create Interactive Map Summarized Within a Spatial Layer's Polygons
+#'
+#' The polygon counterpart of \code{\link{map_sp}} / \code{\link{map_env}}: one
+#' fill layer coloured by the per-polygon summary, plus an outline-only layer for
+#' the polygons of the same boundary layer that contain no observations.
+#'
+#' @param sf_poly sf of the layer's polygons from \code{\link{get_layer_sf}}
+#' @param d_val tibble from \code{\link{prep_sp_poly}}\code{$data} or
+#'   \code{\link{prep_env_poly}}, joined on \code{spatial_key}
+#' @param scale Colour scale list (\code{$expression}) from
+#'   \code{interpolate_palette}, or NULL when no polygon has data
+#' @param side Either "sp" (species, left) or "env" (environment, right);
+#'   determines the layer IDs
+#' @param is_dark Logical, dark basemap
+#'
+#' @return maplibre object
+#'
+#' @details
+#' \strong{Empty polygons are drawn, not omitted.} Most polygons in a layer
+#' contain no CalCOFI samples — 125 of 155 MPAs, for instance. Dropping them
+#' would make the layer look sparser than it is and leave no way to tell an
+#' unsampled polygon from one outside the layer; filling them would read as zero.
+#' So they get an outline and a "no data" tooltip, and no fill.
+#'
+#' The map fits to the polygons that \emph{have} data, so switching aggregation
+#' unit lands the user where the observations are rather than at the full extent
+#' of a statewide layer. That \code{fit_bounds} is also what makes the legend
+#' appear: legends are drawn by the \code{map_before_view} observer in server.R,
+#' which fires on the resulting \code{moveend}.
+#'
+#' @seealso \code{\link{prep_sp_poly}}, \code{\link{prep_env_poly}},
+#'   \code{\link{get_layer_sf}}
+#'
+#' @importFrom mapgl maplibre add_fill_layer add_line_layer add_scale_control
+#' @importFrom dplyr left_join filter
+#'
+#' @export
+map_poly <- function(sf_poly, d_val, scale, side = c("sp", "env"),
+                     is_dark = TRUE) {
+  side <- match.arg(side)
+
+  sf_all <- sf_poly |>
+    left_join(d_val |> select(-spatial_name), by = "spatial_key")
+
+  sf_dat <- sf_all |> filter(!is.na(value))
+  sf_nul <- sf_all |>
+    filter(is.na(value)) |>
+    mutate(tooltip = paste0("<strong>", spatial_name, "</strong><br>no data"))
+
+  if (debug)
+    message("map_poly (", side, "): ", nrow(sf_dat), " polygons with data, ",
+            nrow(sf_nul), " without")
+
+  # Set the view at CONSTRUCTION as well as via fit_bounds.
+  #
+  # fit_bounds() alone is not enough here: `output$map` re-renders the compare
+  # widget when the aggregation unit changes, and on a re-render the client
+  # applies the constructor's center/zoom but NOT `fitBounds` — leaving a map
+  # parked at the default zoom 0, which on the globe projection is a pea-sized
+  # planet and reads as "the feature is broken". Constructing with the view
+  # already set works either way, and fit_bounds() stays because it is what
+  # fires the `moveend` the legend observer in server.R listens for.
+  bb    <- st_bbox(if (nrow(sf_dat) > 0) sf_dat else sf_all)
+  span  <- max(bb["xmax"] - bb["xmin"], bb["ymax"] - bb["ymin"])
+  zoom  <- if (is.finite(span) && span > 0)
+    max(0, min(14, log2(360 / span) - 0.5)) else 5
+
+  m <- maplibre(
+    style  = carto_style(ifelse(is_dark, "dark-matter", "voyager")),
+    center = c(mean(bb[c("xmin", "xmax")]), mean(bb[c("ymin", "ymax")])),
+    zoom   = zoom) |>
+    fit_bounds(bbox = if (nrow(sf_dat) > 0) sf_dat else sf_all) |>
+    add_scale_control(position = "top-left", unit = "metric") |>
+    add_navigation_control()
+
+  # boundary reference layers first (below the summary)
+  vis_ids <- d_spatial_layers |> filter(default_visible) |> pull(dataset_id)
+  m <- m |>
+    add_spatial_layers(d_spatial_layers, visible_ids = vis_ids, is_dark = is_dark)
+
+  id_dat <- paste0(side, "_poly")
+  id_nul <- paste0(side, "_poly_nodata")
+
+  # Unsampled polygons: outline, so they read as "no data" and never as zero.
+  #
+  # The near-transparent grey fill underneath is there to be HOVERED, not seen —
+  # an outline alone is a ~1px hit target, so "why does this one not have a
+  # tooltip?" becomes indistinguishable from "I missed it by two pixels". A
+  # neutral grey at 8% cannot be mistaken for a value on either scale (viridis
+  # runs dark purple → yellow, Spectral blue → red).
+  if (nrow(sf_nul) > 0) {
+    m <- m |>
+      add_fill_layer(
+        id            = paste0(id_nul, "_hit"),
+        source        = sf_nul,
+        fill_color    = ifelse(is_dark, "#9e9e9e", "#616161"),
+        fill_opacity  = 0.08,
+        tooltip       = "tooltip",
+        hover_options = list(fill_opacity = 0.25)) |>
+      add_line_layer(
+        id            = id_nul,
+        source        = sf_nul,
+        line_color    = ifelse(is_dark, "#9e9e9e", "#616161"),
+        line_width    = 1,
+        line_opacity  = 0.6,
+        hover_options = list(line_color = "#ffeb3b", line_opacity = 1))
+  }
+
+  if (nrow(sf_dat) > 0 && !is.null(scale)) {
+    m <- m |>
+      add_fill_layer(
+        id                 = id_dat,
+        source             = sf_dat,
+        fill_color         = scale$expression,
+        fill_outline_color = "white",
+        fill_opacity       = 0.65,
+        tooltip            = "tooltip",
+        hover_options      = list(
+          fill_outline_color = "#ffeb3b",
+          fill_opacity       = 0.85))
+  }
+
+  ctrl <- build_layers_control(
+    vis_ids, d_spatial_layers,
+    c(id_dat, id_nul, paste0(id_nul, "_hit")),
+    label = "Polygon Summary")
+
+  m |>
+    add_layers_control(
+      position     = "top-right",
+      layers       = ctrl,
+      collapsible  = TRUE,
+      margin_right = 45)
 }
 
 

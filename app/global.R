@@ -97,6 +97,47 @@ pmtiles_base_url <- "https://storage.googleapis.com/calcofi-files-public/_spatia
 # cd ~/Github/CalCOFI/db-viz-hex/data
 # gcloud storage buckets update gs://calcofi-files-public --cors-file=_cors_file.json
 
+# spatial summary layers ----
+# Which boundary layers the map can summarize WITHIN (as opposed to the H3
+# hexagons). Driven off `sample_spatial` — the sample-grain point-in-polygon
+# membership table prep_db.R materializes — so a layer only appears if
+# observations actually fall in it. That also keeps three broken layers out of
+# the picker on its own: the release ships National Marine Sanctuaries, CA
+# Watersheds (HUC8) and Ocean Disposal Sites as GEOMETRYCOLLECTION EMPTY (an
+# ingest_spatial.qmd bug), so they have no memberships to summarize and no
+# geometry to draw.
+# Simplification for the polygon geometry sent to the browser. 0.0001 degrees is
+# ~11 m — finer than the ~65 m edge of an H3 res-10 cell, the finest bin the hex
+# view ever draws — so a boundary is never the coarser of the two things on
+# screen. Costs 2.8 MB of WKT on the worst layer (CDFW Regions) against 10.8 MB
+# unsimplified, and under 1 MB on most.
+POLY_SIMPLIFY_DEG <- 0.0001
+
+d_summary_layers <- dbGetQuery(
+  con,
+  "SELECT layer,
+          COUNT(DISTINCT spatial_key) AS n_polygons,
+          COUNT(DISTINCT sample_key)  AS n_samples
+     FROM sample_spatial
+    GROUP BY 1") |>
+  inner_join(
+    d_spatial_layers |>
+      filter(geom_type == "polygon") |>
+      select(layer, group),
+    by = "layer") |>
+  arrange(group, desc(n_samples))
+
+# "Summarize Within" choices: hexagons, then one optgroup per registry group.
+# SINGLE-select on purpose — layers overlap (a station is inside a county AND an
+# ecoregion AND an MPA, all true at once), so letting several be summarized
+# together would count the same observation more than once.
+agg_unit_choices <- c(
+  list("Hexagons (H3)" = "hex"),
+  split(d_summary_layers$layer, d_summary_layers$group) |>
+    lapply(\(x) setNames(as.list(x), x)))
+
+message("summarizable spatial layers: ", nrow(d_summary_layers))
+
 # load functions ----
 source(here("app/functions.R"))
 source(here("app/functions_h3t.R"))

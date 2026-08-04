@@ -174,7 +174,9 @@ map_sp_h3t <- function(tile_url, scale, bbox = c(-125, 30, -115, 38),
       tooltip            = "value"
     )
 
-  ctrl <- build_layers_control(vis_ids, d_spatial_layers, c("sp", "env"))
+  # this map's own layer id only — a control listing "env" here throws when
+  # toggled back on, since that layer lives on the other map (see map_sp())
+  ctrl <- build_layers_control(vis_ids, d_spatial_layers, "sp")
   m |> mapgl::add_layers_control(
     position = "top-right", layers = ctrl, collapsible = TRUE, margin_right = 45
   )
@@ -209,7 +211,7 @@ map_env_h3t <- function(tile_url, scale, env_stat_label, env_var_label,
       tooltip            = "value"
     )
 
-  ctrl <- build_layers_control(vis_ids, d_spatial_layers, c("sp", "env"))
+  ctrl <- build_layers_control(vis_ids, d_spatial_layers, "env")
   m |> mapgl::add_layers_control(
     position = "top-right", layers = ctrl, collapsible = TRUE, margin_right = 45
   )

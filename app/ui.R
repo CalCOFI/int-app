@@ -148,6 +148,61 @@ ui <- function(req) page_sidebar(
     }
     ")) ),
 
+  # Make the floating layers control drive BOTH sides of the compare widget.
+  #
+  # mapgl's control is deliberately per-map, and in a swipe compare both maps are
+  # full-size and stacked, so the two controls land on the same screen position
+  # and only the top one (the "after"/right map's) is clickable. The left map's
+  # control is underneath, unreachable — so a toggle appeared to work on half the
+  # map and nowhere else.
+  #
+  # This wraps _setVisibility rather than the click handler, so it rides on top
+  # of whatever the control decides, including its own `map.getLayer()` guard.
+  # Layer ids are side-specific ("sp_poly" vs "env_poly", "sp3" vs "env3") and
+  # are mapped across; the shared PMTiles boundary ids are identical on both maps
+  # and pass through unchanged. If mapgl ever grows a first-class option for
+  # this (add_layers_control(sync_compare = TRUE)), drop this in favor of it.
+  tags$script(HTML("
+    (function () {
+      function counterpart(id) {
+        if (/^sp($|[0-9_])/.test(id))  return 'env' + id.slice(2);
+        if (/^env($|[0-9_])/.test(id)) return 'sp'  + id.slice(3);
+        return id;   // shared overlay: same id on both maps
+      }
+      function patch() {
+        if (!window.MapglLayersControl) return false;
+        if (window.__ccLayersMirrorPatched) return true;
+        window.__ccLayersMirrorPatched = true;
+        var proto = window.MapglLayersControl.prototype;
+        var orig  = proto._setVisibility;
+        proto._setVisibility = function (layerId, visibility) {
+          orig.call(this, layerId, visibility);
+          try {
+            var el = this._map && this._map.getContainer();
+            if (!el || !window.HTMLWidgets) return;
+            var m = /^(.*)-(before|after)$/.exec(el.id);
+            if (!m) return;
+            var inst = HTMLWidgets.find('#' + m[1]);
+            if (!inst || !inst.getBeforeMap) return;
+            var other = m[2] === 'before' ? inst.getAfterMap() : inst.getBeforeMap();
+            var oid = counterpart(layerId);
+            if (other && other.getLayer(oid))
+              other.setLayoutProperty(oid, 'visibility', visibility);
+          } catch (e) {
+            // mirroring is a convenience; never let it break the real toggle
+          }
+        };
+        return true;
+      }
+      if (!patch()) {
+        var tries = 0;
+        var t = setInterval(function () {
+          if (patch() || ++tries > 80) clearInterval(t);
+        }, 250);
+      }
+    })();
+  ")),
+
   useConductor(),
   useBusyIndicators(spinners = TRUE, fade = TRUE),
 
@@ -206,6 +261,26 @@ ui <- function(req) page_sidebar(
 
           conditionalPanel(
             "input.outputPanel === 'Map'",
+            selectInput(
+              "sel_agg_unit",
+              tagList(
+                "Summarize Within",
+                popover(
+                  bs_icon("question-circle"),
+                  HTML("Choose the unit the map aggregates into.<br>
+                        <strong>Hexagons (H3)</strong> bins observations into
+                        equal-area cells that get finer as you zoom in.<br>
+                        A <strong>boundary layer</strong> instead reports one
+                        value per polygon — per MPA, per county, per ecoregion.<br><br>
+                        One layer at a time: the layers overlap (a station can sit
+                        inside a county, an ecoregion <em>and</em> an MPA, and all
+                        three are true), so summarizing across them would count the
+                        same observation more than once.<br><br>
+                        Polygons with no CalCOFI samples are drawn as an outline
+                        and labelled <em>no data</em> — they are not zero."))),
+              choices  = agg_unit_choices,
+              selected = "hex"),
+            uiOutput("poly_note"),
             selectInput(
               "sel_env_stat",
               "Environmental Summary Statistic",
