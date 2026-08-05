@@ -1,11 +1,6 @@
 # TODO:
 # - [ ] use default species across all time and space: sardine (since motivated creation of CalCOFI; see https://en.wikipedia.org/wiki/CalCOFI)
 
-# Install librarian if needed
-if (!requireNamespace("librarian", quietly = TRUE)) {
-  install.packages("librarian")
-}
-
 # Load libraries
 # remotes::install_github("bbest/mapgl@fix-compare-widget-parity", force=T) # https://github.com/walkerke/mapgl/pull/187
 # remotes::install_github("calcofi/calcofi4r", force = T)
@@ -13,42 +8,52 @@ if (!requireNamespace("librarian", quietly = TRUE)) {
 #   needs calcofi4r >= 1.2.0 for cc_match_bio_env(); build_download_bundle()
 #   errors clearly if an older version is installed.
 # remotes::install_github("bbest/mapgl@feat/add-h3t-source", force=T)       # https://github.com/walkerke/mapgl/pull/199
-librarian::shelf(
-  bslib,
-  bsicons,
-  calcofi / calcofi4r,
-  conductor,
-  data.tree,
-  DBI,
-  dplyr,
-  DT,
-  duckdb,
-  geosphere,
-  ggplot2,
-  glue,
-  here,
-  highcharter,
-  htmltools,
-  htmlwidgets,
-  httr2,
-  jsonlite,
-  leaflet,
-  litedown,
-  lubridate,
-  mapgl,
-  plotly,
-  purrr,
-  readr,
-  sf,
-  shiny,
-  shinyWidgets,
-  stringr,
-  thematic,
-  tibble,
-  tidyr,
-  zip,
-  quiet = TRUE
-)
+#
+# `library()`, NOT `librarian::shelf()` — a deliberate exception to the
+# convention in ../../CLAUDE.md.
+#
+# NOT for speed: measured interleaved over three runs each, the two are the
+# same to within run-to-run noise (3.6-6.5 s either way). The reason is that a
+# served app should not be installing packages at runtime — shelf() will fetch
+# and install a missing dependency on first request, which turns a deploy
+# mistake into a slow, silent, half-working app instead of a startup failure,
+# and does it as the `shiny` user against whatever library path it happens to
+# have write access to.
+#
+# The trade is that a missing package is now an error. So check the whole set
+# FIRST and report every missing one with the command that installs it, rather
+# than dying on the first `library()` and making a deploy a game of
+# whack-a-mole — two of these are GitHub-only, one of them a fork, so the right
+# command is not the same for all of them.
+PKGS <- c(
+  "bslib", "bsicons", "calcofi4r", "conductor", "data.tree", "DBI", "dplyr",
+  "DT", "duckdb", "geosphere", "ggplot2", "glue", "here", "highcharter",
+  "htmltools", "htmlwidgets", "httr2", "jsonlite", "leaflet", "litedown",
+  "lubridate", "mapgl", "plotly", "purrr", "readr", "sf", "shiny",
+  "shinyWidgets", "stringr", "thematic", "tibble", "tidyr", "zip")
+
+PKGS_GITHUB <- c(
+  calcofi4r = "calcofi/calcofi4r",
+  # the h3t tile source and the compare-widget parity fix are not upstream yet
+  mapgl     = "bbest/mapgl@feat/add-h3t-source")
+
+local({
+  missing <- PKGS[!vapply(PKGS, requireNamespace, logical(1), quietly = TRUE)]
+  if (length(missing) == 0) return(invisible())
+  gh  <- intersect(missing, names(PKGS_GITHUB))
+  cran <- setdiff(missing, gh)
+  stop(
+    "missing package(s): ", paste(missing, collapse = ", "), "\n",
+    if (length(cran)) paste0(
+      '  install.packages(c("', paste(cran, collapse = '", "'), '"))\n'),
+    if (length(gh)) paste0(
+      '  remotes::install_github(c("',
+      paste(PKGS_GITHUB[gh], collapse = '", "'), '"))\n'),
+    call. = FALSE)
+})
+
+invisible(lapply(
+  PKGS, \(p) suppressPackageStartupMessages(library(p, character.only = TRUE))))
 
 # variables ----
 hex_geo <- here("data/hex.geojson")
