@@ -19,7 +19,16 @@ ui <- function(req) page_sidebar(
         img(src = "./logo_calcofi_light.svg", height="50px",
             class = "intapp-logo-light", .noWS = "after"),
         href = "https://calcofi.io"),
-      "Integrated App")),
+      "Integrated App",
+      # Which frozen database release everything on screen came from. In the
+      # TITLE rather than the sidebar or the About tab because it has to survive
+      # a collapsed sidebar and every tab switch: a figure someone screenshots
+      # out of here is only reproducible if the release travelled with it.
+      span(class = "intapp-release",
+           title = paste0(
+             "CalCOFI database release ", DB_RELEASE,
+             " — every value shown comes from this frozen release"),
+           DB_RELEASE))),
 
   tags$head(
     tags$link(rel = "icon", type = "image/svg+xml", href = "logo_calcofi.svg"),
@@ -35,6 +44,22 @@ ui <- function(req) page_sidebar(
        original SVG has WHITE 'CalCOFI.io' text, hidden on light bg. */
     [data-bs-theme='light'] .intapp-logo-dark  { display: none; }
     [data-bs-theme='dark']  .intapp-logo-light { display: none; }
+
+    /* release tag in the title: present, never competing with it. Sized off
+       the title's own font so it tracks the responsive header, and set in the
+       tabular figures the version string deserves. */
+    .intapp-release {
+      font-size: 0.55em;
+      font-weight: 400;
+      opacity: 0.5;
+      margin-left: 0.45rem;
+      vertical-align: 0.35em;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+      cursor: help;
+    }
+    .intapp-release:hover { opacity: 0.8; }
     .treeview {
       list-style: none;
       padding-left: 0.1rem;

@@ -204,7 +204,18 @@ h3t_release_of <- function(path) {
                   regexpr("v[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}", basename(tgt)))
   if (length(m)) m else ""
 }
-h3t_release <- Sys.getenv("CALCOFI_H3T_RELEASE", h3t_release_of(db_path))
+# The frozen release every number in this app comes from. Shown in the header
+# (ui.R) and reused below as the tile cache-buster.
+#
+# It is read off the DuckDB THIS app opened, which is the honest label for the
+# tables, plots and downloads. Note it can disagree with the h3t tile service on
+# a dev machine: the service always opens its own `calcofi_latest.duckdb` and
+# ignores the `release=` it is handed (that param is only a Varnish cache key),
+# so a local DuckDB lagging the server means the header says one release while
+# the map draws another. On the server the two are the same symlink, so they
+# cannot drift there.
+DB_RELEASE  <- h3t_release_of(db_path)
+h3t_release <- Sys.getenv("CALCOFI_H3T_RELEASE", DB_RELEASE)
 if (!nzchar(h3t_release))
   warning("could not derive H3T_RELEASE from ", db_path,
           " — tile URLs will not be release-tagged, so Varnish may serve stale tiles")
