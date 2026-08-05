@@ -11,53 +11,76 @@ h3t_base_url <- function() {
 
 # ------------------------------------------------------------------- sql build
 
-# species SELECT: projects (cell_id, value, n) from bio_obs. res_placeholder
-# is a literal that the server will substitute per tile based on zoom; we use
-# a fixed resolution for now (configurable via the `res` arg).
-build_sp_sql <- function(sp_name, qtr, date_range, include_children = TRUE) {
-  # note: emits `h3_cell_to_parent(hex_id, {{res}})` with the literal placeholder
-  # `{{res}}`. the h3t API substitutes `{{res}}` with the tile's effective H3
-  # resolution (derived from zoom) before parsing, so one cached SQL string
-  # serves every zoom level. the parent cell (UBIGINT, < 2^63) casts to BIGINT
-  # as before — the API's cell_id contract is unchanged. requires `LOAD h3`.
-  hex_col <- DBI::SQL("h3_cell_to_parent(hex_id, {{res}})")
-  base_sql <- glue::glue_sql(
-    "SELECT {hex_col} AS cell_id, AVG(std_tally) AS value, COUNT(*) AS n
-       FROM bio_obs
-      WHERE std_tally IS NOT NULL
-        AND scientific_name = {sp_name}
-        AND quarter IN ({qtr*})
-        AND time_start BETWEEN {as.character(date_range[1])} AND {as.character(date_range[2])}
-      GROUP BY 1",
-    .con = DBI::ANSI(), sp_name = sp_name, qtr = qtr,
-    date_range = date_range, hex_col = hex_col)
+# Both builders emit `h3_cell_to_parent(hex_id, {{res}})` with the literal
+# placeholder `{{res}}`. The h3t API substitutes `{{res}}` with the tile's
+# effective H3 resolution (derived from zoom) before parsing, so one cached SQL
+# string serves every zoom level. The parent cell (UBIGINT, < 2^63) casts to
+# BIGINT — the API's cell_id contract is unchanged. Requires `LOAD h3`.
+HEX_COL <- DBI::SQL("h3_cell_to_parent(hex_id, {{res}})")
 
-  if (isTRUE(include_children)) {
-    base_sql <- glue::glue_sql(
-      "WITH RECURSIVE children AS (
-         SELECT worms_id FROM species WHERE scientific_name = {sp_name}
-         UNION ALL
-         SELECT t.taxonID::INTEGER FROM taxon t JOIN children c ON t.parentNameUsageID = CAST(c.worms_id AS VARCHAR)
-       )
-       SELECT {hex_col} AS cell_id, AVG(std_tally) AS value, COUNT(*) AS n
-         FROM bio_obs
-        WHERE std_tally IS NOT NULL
-          AND worms_id IN (SELECT worms_id FROM children)
-          AND quarter IN ({qtr*})
-          AND time_start BETWEEN {as.character(date_range[1])} AND {as.character(date_range[2])}
-        GROUP BY 1",
-      .con = DBI::ANSI(), sp_name = sp_name, qtr = qtr,
-      date_range = date_range, hex_col = hex_col)
-  }
-
-  as.character(base_sql)
+# Point-in-polygon clause for a spatial filter (drawn polygon or grid zones),
+# in the same shape the dbplyr path uses in server.R. The h3t service runs
+# DuckDB with `spatial` loaded, so ST_Within is available there too — verified
+# against /h3t/stats. lon/lat columns differ between the two tables.
+poly_clause <- function(poly_wkt, lon_col, lat_col) {
+  if (is.null(poly_wkt) || !nzchar(poly_wkt)) return(NULL)
+  glue::glue_sql(
+    "ST_Within(ST_Point({DBI::SQL(lon_col)}, {DBI::SQL(lat_col)}),
+                ST_GeomFromText({poly_wkt}))",
+    .con = DBI::ANSI())
 }
 
-# env SELECT: projects (cell_id, value, n) from env_obs at a fixed resolution.
+#' Species tile SELECT: projects (cell_id, value, n) from bio_obs.
+#'
+#' Takes the ALREADY-RESOLVED id sets from \code{resolve_sp_ids()} rather than
+#' resolving taxa itself. It used to take one display name and walk the
+#' hierarchy in a recursive CTE, which meant three ways to disagree with the
+#' rest of the app, all of them silent:
+#'   * only the FIRST selected taxon reached the tiles (glue_sql interpolates a
+#'     length-n vector into `scientific_name = …`, not an IN list);
+#'   * ITIS-only taxa (seabirds, marine mammals) have no WoRMS id, so the CTE
+#'     matched nothing for them while `get_sp()` matched them by name;
+#'   * the dataset checkboxes and the spatial filter were not applied at all.
+#' Filtering on exactly what `get_sp()` filtered on makes map and tables agree
+#' by construction.
+build_sp_sql <- function(worms_ids, sci_names, qtr, date_range,
+                         datasets = NULL, poly_wkt = NULL) {
+  taxa <- if (length(worms_ids) > 0 && length(sci_names) > 0) {
+    glue::glue_sql("(worms_id IN ({worms_ids*}) OR scientific_name IN ({sci_names*}))",
+                   .con = DBI::ANSI())
+  } else if (length(worms_ids) > 0) {
+    glue::glue_sql("worms_id IN ({worms_ids*})", .con = DBI::ANSI())
+  } else if (length(sci_names) > 0) {
+    glue::glue_sql("scientific_name IN ({sci_names*})", .con = DBI::ANSI())
+  } else {
+    # nothing resolves; an empty IN () is a SQL error, so say so explicitly
+    DBI::SQL("FALSE")
+  }
+
+  where <- c(
+    "std_tally IS NOT NULL",
+    as.character(taxa),
+    as.character(glue::glue_sql("quarter IN ({qtr*})", .con = DBI::ANSI())),
+    as.character(glue::glue_sql(
+      "time_start BETWEEN {as.character(date_range[1])} AND {as.character(date_range[2])}",
+      .con = DBI::ANSI())),
+    if (!is.null(datasets) && length(datasets) > 0)
+      as.character(glue::glue_sql("dataset_key IN ({datasets*})", .con = DBI::ANSI())),
+    as.character(poly_clause(poly_wkt, "longitude", "latitude")))
+
+  as.character(glue::glue_sql(
+    "SELECT {hex_col} AS cell_id, AVG(std_tally) AS value, COUNT(*) AS n
+       FROM bio_obs
+      WHERE {DBI::SQL(paste(where, collapse = ' AND '))}
+      GROUP BY 1",
+    .con = DBI::ANSI(), hex_col = HEX_COL))
+}
+
+# env SELECT: projects (cell_id, value, n) from env_obs.
 build_env_sql <- function(measurement_type, qtr, date_range, depth_range,
-                          stat = c("mean", "median", "min", "max", "sd")) {
+                          stat = c("mean", "median", "min", "max", "sd"),
+                          poly_wkt = NULL) {
   stat <- match.arg(stat)
-  hex_col <- DBI::SQL("h3_cell_to_parent(hex_id, {{res}})")
   agg <- switch(stat,
     mean   = "AVG(qty)",
     median = "MEDIAN(qty)",
@@ -65,18 +88,24 @@ build_env_sql <- function(measurement_type, qtr, date_range, depth_range,
     max    = "MAX(qty)",
     sd     = "STDDEV_SAMP(qty)"
   )
-  sql <- glue::glue_sql(
+
+  where <- c(
+    "qty IS NOT NULL AND NOT isnan(qty) AND isfinite(qty)",
+    as.character(glue::glue_sql("measurement_type = {measurement_type}", .con = DBI::ANSI())),
+    as.character(glue::glue_sql("quarter IN ({qtr*})", .con = DBI::ANSI())),
+    as.character(glue::glue_sql(
+      "datetime_utc BETWEEN {as.character(date_range[1])} AND {as.character(date_range[2])}",
+      .con = DBI::ANSI())),
+    as.character(glue::glue_sql(
+      "depth_m BETWEEN {depth_range[1]} AND {depth_range[2]}", .con = DBI::ANSI())),
+    as.character(poly_clause(poly_wkt, "lon_dec", "lat_dec")))
+
+  as.character(glue::glue_sql(
     "SELECT {hex_col} AS cell_id, {DBI::SQL(agg)} AS value, COUNT(*) AS n
        FROM env_obs
-      WHERE qty IS NOT NULL AND NOT isnan(qty) AND isfinite(qty)
-        AND measurement_type = {measurement_type}
-        AND quarter IN ({qtr*})
-        AND datetime_utc BETWEEN {as.character(date_range[1])} AND {as.character(date_range[2])}
-        AND depth_m BETWEEN {depth_range[1]} AND {depth_range[2]}
+      WHERE {DBI::SQL(paste(where, collapse = ' AND '))}
       GROUP BY 1",
-    .con = DBI::ANSI(), measurement_type = measurement_type, qtr = qtr,
-    date_range = date_range, depth_range = depth_range, hex_col = hex_col)
-  as.character(sql)
+    .con = DBI::ANSI(), hex_col = HEX_COL))
 }
 
 # -------------------------------------------------------- URL / stats helpers

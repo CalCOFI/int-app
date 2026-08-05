@@ -152,14 +152,31 @@ get_taxon_parentage <- function(taxonID, con, authority = "WoRMS"){
 #' @importFrom lubridate quarter
 #'
 #' @export
-get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE, datasets = NULL) {
-  if (debug)
-    message(
-      "get_sp: sp_name = ", paste(sp_name, collapse = ", "),
-      ", qtr = ", paste(qtr, collapse = ","),
-      ", date_range = ", paste(date_range, collapse = " to "),
-      ", ck_children = ", ck_children)
-
+#' Resolve Selected Taxa Names to the Ids `bio_obs` is Filtered On
+#'
+#' Turns the picker's display names into the two id sets that identify the
+#' selection in \code{bio_obs}: WoRMS ids (optionally including the taxonomic
+#' children) and, for taxa with no WoRMS id, scientific names.
+#'
+#' Split out of \code{\link{get_sp}} so the h3t tile SQL
+#' (\code{build_sp_sql()}) filters on the SAME ids the tables and plots do.
+#' While the tile query resolved its own taxa — with a recursive CTE, and only
+#' ever for one name — the map could and did show a different set of
+#' observations than the Time Series beside it.
+#'
+#' @param sp_name Character vector of picker labels, "Common (rank: Scientific)"
+#' @param ck_children Include taxonomic children of the selected taxa
+#'
+#' @return list with \code{worms_ids} (integer) and \code{sci_names} (character)
+#'
+#' @export
+resolve_sp_ids <- function(sp_name, ck_children = TRUE) {
+  # Memoized: a Submit resolves the same selection twice — once for get_sp()'s
+  # table query and once for the tile SQL — and the children walk runs one
+  # recursive CTE PER selected taxon, so a 50-taxon selection is 50 round trips
+  # each time. Keyed on the arguments; nothing below depends on session state.
+  key <- rlang::hash(list(sort(sp_name), ck_children))
+  if (!is.null(sp_ids_cache[[key]])) return(sp_ids_cache[[key]])
   # resolve selected names to worms_ids via species + taxon tables
   # name format must match global.R: "Common Name (rank: Scientific Name)"
   sp_taxon <- tbl(con, "species") |>
@@ -199,6 +216,32 @@ get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE, datasets = NULL
   # farallon_bird-mammal were unreachable from the picker. Fall back to the
   # scientific name for those.
   sci_names <- unique(sel$scientific_name[is.na(sel$worms_id)])
+
+  out <- list(
+    # bio_obs.worms_id is INTEGER; keep the ids typed so the same vector can be
+    # interpolated into raw SQL for the tile service without a cast
+    worms_ids = as.integer(stats::na.omit(worms_ids)),
+    sci_names = sci_names[!is.na(sci_names)])
+
+  sp_ids_cache[[key]] <- out
+  out
+}
+# survives for the life of the R process; the taxonomy it reads is fixed by the
+# release the app opened, so a stale entry is not possible without a restart
+sp_ids_cache <- new.env(parent = emptyenv())
+
+
+get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE, datasets = NULL) {
+  if (debug)
+    message(
+      "get_sp: sp_name = ", paste(sp_name, collapse = ", "),
+      ", qtr = ", paste(qtr, collapse = ","),
+      ", date_range = ", paste(date_range, collapse = " to "),
+      ", ck_children = ", ck_children)
+
+  ids       <- resolve_sp_ids(sp_name, ck_children)
+  worms_ids <- ids$worms_ids
+  sci_names <- ids$sci_names
 
   df_sp <- tbl(con, "bio_obs")
   df_sp <- if (length(worms_ids) > 0 && length(sci_names) > 0) {
@@ -312,6 +355,36 @@ get_env <- function(env_var, qtr, date_range, min_depth, max_depth) {
 
 
 # data preparation functions ----
+
+#' Hexagon Geometry, Loaded on First Use
+#'
+#' \code{data/hex.geojson} is 153 MB — 434,218 polygons covering all 10 H3
+#' resolutions — and \code{st_read()}ing it costs ~5.6 s and ~370 MB of RSS in
+#' every R process the app starts. global.R used to read it eagerly, so every
+#' session paid that before the UI appeared.
+#'
+#' Exactly two callers need it: \code{\link{prep_sp_hex}} and
+#' \code{\link{prep_env_hex}}, which attach geometry to their aggregates. When
+#' \code{USE_H3T} is on — the normal case — neither runs, because the tile
+#' service derives each cell's boundary per tile. So the eager read paid the
+#' full cost for something nothing then used.
+#'
+#' Loading here instead means the cost is paid once, in the one session that
+#' actually asks for hexagon geometry (a classic-path fallback, or a "Map data"
+#' download that wants geometry), and never otherwise.
+#'
+#' @return sf object of hexagons with \code{hex_id} and \code{hex_res}
+#'
+#' @export
+get_sf_hex <- function() {
+  if (is.null(hex_cache$sf_hex)) {
+    if (debug) message("get_sf_hex: reading ", hex_geo, " (first use) ...")
+    hex_cache$sf_hex <- sf::st_read(hex_geo, quiet = TRUE)
+  }
+  hex_cache$sf_hex
+}
+hex_cache <- new.env(parent = emptyenv())
+
 # TODO (long-term): replace preloaded hex layers with h3t tile endpoint
 #   - plumber API at /api/h3t/{z}/{x}/{y} accepting SQL query params
 #   - determines H3 resolution from zoom z, filters by tile extent x/y
@@ -359,8 +432,22 @@ get_env <- function(env_var, qtr, date_range, min_depth, max_depth) {
 #' @importFrom dbplyr compute sql
 #'
 #' @export
-prep_sp_hex <- function(df_sp, res_range) {
-  if (debug) message("prep_sp_hex: aggregating species data for resolutions ", paste(res_range, collapse = ","))
+#' Aggregate Species Data into H3 Cells (no geometry)
+#'
+#' The database half of \code{\link{prep_sp_hex}}: one row per (resolution,
+#' cell) with the aggregate, and no polygon attached.
+#'
+#' Separated out because attaching geometry means reading the 153 MB
+#' \code{hex.geojson} (see \code{\link{get_sf_hex}}), and the callers that
+#' write a CSV do not want it — the sfc column write.csv() emits is an R
+#' \code{list(c(...))} literal, not WKT, so it was unusable anyway.
+#'
+#' @inheritParams prep_sp_hex
+#' @return tibble with \code{resolution}, \code{hexid}, \code{sp.value},
+#'   \code{n}, \code{min_dtime}, \code{max_dtime}, \code{tooltip}
+#' @export
+agg_sp_hex <- function(df_sp, res_range) {
+  if (debug) message("agg_sp_hex: aggregating species data for resolutions ", paste(res_range, collapse = ","))
 
   # precompute and store joins in a temporary table
   df_sp_temp <- df_sp |>
@@ -396,11 +483,16 @@ prep_sp_hex <- function(df_sp, res_range) {
     select(resolution, hexid = hex_id, sp.value, n, min_dtime, max_dtime, tooltip) |>
     collect()
 
-  if (debug) message("prep_sp_hex: collected ", nrow(hex_sp_collected), " hex records before join")
+  if (debug) message("agg_sp_hex: collected ", nrow(hex_sp_collected), " hex records")
 
-  hex_sp <- hex_sp_collected |>
+  hex_sp_collected
+}
+
+
+prep_sp_hex <- function(df_sp, res_range) {
+  hex_sp <- agg_sp_hex(df_sp, res_range) |>
     left_join(
-      sf_hex |>
+      get_sf_hex() |>
         select(hexid = hex_id, hex_res, geometry),
       join_by(
         hexid,
@@ -457,8 +549,17 @@ prep_sp_hex <- function(df_sp, res_range) {
 #' @importFrom dbplyr compute sql
 #'
 #' @export
-prep_env_hex <- function(df_env, res_range, env_stat) {
-  if (debug) message("prep_env_hex: aggregating env data for resolutions ", paste(res_range, collapse = ","),
+#' Aggregate Environmental Data into H3 Cells (no geometry)
+#'
+#' The database half of \code{\link{prep_env_hex}} — see \code{\link{agg_sp_hex}}
+#' for why the geometry join is separable.
+#'
+#' @inheritParams prep_env_hex
+#' @return tibble with \code{resolution}, \code{hexid}, \code{env.value},
+#'   \code{tooltip}
+#' @export
+agg_env_hex <- function(df_env, res_range, env_stat) {
+  if (debug) message("agg_env_hex: aggregating env data for resolutions ", paste(res_range, collapse = ","),
                      ", stat = ", env_stat)
 
   # precompute and store joins in a temporary table
@@ -502,11 +603,16 @@ prep_env_hex <- function(df_env, res_range, env_stat) {
     select(resolution, hexid = hex_id, env.value, tooltip) |>
     collect()
 
-  if (debug) message("prep_env_hex: collected ", nrow(hex_env_collected), " hex records before join")
+  if (debug) message("agg_env_hex: collected ", nrow(hex_env_collected), " hex records")
 
-  hex_env <- hex_env_collected |>
+  hex_env_collected
+}
+
+
+prep_env_hex <- function(df_env, res_range, env_stat) {
+  hex_env <- agg_env_hex(df_env, res_range, env_stat) |>
     left_join(
-      sf_hex |>
+      get_sf_hex() |>
         select(hexid = hex_id, hex_res, geometry),
       join_by(
         hexid,
@@ -1164,17 +1270,19 @@ prep_filter_summary <- function(sel_name, sel_env_var, sel_qtr, sel_date_range,
 
 prep_summary_stats <- function(df_sp, df_env) {
 
-  stat_list <- list()
+  # Count IN the database. This was `nrow(df |> collect())` on both tables,
+  # which pulled every selected row into R to look at nrow() and throw it away
+  # — 639K rows and ~0.4 s for the default selection, on the startup path, and
+  # it grows with the filter: a broad environmental variable over the full date
+  # range is millions of rows materialized for two integers nobody sees.
+  n_sp  <- df_sp  |> summarize(n = n()) |> pull(n)
+  n_env <- df_env |> summarize(n = n()) |> pull(n)
 
-  stat_list <- c(stat_list, "**Species Data**")
-
-  stat_list <- c(stat_list, paste0(nrow(df_sp |> collect()) |> format(big.mark = ','), " observations"))
-
-  stat_list <- c(stat_list, "\n**Environmental Data**")
-
-  stat_list <- c(stat_list, paste0(nrow(df_env |> collect()) |> format(big.mark = ','), " observations"))
-
-  return(stat_list)
+  list(
+    "**Species Data**",
+    paste0(format(n_sp, big.mark = ","), " observations"),
+    "\n**Environmental Data**",
+    paste0(format(n_env, big.mark = ","), " observations"))
 }
 
 taxa_tree_builder <- function(df_sp) {

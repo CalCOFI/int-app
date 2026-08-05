@@ -90,6 +90,10 @@ server <- function(input, output, session) {
     # rebuilt the widget in hex mode on the same flush.
     agg_unit       = "hex",
     env_stat       = "mean",
+    # WKT of the active spatial filter (drawn polygon or grid zones), NULL for
+    # none — the h3t tile SQL needs it, and it is part of the env tile cache key
+    spatial_wkt    = NULL,
+    env_tile_key   = NULL,  # hash of the filters the env tile URL was built from
     params = list( # filter/analysis params
       taxa             = default_sp_name,
       env_var          = "temperature",
@@ -108,6 +112,69 @@ server <- function(input, output, session) {
       dprof_params     = list(transect   = NULL,
                               buffer     = NULL)
     ))
+
+  # map builders ----
+  # ONE definition each, called by BOTH the startup preload and the Submit
+  # handler. They were written out twice and the copies drifted: Submit never
+  # grew an h3t branch, so the first Submit of a session silently downgraded the
+  # species side to the classic 10-resolution sf path — ~4 s of server work
+  # shipping an 88 MB widget to the browser — while the environmental side
+  # beside it kept drawing h3t tiles. The h3t path costs one /h3t/stats call
+  # (~0.5 s) and sends a URL.
+  #
+  # `spec$scales` is a length-10 list indexed by resolution because that is what
+  # the zoom observer's legend lookup expects; h3t colors every zoom from one
+  # scale, so it hands over the same scale ten times.
+
+  sp_map_spec <- function(df_sp, sel_name, sel_qtr, sel_date_range,
+                          ck_children, datasets = NULL, poly_wkt = NULL,
+                          is_dark = TRUE) {
+    if (USE_H3T) {
+      # Resolve taxa HERE and hand the ids to the SQL builder, so the tiles
+      # filter on exactly what get_sp() filtered on — same children, same
+      # ITIS-only fallback, same dataset checkboxes, same spatial filter.
+      ids   <- resolve_sp_ids(sel_name, ck_children)
+      sql   <- build_sp_sql(ids$worms_ids, ids$sci_names, sel_qtr, sel_date_range,
+                            datasets = datasets, poly_wkt = poly_wkt)
+      stats <- fetch_h3t_stats(sql, H3T_RELEASE)
+      if (debug) { message("sp stats:"); print(stats) }
+      scale <- build_h3t_scale(stats, palette = \(n) hcl.colors(n, palette = "Viridis"))
+      list(
+        map       = map_sp_h3t(h3t_tile_url(sql, H3T_RELEASE), scale, is_dark = is_dark),
+        layer_ids = "sp",
+        scales    = rep(list(scale), length(res_range)))
+    } else {
+      hex_list <- prep_sp_hex(df_sp, res_range)
+      scales   <- lapply(hex_list, interpolate_palette, column = "sp.value",
+                         palette = \(n) hcl.colors(n, palette = "Viridis"))
+      list(
+        map       = map_sp(hex_list, scales, is_dark = is_dark),
+        layer_ids = paste0("sp", res_range),
+        scales    = scales)
+    }
+  }
+
+  # h3t only: the environmental side is assembled into a widget inside
+  # output$map (it needs the stat/variable labels), so this returns the two
+  # pieces that depend on the filters rather than a finished map.
+  env_tile_spec <- function(env_var, sel_qtr, sel_date_range, sel_depth_range,
+                            env_stat, poly_wkt = NULL) {
+    sql   <- build_env_sql(env_var, sel_qtr, sel_date_range, sel_depth_range,
+                           stat = env_stat, poly_wkt = poly_wkt)
+    stats <- fetch_h3t_stats(sql, H3T_RELEASE)
+    if (debug) { message("env stats:"); print(stats) }
+    scale <- build_h3t_scale(stats, palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
+    list(tile_url = h3t_tile_url(sql, H3T_RELEASE), scale = scale)
+  }
+
+  # Everything the env tile URL depends on. output$map rebuilds the URL when
+  # this changes and reuses it when it does not. Previously the URL was cached
+  # under `env_stat == "mean"` alone and rx$env_tile_url was only ever written
+  # at startup — so submitting a DIFFERENT environmental variable relabeled the
+  # legend while the tiles kept showing the old one, with nothing to see it by.
+  env_tile_key <- function(env_stat) rlang::hash(list(
+    rx$env_var, rx$params$sel_qtr, rx$params$date_range,
+    rx$params$depth_range, env_stat, rx$spatial_wkt))
 
   # session.once -> ... ----
   observeEvent(session$clientData, once = TRUE, {
@@ -135,36 +202,17 @@ server <- function(input, output, session) {
         # side (from /h3t/stats) for the legend.
         if (debug) message("USE_H3T: fetching stats instead of preloading hex lists")
 
-        # extract scientific_name from UI-formatted label "Common name (rank: Scientific name)"
-        sci_name <- sub(".*\\(.*:\\s*([^)]+)\\).*", "\\1", sel_name)
-        sp_sql  <- build_sp_sql(sci_name, sel_qtr, sel_date_range, include_children = FALSE)
-        env_sql <- build_env_sql(sel_env_var, sel_qtr, sel_date_range, sel_depth_range, stat = env_stat)
+        spec <- sp_map_spec(df_sp, sel_name, sel_qtr, sel_date_range, ck_children)
+        rx$map_sp       <- spec$map
+        rx$sp_layer_ids <- spec$layer_ids
+        rx$sp_scale     <- spec$scales
 
-        sp_stats  <- fetch_h3t_stats(sp_sql,  H3T_RELEASE)
-        env_stats <- fetch_h3t_stats(env_sql, H3T_RELEASE)
-        if (debug) {
-          message("sp stats:  "); print(sp_stats)
-          message("env stats: "); print(env_stats)
-        }
+        env <- env_tile_spec(sel_env_var, sel_qtr, sel_date_range,
+                             sel_depth_range, env_stat)
+        rx$env_tile_url     <- env$tile_url
+        rx$env_scale_single <- env$scale
+        rx$env_scale        <- rep(list(env$scale), length(res_range))
 
-        sp_scale  <- build_h3t_scale(sp_stats,
-          palette = \(n) hcl.colors(n, palette = "Viridis"))
-        env_scale <- build_h3t_scale(env_stats,
-          palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
-
-        sp_tile_url  <- h3t_tile_url(sp_sql,  H3T_RELEASE)
-        env_tile_url <- h3t_tile_url(env_sql, H3T_RELEASE)
-
-        rx$map_sp      <- map_sp_h3t(sp_tile_url,  sp_scale)
-        rx$sp_layer_ids <- "sp"
-        rx$env_tile_url <- env_tile_url
-        rx$env_scale_single <- env_scale
-
-        # keep the zoom observer happy: length-10 list of copies
-        rx$sp_scale    <- rep(list(sp_scale),  length(res_range))
-        rx$env_scale   <- rep(list(env_scale), length(res_range))
-
-        # summary stats: build_h3t_scale gave us min/max/n; reuse
         rx$summary_stats <- prep_summary_stats(df_sp, df_env)
 
       } else {
@@ -215,6 +263,10 @@ server <- function(input, output, session) {
       rx$params$date_range  <- sel_date_range
       rx$params$depth_range <- sel_depth_range
       rx$params$ck_children <- ck_children
+
+      # stamp the key AFTER rx$params is populated (it hashes those fields), so
+      # output$map reuses the tile URL just fetched instead of fetching it again
+      if (USE_H3T) rx$env_tile_key <- env_tile_key(env_stat)
 
       rx$filter_summary <- prep_filter_summary(
         sel_name, sel_env_var, sel_qtr, sel_date_range,
@@ -338,24 +390,26 @@ server <- function(input, output, session) {
     rx$lbl_sp_value <- "Avg. CPUE (density)"
 
     if (USE_H3T) {
-      # h3t path: reuse the tile_url + scale computed in the preload block.
-      # if env_stat changes from the default, we rebuild the URL/scale here.
-      if (is.null(rx$env_tile_url) || env_stat != "mean") {
-        env_sql <- build_env_sql(
+      # h3t path: reuse the tile_url + scale from the preload while the filters
+      # behind them are unchanged, refetch when any of them moves.
+      #
+      # The condition used to be `is.null(rx$env_tile_url) || env_stat != "mean"`
+      # and the rebuild branch never wrote rx$env_tile_url back — so after
+      # startup set it once, the URL was frozen. A Submit that picked a
+      # different environmental variable, date range or depth range updated
+      # rx$lbl_env_var (the legend) and left the tiles showing temperature.
+      key <- env_tile_key(env_stat)
+      if (is.null(rx$env_tile_url) || !identical(key, rx$env_tile_key)) {
+        env <- env_tile_spec(
           rx$env_var,
           isolate(rx$params$sel_qtr), isolate(rx$params$date_range),
-          isolate(rx$params$depth_range), stat = env_stat)
-        env_stats <- fetch_h3t_stats(env_sql, H3T_RELEASE)
-        env_scale <- build_h3t_scale(env_stats,
-          palette = \(n) rev(hcl.colors(n, palette = "Spectral")))
-        env_tile_url <- h3t_tile_url(env_sql, H3T_RELEASE)
-        rx$env_scale_single <- env_scale
-        rx$env_scale <- rep(list(env_scale), length(res_range))
-      } else {
-        env_tile_url <- rx$env_tile_url
-        env_scale    <- rx$env_scale_single
+          isolate(rx$params$depth_range), env_stat, rx$spatial_wkt)
+        rx$env_tile_url     <- env$tile_url
+        rx$env_scale_single <- env$scale
+        rx$env_scale        <- rep(list(env$scale), length(res_range))
+        rx$env_tile_key     <- key
       }
-      map_env_obj <- map_env_h3t(env_tile_url, env_scale,
+      map_env_obj <- map_env_h3t(rx$env_tile_url, rx$env_scale_single,
                                  env_stat_label, rx$lbl_env_var)
       rx$params$map_params$env_stat <- env_stat
       rx$env_stat <- env_stat
@@ -1129,40 +1183,33 @@ server <- function(input, output, session) {
            depth_max = sel_depth_range[2]),
       get_env(sel_env_var, sel_qtr, sel_date_range, sel_depth_range[1], sel_depth_range[2]))
 
-    # Apply spatial filter based on priority: drawn polygon > selected zones > all data
+    # Apply spatial filter based on priority: drawn polygon > selected zones > all data.
+    # The WKT is kept in `spatial_wkt` (and on rx) so the h3t tile SQL can apply
+    # the SAME constraint — the tiles are a separate query against a separate
+    # service, so a filter applied only to the dbplyr tables would leave the map
+    # showing observations the plots beside it exclude.
+    spatial_wkt <- NULL
     if (!is.null(drawn_polygon) && nrow(drawn_polygon) > 0) {
-      # Use drawn polygon (existing code)
-      polygon_wkt <- st_as_text(drawn_polygon$geometry[[1]])
-
-      df_sp <- df_sp |>
-        filter(sql(paste0(
-          "ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('", polygon_wkt, "'))"
-        )))
-
-      df_env <- df_env |>
-        filter(sql(paste0(
-          "ST_Within(ST_Point(lon_dec, lat_dec), ST_GeomFromText('", polygon_wkt, "'))"
-        )))
+      spatial_wkt <- st_as_text(drawn_polygon$geometry[[1]])
 
     } else if (!is.null(rx$sel_zones) && length(rx$sel_zones) > 0) {
-      # Filter by selected grid zones
-
-      zones_wkt <- cc_grid_zones |>
+      spatial_wkt <- cc_grid_zones |>
         filter(zone_key %in% rx$sel_zones) |>
         pull(geom) |>
         st_union() |>
         st_as_text()
+    }
+    rx$spatial_wkt <- spatial_wkt
 
-      # Filter species data by zones
+    if (!is.null(spatial_wkt)) {
       df_sp <- df_sp |>
         filter(sql(paste0(
-          "ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('", zones_wkt, "'))"
+          "ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('", spatial_wkt, "'))"
         )))
 
-      # Filter ocean data by zones
       df_env <- df_env |>
         filter(sql(paste0(
-          "ST_Within(ST_Point(lon_dec, lat_dec), ST_GeomFromText('", zones_wkt, "'))"
+          "ST_Within(ST_Point(lon_dec, lat_dec), ST_GeomFromText('", spatial_wkt, "'))"
         )))
     }
 
@@ -1220,15 +1267,16 @@ server <- function(input, output, session) {
 
     # generate map
     if (debug) message("Generating species map...\n")
-    is_dark       <- input$dark_toggle == "dark"
-    sp_hex_list   <- prep_sp_hex(df_sp, res_range)
-    sp_scale_list <- lapply(
-      sp_hex_list,
-      interpolate_palette,
-      column  = "sp.value",
-      palette = \(n) hcl.colors(n, palette = "Viridis"))
-    rx$map_sp     <- map_sp(sp_hex_list, sp_scale_list, is_dark = is_dark)
-    rx$sp_layer_ids <- paste0("sp", res_range)
+    spec <- sp_map_spec(
+      df_sp, sel_name, sel_qtr, sel_date_range, ck_children,
+      datasets = input$sel_bio_ds, poly_wkt = spatial_wkt,
+      is_dark  = input$dark_toggle == "dark")
+    rx$map_sp       <- spec$map
+    rx$sp_layer_ids <- spec$layer_ids
+    # rx$sp_scale was NOT updated here, in either path — so after a Submit the
+    # species legend kept redrawing the breaks of the STARTUP selection every
+    # time the zoom observer fired.
+    rx$sp_scale     <- spec$scales
     if (debug) message("Species map generated and stored in rx$map_sp\n")
 
     # output$map no longer depends on rx$map_sp (it isolates everything but its
@@ -1680,9 +1728,14 @@ server <- function(input, output, session) {
               "data/summarized/map/species_polygon_units.csv")
 
           } else {
-            sp_hex  <- prep_sp_hex(rx$df_sp, res_range) |> bind_rows() |> select(-tooltip)
-            env_hex <- prep_env_hex(rx$df_env, res_range, env_stat) |>
-              bind_rows() |> select(-tooltip)
+            # agg_*, not prep_* — the aggregate WITHOUT the hexagon polygons.
+            # Joining them cost a 5.6 s / 153 MB read of hex.geojson and then
+            # wrote an sfc column that write.csv() renders as an R literal
+            # (`list(c(-113.6, ..., 16.5))`), not WKT — so the geometry column
+            # was unreadable to every tool a CSV is opened in. `hexid` is an H3
+            # index: a reader recovers the polygon from it with h3_cell_to_boundary().
+            sp_hex  <- agg_sp_hex(rx$df_sp, res_range) |> select(-tooltip)
+            env_hex <- agg_env_hex(rx$df_env, res_range, env_stat) |> select(-tooltip)
 
             write_data(sp_hex , "data/summarized/map/species_map.csv")
             write_data(env_hex, "data/summarized/map/env_map.csv")
