@@ -130,11 +130,12 @@ server <- function(input, output, session) {
                           ck_children, datasets = NULL, poly_wkt = NULL,
                           is_dark = TRUE) {
     if (USE_H3T) {
-      # Resolve taxa HERE and hand the ids to the SQL builder, so the tiles
-      # filter on exactly what get_sp() filtered on — same children, same
-      # ITIS-only fallback, same dataset checkboxes, same spatial filter.
+      # Resolve taxa HERE and hand the taxon_keys to the SQL builder, so the
+      # tiles filter on exactly what get_sp() filtered on — same children walk
+      # (ITIS for birds, WoRMS otherwise), same dataset checkboxes, same
+      # spatial filter.
       ids   <- resolve_sp_ids(sel_name, ck_children)
-      sql   <- build_sp_sql(ids$worms_ids, ids$sci_names, sel_qtr, sel_date_range,
+      sql   <- build_sp_sql(ids$taxon_keys, sel_qtr, sel_date_range,
                             datasets = datasets, poly_wkt = poly_wkt)
       stats <- fetch_h3t_stats(sql, H3T_RELEASE)
       if (debug) { message("sp stats:"); print(stats) }

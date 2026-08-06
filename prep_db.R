@@ -158,23 +158,56 @@ dbExecute(con, "
                       TRY_CAST(dt.ds_taxa_code AS INTEGER) IS NULL, dt.dataset_key) AS rn
     FROM dataset_taxon dt JOIN taxon_u t USING (taxon_key)
   ) WHERE rn = 1")
-# legacy WoRMS-hierarchy `taxon` (authority/taxonID/parentNameUsageID/…) from the
-# worms:-keyed rows; parentNameUsageID = the integer in the parent's taxon_key
+# hierarchy `taxon`, keyed on `taxon_key` — ONE tree per authority, each native.
+#
+# Was `WHERE taxon_key LIKE 'worms:%'`, i.e. a filter on the KEY AUTHORITY, so
+# every seabird and marine mammal was absent from the tree entirely.
+#
+# The obvious repair — keep the filter off but key on `worms_id` — does not work,
+# and the numbers say why. Of the release's 169 ITIS taxa:
+#
+#     rank      nodes   have a worms_id
+#     Family       17        0
+#     Order        10        0
+#     Genus        41        3
+#     Species      90       88
+#
+# WoRMS simply has no AphiaID for a bird family or order. Keying the tree on
+# worms_id therefore keeps the bird SPECIES and drops every family and order
+# above them, orphaning 72 species into roots — a tree that looks populated and
+# is wrong. (It is easy to convince yourself otherwise: `Ardenna` is one of the
+# three genera that DO have an AphiaID, so spot-checking that one genus passes.)
+#
+# So key on `taxon_key` and let each authority keep its own tree: birds walk the
+# ITIS chain (Ardenna grisea -> Ardenna -> Procellariidae -> Procellariiformes ->
+# Aves -> ... -> Animalia, all 12 ranks present in the release), everything else
+# walks WoRMS. The chains are self-consistent by construction — a taxon_key's
+# parent_taxon_key is always in the same authority — so the recursion needs no
+# authority filter to stay in one tree. `authority` is kept for display and for
+# callers that still want to scope explicitly.
 dbExecute(con, "
   CREATE OR REPLACE TABLE taxon AS
-  SELECT 'WoRMS'                                              AS authority,
-         worms_id                                            AS taxonID,
-         worms_id                                            AS acceptedNameUsageID,
-         TRY_CAST(replace(parent_taxon_key,'worms:','') AS INTEGER) AS parentNameUsageID,
-         scientific_name                                     AS scientificName,
-         rank                                                AS taxonRank,
-         taxonomic_status                                    AS taxonomicStatus
-  FROM taxon_u WHERE taxon_key LIKE 'worms:%' AND worms_id IS NOT NULL")
-# legacy `taxa_rank` (rank -> order) folded into unified taxon.rank_order
+  SELECT CASE WHEN t.taxon_key LIKE 'itis:%' THEN 'ITIS' ELSE 'WoRMS' END AS authority,
+         t.taxon_key        AS taxonID,
+         t.taxon_key        AS acceptedNameUsageID,
+         t.parent_taxon_key AS parentNameUsageID,
+         t.scientific_name  AS scientificName,
+         t.rank             AS taxonRank,
+         t.taxonomic_status AS taxonomicStatus,
+         t.worms_id, t.itis_id
+  FROM taxon_u t")
+# legacy `taxa_rank` (rank -> order) folded into unified taxon.rank_order.
+#
+# MUST be one row per rank. `SELECT DISTINCT rank, rank_order` is not: taxa whose
+# rank_order was never populated (every ITIS-keyed taxon — the release only
+# assigns rank_order from the ichthyo `taxa_rank` lookup) contribute a second
+# pair `(Family, NULL)` alongside `(Family, 140)`. get_taxon_children() ends with
+# a LEFT JOIN on taxonRank, so each such rank DOUBLED every row of the taxa tree
+# and its observation counts, silently.
 dbExecute(con, "
   CREATE OR REPLACE TABLE taxa_rank AS
-  SELECT DISTINCT rank AS taxonRank, rank_order
-  FROM taxon_u WHERE rank IS NOT NULL")
+  SELECT rank AS taxonRank, max(rank_order) AS rank_order
+  FROM taxon_u WHERE rank IS NOT NULL GROUP BY rank")
 
 # step B: bio_obs materialized table ----
 # ichthyo (larvae/eggs + folded inverts) observations from the consolidated
@@ -204,6 +237,7 @@ dbExecute(
     sp.common_name,
     sp.species_id,
     sp.worms_id,
+    o.taxon_key,
     tx.parentNameUsageID AS parent_id,
     o.measurement_value AS tally,
     smp.tow_type,
@@ -242,9 +276,11 @@ dbExecute(
   FROM obs o
   JOIN species sp
     ON sp.taxon_key = o.taxon_key
-  -- WoRMS parent taxon id, needed by taxa_tree_builder's (worms_id, parent_id) grouping
+  -- parent taxon key, needed by taxa_tree_builder's (taxon_key, parent_id)
+  -- grouping. Joined on taxon_key rather than worms_id so a bird resolves to its
+  -- ITIS parent instead of NULL (no bird family or order has an AphiaID).
   LEFT JOIN taxon tx
-    ON sp.worms_id = tx.taxonID AND tx.authority = 'WoRMS'
+    ON tx.taxonID = o.taxon_key
   LEFT JOIN sample_measurement shf
     ON o.sample_key = shf.sample_key AND shf.measurement_type = 'std_haul_factor'
   LEFT JOIN sample_measurement ps

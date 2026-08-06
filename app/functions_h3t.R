@@ -32,8 +32,8 @@ poly_clause <- function(poly_wkt, lon_col, lat_col) {
 
 #' Species tile SELECT: projects (cell_id, value, n) from bio_obs.
 #'
-#' Takes the ALREADY-RESOLVED id sets from \code{resolve_sp_ids()} rather than
-#' resolving taxa itself. It used to take one display name and walk the
+#' Takes the ALREADY-RESOLVED `taxon_key`s from \code{resolve_sp_ids()} rather
+#' than resolving taxa itself. It used to take one display name and walk the
 #' hierarchy in a recursive CTE, which meant three ways to disagree with the
 #' rest of the app, all of them silent:
 #'   * only the FIRST selected taxon reached the tiles (glue_sql interpolates a
@@ -42,16 +42,12 @@ poly_clause <- function(poly_wkt, lon_col, lat_col) {
 #'     matched nothing for them while `get_sp()` matched them by name;
 #'   * the dataset checkboxes and the spatial filter were not applied at all.
 #' Filtering on exactly what `get_sp()` filtered on makes map and tables agree
-#' by construction.
-build_sp_sql <- function(worms_ids, sci_names, qtr, date_range,
+#' by construction. Since both now filter `taxon_key`, there is one key space
+#' rather than a worms_id set plus a scientific_name set to keep in agreement.
+build_sp_sql <- function(taxon_keys, qtr, date_range,
                          datasets = NULL, poly_wkt = NULL) {
-  taxa <- if (length(worms_ids) > 0 && length(sci_names) > 0) {
-    glue::glue_sql("(worms_id IN ({worms_ids*}) OR scientific_name IN ({sci_names*}))",
-                   .con = DBI::ANSI())
-  } else if (length(worms_ids) > 0) {
-    glue::glue_sql("worms_id IN ({worms_ids*})", .con = DBI::ANSI())
-  } else if (length(sci_names) > 0) {
-    glue::glue_sql("scientific_name IN ({sci_names*})", .con = DBI::ANSI())
+  taxa <- if (length(taxon_keys) > 0) {
+    glue::glue_sql("taxon_key IN ({taxon_keys*})", .con = DBI::ANSI())
   } else {
     # nothing resolves; an empty IN () is a SQL error, so say so explicitly
     DBI::SQL("FALSE")

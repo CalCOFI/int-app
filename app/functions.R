@@ -5,10 +5,16 @@
 #' Queries the taxonomy table to find all child taxa of a given taxonID,
 #' using a recursive CTE. Returns a tibble with taxon details and depth levels.
 #'
-#' @param taxonID Character string of the parent taxonID to query
+#' `taxonID` is a `taxon_key` (`"worms:137202"` / `"itis:1255050"`), so the walk
+#' stays inside one authority's tree by construction — a key's parent is always
+#' in the same authority. That is what lets seabirds expand through their ITIS
+#' families and orders, which have no WoRMS ids to walk at all.
+#'
+#' @param taxonID Character `taxon_key` of the parent to query
 #' @param con DuckDB database connection object
-#' @param authority Character string specifying the taxonomic authority (default: "worms")
-get_taxon_children <- function(taxonID, con, authority = "WoRMS") {
+#' @param authority optional authority to scope to ("WoRMS"/"ITIS"); NULL (the
+#'   default) walks whichever tree the key belongs to, which is what callers want
+get_taxon_children <- function(taxonID, con, authority = NULL) {
 
   query_sql <- glue("
     WITH RECURSIVE taxon_children AS (
@@ -36,8 +42,8 @@ get_taxon_children <- function(taxonID, con, authority = "WoRMS") {
       FROM taxon t
       INNER JOIN taxon_children tc ON t.parentNameUsageID = tc.taxonID
       WHERE
-        t.parentNameUsageID IS NOT NULL AND
-        t.authority = '{authority}'
+        t.parentNameUsageID IS NOT NULL
+        {if (is.null(authority)) '' else glue(\"AND t.authority = '{authority}'\")}
     )
     SELECT tc.*, COALESCE(tr.rank_order, 99) as rank_order
     FROM taxon_children tc
@@ -167,7 +173,7 @@ get_taxon_parentage <- function(taxonID, con, authority = "WoRMS"){
 #' @param sp_name Character vector of picker labels, "Common (rank: Scientific)"
 #' @param ck_children Include taxonomic children of the selected taxa
 #'
-#' @return list with \code{worms_ids} (integer) and \code{sci_names} (character)
+#' @return list with \code{taxon_keys} (character `taxon_key`s)
 #'
 #' @export
 resolve_sp_ids <- function(sp_name, ck_children = TRUE) {
@@ -177,12 +183,16 @@ resolve_sp_ids <- function(sp_name, ck_children = TRUE) {
   # each time. Keyed on the arguments; nothing below depends on session state.
   key <- rlang::hash(list(sort(sp_name), ck_children))
   if (!is.null(sp_ids_cache[[key]])) return(sp_ids_cache[[key]])
-  # resolve selected names to worms_ids via species + taxon tables
+  # resolve selected names to taxon_keys via species + taxon tables
   # name format must match global.R: "Common Name (rank: Scientific Name)"
+  #
+  # Joined on taxon_key, not worms_id, and NOT filtered to authority WoRMS: the
+  # seabirds and marine mammals key `itis:`, and scoping this join to one
+  # authority is what left them with no taxonRank and no hierarchy to walk.
   sp_taxon <- tbl(con, "species") |>
     left_join(
-      tbl(con, "taxon") |> filter(authority == "WoRMS"),
-      by = join_by(worms_id == taxonID)) |>
+      tbl(con, "taxon"),
+      by = join_by(taxon_key == taxonID)) |>
     mutate(
       rank_part = ifelse(
         is.na(taxonRank) | taxonRank == "",
@@ -196,32 +206,27 @@ resolve_sp_ids <- function(sp_name, ck_children = TRUE) {
 
   sel <- sp_taxon |>
     filter(name %in% sp_name) |>
-    select(name, scientific_name, worms_id) |>
+    select(name, scientific_name, taxon_key) |>
     collect()
 
   if (ck_children) {
-    # the children walk is a WoRMS hierarchy, so it only applies to taxa that
-    # have a WoRMS id
+    # walks whichever authority's tree the key belongs to — WoRMS for most,
+    # ITIS for the seabirds and marine mammals
     df_sel <- sel |>
-      filter(!is.na(worms_id)) |>
-      mutate(children = map(worms_id, get_taxon_children, con = con)) |>
+      filter(!is.na(taxon_key)) |>
+      mutate(children = map(taxon_key, get_taxon_children, con = con)) |>
       unnest(children)
-    worms_ids <- unique(df_sel$acceptedNameUsageID)
+    taxon_keys <- unique(df_sel$acceptedNameUsageID)
   } else {
-    worms_ids <- unique(sel$worms_id[!is.na(sel$worms_id)])
+    taxon_keys <- unique(sel$taxon_key[!is.na(sel$taxon_key)])
   }
-  # Taxa that resolve to ITIS rather than WoRMS — the seabirds and marine
-  # mammals — carry NO worms_id, so matching on it alone returned ZERO rows for
-  # every one of them: all 123 taxa and 64,956 observations of
-  # farallon_bird-mammal were unreachable from the picker. Fall back to the
-  # scientific name for those.
-  sci_names <- unique(sel$scientific_name[is.na(sel$worms_id)])
 
-  out <- list(
-    # bio_obs.worms_id is INTEGER; keep the ids typed so the same vector can be
-    # interpolated into raw SQL for the tile service without a cast
-    worms_ids = as.integer(stats::na.omit(worms_ids)),
-    sci_names = sci_names[!is.na(sci_names)])
+  # One key space for both authorities, so there is no id to be missing and no
+  # name-matching fallback to keep in sync. The previous version matched on
+  # `worms_id` and fell back to `scientific_name` for the ITIS-keyed taxa —
+  # which worked, but meant two code paths whose results had to agree, and the
+  # name path could not expand children at all.
+  out <- list(taxon_keys = taxon_keys[!is.na(taxon_keys)])
 
   sp_ids_cache[[key]] <- out
   out
@@ -239,17 +244,12 @@ get_sp <- function(sp_name, qtr, date_range, ck_children = TRUE, datasets = NULL
       ", date_range = ", paste(date_range, collapse = " to "),
       ", ck_children = ", ck_children)
 
-  ids       <- resolve_sp_ids(sp_name, ck_children)
-  worms_ids <- ids$worms_ids
-  sci_names <- ids$sci_names
+  ids        <- resolve_sp_ids(sp_name, ck_children)
+  taxon_keys <- ids$taxon_keys
 
   df_sp <- tbl(con, "bio_obs")
-  df_sp <- if (length(worms_ids) > 0 && length(sci_names) > 0) {
-    df_sp |> filter(worms_id %in% worms_ids | scientific_name %in% sci_names)
-  } else if (length(worms_ids) > 0) {
-    df_sp |> filter(worms_id %in% worms_ids)
-  } else if (length(sci_names) > 0) {
-    df_sp |> filter(scientific_name %in% sci_names)
+  df_sp <- if (length(taxon_keys) > 0) {
+    df_sp |> filter(taxon_key %in% taxon_keys)
   } else {
     df_sp |> filter(FALSE)   # nothing selected resolves; an empty IN () is a SQL error
   }
@@ -1286,38 +1286,41 @@ prep_summary_stats <- function(df_sp, df_env) {
 }
 
 taxa_tree_builder <- function(df_sp) {
-  # observed taxa: match by worms_id, NOT the display-name string. get_sp() builds
+  # observed taxa: match by taxon_key, NOT the display-name string. get_sp() builds
   # df_sp$name as "common (scientific)" while the species/taxon join below builds
   # it as "common (rank: scientific)" — since the unified-taxon reprep populated
   # taxonRank, those two formats diverge and a name-based filter silently returns
-  # zero rows (then the downstream select on acceptedNameUsageID errors). worms_id
-  # is the stable key both sides already carry.
-  sel_worms <- unique(df_sp |> pull(worms_id))
+  # zero rows (then the downstream select on acceptedNameUsageID errors).
+  # taxon_key is the stable key both sides already carry, and unlike worms_id it
+  # exists for every taxon — no bird family or order has an AphiaID.
+  sel_keys <- unique(df_sp |> pull(taxon_key))
 
   # get counts by taxa in data
   df_counts <- df_sp |>
     summarize(
       n = sum(!is.na(std_tally)),
-      .by = c(worms_id, parent_id)) |>
+      .by = c(taxon_key, parent_id)) |>
     collect()
 
   # build data.tree of taxa
   tree_counts <- tbl(con, "species") |>
-    filter(worms_id %in% sel_worms) |>
-    select(worms_id) |>
+    filter(taxon_key %in% sel_keys) |>
+    select(taxon_key) |>
     collect() |>
     # get children of user-selected taxa
     mutate(
-      children = map(worms_id, get_taxon_children, con = con) ) |>
+      children = map(taxon_key, get_taxon_children, con = con) ) |>
     unnest(children) |>
-    select(worms_id = acceptedNameUsageID, parent_id = parentNameUsageID, sci_name = scientificName) |>
+    select(taxon_key = acceptedNameUsageID, parent_id = parentNameUsageID, sci_name = scientificName) |>
     unique() |>
     # combine with observation counts
     left_join(
-      df_counts, by = join_by(worms_id, parent_id)
+      df_counts, by = join_by(taxon_key, parent_id)
     ) |>
     mutate(
-      parent_id = ifelse(!(parent_id %in% worms_id), 0, parent_id),
+      # a parent outside the selected set becomes the tree root. "0" rather than
+      # 0 because taxon_key is a string now.
+      parent_id = ifelse(!(parent_id %in% taxon_key) | is.na(parent_id), "0", parent_id),
       sci_name = paste0("<i>", sci_name, "</i>"),
       n = ifelse(is.na(n),0,n)
     ) |>

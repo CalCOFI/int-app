@@ -239,11 +239,17 @@ message("H3T_RELEASE: ", H3T_RELEASE)
 # everything by default, but the Dataset filter narrows it to what that dataset
 # holds. 80 of 993 taxa appear in MORE than one dataset (Appendicularia is in
 # both zoodb and zooscan), so this is a filter, not a partition.
+# Joined on taxon_key and NOT filtered to authority WoRMS. Two reasons, and the
+# second is load-bearing: seabirds key `itis:`, so a WoRMS-only join returned a
+# NULL taxonRank for every one of them; and `resolve_sp_ids()` must rebuild this
+# EXACT label to match the user's selection. If one side emits
+# "Common Murre (Uria aalge)" and the other "Common Murre (species: Uria aalge)",
+# the selection resolves to zero rows with no error — which is precisely the
+# divergence documented in taxa_tree_builder(). Change these two together.
 d_sp <- tbl(con, "species") |>
   left_join(
-    tbl(con, "taxon") |>
-      filter(authority == "WoRMS"),
-    by = join_by(worms_id == taxonID)
+    tbl(con, "taxon"),
+    by = join_by(taxon_key == taxonID)
   ) |>
   mutate(
     rank_part = ifelse(
@@ -263,10 +269,12 @@ d_sp <- tbl(con, "species") |>
 sp_names <- sort(d_sp$name)
 
 # Which dataset(s) observed each taxon, keyed on scientific_name and NOT on
-# worms_id: seabirds and marine mammals resolve to ITIS, so `farallon_bird-mammal`
-# carries a NULL worms_id on 59,858 of its 64,956 rows (123 taxa, only 33 with a
-# WoRMS id). Joining on worms_id would have dropped 92% of that dataset from the
-# filter without a word.
+# worms_id. The original reason was that seabirds and marine mammals resolve to
+# ITIS, so `farallon_bird-mammal` carried a NULL worms_id on 59,858 of its 64,956
+# rows and a worms_id join dropped 92% of the dataset without a word. Release
+# v2026.08.06 gives every one of those taxa a worms_id, so that specific hazard
+# is gone — but scientific_name (or taxon_key) remains the right key here,
+# because it does not depend on which authority happens to own a taxon.
 d_taxa_ds <- dbGetQuery(
   con,
   "SELECT DISTINCT dataset_key, scientific_name FROM bio_obs
