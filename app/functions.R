@@ -2070,6 +2070,29 @@ plot_ts <- function(sp_ts, env_ts, ts_res, sel_env_var, is_dark = T) {
 
 # UI component functions ----
 
+#' Label for the Taxa tab's dataset-picker trigger
+#'
+#' States what the filter will actually do, which is why zero selected reads the
+#' same as all selected: an empty selection is not a filter that matches nothing
+#' (\code{\link{get_sp}} skips the dataset predicate entirely), so calling it
+#' "none" would be a label that contradicts the results.
+#'
+#' Mirrored in JavaScript in \code{app/ui.R}, which rewrites this label on every
+#' click; R only paints it the first time. Change the two together, or the
+#' button tells the truth exactly once.
+#'
+#' @param selected character vector of selected \code{dataset_key}
+#' @param n_all total number of datasets on offer
+#' @return length-1 character label, e.g. \code{"3 of 14 datasets"}
+#'
+#' @export
+bio_ds_label <- function(selected, n_all = nrow(d_bio_datasets)) {
+  n <- length(selected)
+  if (n == 0 || n >= n_all) sprintf("All %d datasets", n_all)
+  else                      sprintf("%d of %d datasets", n, n_all)
+}
+
+
 #' Data Selection Modal Dialog
 #'
 #' Creates a multi-tabbed modal dialog for selecting species, environmental
@@ -2105,7 +2128,12 @@ plot_ts <- function(sp_ts, env_ts, ts_res, sel_env_var, is_dark = T) {
 #' @export
 #' @param env_var currently selected environmental measurement_type, so
 #'   reopening the modal does not silently reset it
-modal_data <- function(env_var = "temperature") {
+#' @param bio_ds currently selected biological \code{dataset_key}s, for the same
+#'   reason; \code{NULL} selects every dataset
+modal_data <- function(env_var = "temperature", bio_ds = NULL) {
+  bio_ds <- if (is.null(bio_ds)) d_bio_datasets$dataset_key
+            else intersect(bio_ds, d_bio_datasets$dataset_key)
+
   modalDialog(
     title = "Data Selection",
     navset_tab(
@@ -2113,23 +2141,54 @@ modal_data <- function(env_var = "temperature") {
       nav_panel(
         "Taxa", br(),
         # Which datasets contribute, and a way to work in just one. The app
-        # reads all 9 bio datasets (it used to be ichthyo alone), so without
-        # this the taxa list is 1,377 names with no indication of where any of
-        # them came from. 80 taxa appear in more than one dataset, so this
-        # filters observations too, not only the picker.
-        checkboxGroupInput(
-          "sel_bio_ds",
-          tagList(
-            "Dataset",
-            popover(
-              bs_icon("question-circle"),
-              "Which biological datasets to draw taxa and observations from.
-               Unchecking a dataset removes both its taxa from the list below
-               and its observations from the results \u2014 a taxon sampled by
-               two programs keeps only the selected one.")),
-          choices  = setNames(d_bio_datasets$dataset_key, d_bio_datasets$label),
-          selected = d_bio_datasets$dataset_key,
-          width    = "100%"),
+        # reads every biological dataset in the release (it used to be ichthyo
+        # alone), so without this the taxa list is 1,377 names with no
+        # indication of where any of them came from. 80 taxa appear in more than
+        # one dataset, so this filters observations too, not only the picker.
+        #
+        # In a POPOVER rather than inline, because the list is one line longer
+        # per ingest and there is no end to that: at 14 datasets it filled the
+        # dialog and pushed the taxa picker (the thing this tab is for) below
+        # the fold. The trigger states the selection, so nothing is hidden by
+        # being one click away.
+        div(
+          class = "d-flex align-items-center flex-wrap gap-2 mb-3",
+          tags$label(class = "col-form-label fw-semibold py-0", "Datasets"),
+          popover(
+            tags$button(
+              type  = "button",
+              class = "btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2",
+              bs_icon("database"),
+              # the one element the JS rewrites; it lives in the TRIGGER, which
+              # stays put, not in the content Bootstrap moves in and out
+              tags$span(id = "bio_ds_count", bio_ds_label(bio_ds)),
+              bs_icon("chevron-down")),
+            div(
+              class = "d-flex justify-content-between align-items-start gap-3 mb-2",
+              tags$span(
+                class = "small text-muted",
+                "Unchecking a dataset removes its taxa from the list of
+                 selectable taxa plus its observations from the results.
+                 (Unchecking all datasets is the same as checking them all.)"),
+              tags$button(
+                type  = "button",
+                class = "btn btn-outline-secondary btn-sm flex-shrink-0 cc-ds-all",
+                "Select all")),
+            checkboxGroupInput(
+              "sel_bio_ds",
+              NULL,
+              choices  = setNames(d_bio_datasets$dataset_key, d_bio_datasets$label),
+              selected = bio_ds,
+              width    = "100%"),
+            title     = "Taxa datasets",
+            placement = "bottom",
+            # container: the popover content is otherwise re-parented to <body>,
+            # outside the modal, where Bootstrap's modal focus trap yanks focus
+            # straight back out of it and the checkboxes cannot be reached by
+            # keyboard at all. Keeping it inside #shiny-modal satisfies the trap.
+            options   = list(
+              container   = "#shiny-modal",
+              customClass = "cc-ds-popover"))),
         selectizeInput(
           "sel_name",
           "Taxa",

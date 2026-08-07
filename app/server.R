@@ -955,7 +955,12 @@ server <- function(input, output, session) {
 
   # sel_data -> modal_data(), spatial_filter_map ----
   observeEvent(input$sel_data, {
-    showModal(modal_data(env_var = rx$env_var %||% "temperature"))
+    # carry BOTH the variable and the dataset narrowing across a reopen; the
+    # modal is rebuilt from scratch each time, so anything not passed here silently
+    # resets to its default the next time the user opens the filters
+    showModal(modal_data(
+      env_var = rx$env_var %||% "temperature",
+      bio_ds  = isolate(input$sel_bio_ds)))
     updateSelectizeInput(
       session, "sel_name",
       choices  = sp_names_for(isolate(input$sel_bio_ds)),
@@ -1226,7 +1231,9 @@ server <- function(input, output, session) {
           quarters = sel_qtr, date_beg = sel_date_range[1],
           date_end = sel_date_range[2], status = "empty")
       showNotification("No observations found for selected species.", type = "warning")
-      showModal(modal_data())
+      # reopened on an empty result, so it must come back with what the user
+      # actually chose — resetting it here hides the filter that emptied it
+      showModal(modal_data(env_var = sel_env_var, bio_ds = input$sel_bio_ds))
       return(NULL)
     }
 

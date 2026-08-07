@@ -162,6 +162,28 @@ ui <- function(req) page_sidebar(
       gap: 0.4rem;
     }
 
+    /* --- Taxa > Datasets popover ------------------------------------- */
+    /* The dataset list grows by one line per ingest, so it is behind a
+       popover rather than inline in the Taxa tab. Two consequences to hold:
+       the popover needs more than Bootstrap's 276px default to fit a label
+       like 'CCE-LTER: Picoplankton & bacteria - 1,234,567 obs, 4 variables',
+       and it needs a height cap so a growing list scrolls itself instead of
+       running off the dialog.
+
+       Selectors are id-scoped, not scoped under .modal: while a popover is
+       shown Bootstrap re-parents its content, so any rule that depends on
+       where the markup was authored stops applying at exactly the moment it
+       is on screen. */
+    .cc-ds-popover { --bs-popover-max-width: 30rem; }
+    .cc-ds-popover .popover-body { max-height: 45vh; overflow-y: auto; }
+    #sel_bio_ds { width: 100%; max-width: 100%; margin-bottom: 0; }
+    #sel_bio_ds .checkbox label,
+    #sel_bio_ds .form-check-label {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+    }
+
     /* The dataset heading in the Variable picker is the only thing
        distinguishing `nitrite` (Bottle) from `btl_nitrite` (CTD Cast), so it
        has to be legible — it renders muted gray by default.
@@ -271,6 +293,51 @@ ui <- function(req) page_sidebar(
           if (patch() || ++tries > 80) clearInterval(t);
         }, 250);
       }
+    })();
+  ")),
+
+  # Keep the Taxa > Datasets popover trigger reporting the current selection,
+  # and give it a "Select all".
+  #
+  # Client-side on purpose. The trigger sits in the modal while the checkboxes
+  # are re-parented into the popover on show and back out on hide, so this is
+  # delegated from `document` and works in either position. Doing it server-side
+  # would mean re-rendering the trigger under an open popover, which closes it.
+  #
+  # Both handlers dispatch a bubbling `change` on the checkbox group itself,
+  # which is what Shiny's checkboxGroup binding subscribes to, so the server
+  # sees a normal input update and nothing here has to know about Shiny.
+  tags$script(HTML("
+    (function () {
+      // MIRRORS bio_ds_label() in app/functions.R, which paints the first
+      // label server-side. Zero selected reads as all because that is what the
+      // filter does: an empty selection skips the dataset predicate entirely.
+      function label(n, nAll) {
+        return (n === 0 || n >= nAll)
+          ? 'All ' + nAll + ' datasets'
+          : n + ' of ' + nAll + ' datasets';
+      }
+      function group() { return document.getElementById('sel_bio_ds'); }
+      function refresh() {
+        var grp = group(), out = document.getElementById('bio_ds_count');
+        if (!grp || !out) return;
+        out.textContent = label(
+          grp.querySelectorAll('input[type=checkbox]:checked').length,
+          grp.querySelectorAll('input[type=checkbox]').length);
+      }
+      document.addEventListener('change', function (e) {
+        if (e.target.closest && e.target.closest('#sel_bio_ds')) refresh();
+      });
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest || !e.target.closest('.cc-ds-all')) return;
+        e.preventDefault();
+        var grp = group();
+        if (!grp) return;
+        grp.querySelectorAll('input[type=checkbox]').forEach(function (b) {
+          b.checked = true;
+        });
+        grp.dispatchEvent(new Event('change', { bubbles: true }));
+      });
     })();
   ")),
 
