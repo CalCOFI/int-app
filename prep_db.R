@@ -521,7 +521,11 @@ sf_hex <- bind_rows(hex_list)
 # truncated GeoJSON. Write beside it and rename, which is atomic.
 hex_tmp <- paste0(hex_geo, ".new")
 if (file.exists(hex_tmp)) file.remove(hex_tmp)
-st_write(sf_hex, hex_tmp, delete_dsn = TRUE, quiet = TRUE)
+# driver = "GeoJSON" is required, not decorative: st_write() infers the driver
+# from the file EXTENSION, and the aside-and-swap name ends in `.new`, so it
+# failed with "Could not guess driver for .../hex.geojson.new" and took the whole
+# prep_db run down after the ~25 min spatial build had already succeeded.
+st_write(sf_hex, hex_tmp, driver = "GeoJSON", delete_dsn = TRUE, quiet = TRUE)
 if (!file.rename(hex_tmp, hex_geo))
   stop("could not swap ", hex_tmp, " -> ", hex_geo)
 cat("  hex.geojson:", nrow(sf_hex), "hexagons across 10 resolutions\n")
