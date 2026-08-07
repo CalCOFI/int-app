@@ -44,6 +44,14 @@ hex_geo <- here("data/hex.geojson")
 keep_tables <- c("obs", "sample_measurement", "sample", "taxon", "dataset_taxon",
                  "measurement_type", "spatial", "spatial_attribute")
 
+# Optional, because it is a nicety rather than a dependency: `dataset` is the
+# release's own registry of what it contains (provider, dataset, dataset_name),
+# which global.R uses to LABEL the Taxa / Environmental dataset pickers, so a
+# newly ingested dataset names itself instead of waiting on a hand-edited
+# lookup. Which datasets those pickers OFFER is measured from obs either way, so
+# an older release without this table still preps and still works.
+opt_tables <- c("dataset")
+
 cat("fetching catalog for version:", db_version, "\n")
 info       <- cc_db_info(version = db_version)
 all_tables <- info$tables$name
@@ -51,6 +59,11 @@ missing    <- setdiff(keep_tables, all_tables)
 if (length(missing) > 0)
   stop("release ", db_version, " is missing required tables: ",
        paste(missing, collapse = ", "))
+skipped <- setdiff(opt_tables, all_tables)
+if (length(skipped) > 0)
+  cat("optional tables absent from this release:",
+      paste(skipped, collapse = ", "), "\n")
+keep_tables <- c(keep_tables, intersect(opt_tables, all_tables))
 cat("tables to load:", paste(keep_tables, collapse = ", "), "\n")
 
 # step A: download parquets + create local DuckDB tables ----
@@ -530,7 +543,8 @@ if (!file.rename(hex_tmp, hex_geo))
   stop("could not swap ", hex_tmp, " -> ", hex_geo)
 cat("  hex.geojson:", nrow(sf_hex), "hexagons across 10 resolutions\n")
 
-# step E: drop build-only objects (keep species/taxon/taxa_rank + bio_obs/env_obs) ----
+# step E: drop build-only objects (keep species/taxon/taxa_rank + bio_obs/env_obs
+#         + dataset) ----
 cat("dropping build-only tables...\n")
 drop_obj <- function(con, name) {
   # obs is a remote (partitioned) VIEW; sample_measurement is a local TABLE

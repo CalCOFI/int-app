@@ -338,11 +338,34 @@ DATASET_LABELS <- c(
   "calcofi_phyllosoma"             = "CalCOFI: Phyllosoma",
   "sio_mesopelagic-fish"           = "SIO: Mesopelagic fish")
 
-# falls back to the raw key rather than NA, so a newly ingested dataset shows up
-# looking unpolished instead of vanishing (cf. the provider.csv lesson)
+# The release's own dataset registry — provider + dataset + dataset_name — so a
+# dataset the map above has never heard of still names itself. prep_db.R keeps
+# it in the local DuckDB; a database built before it did simply has no such
+# table, and the curated map plus the raw key still cover every case.
+d_dataset <- if ("dataset" %in% dbListTables(con)) {
+  tbl(con, "dataset") |>
+    select(provider, dataset, dataset_name) |>
+    collect() |>
+    mutate(dataset_key = paste(provider, dataset, sep = "_"))
+} else {
+  tibble(dataset_key = character(), dataset_name = character())
+}
+
+# Three sources, in this order, and the order is the point:
+#   1. the curated short forms above — "CalCOFI: Bottle" reads better in a
+#      pick-list than the release's formal "CalCOFI Bottle Database";
+#   2. `dataset_name` from the release, so a newly ingested dataset arrives
+#      with a real name instead of waiting on someone to edit this file;
+#   3. the raw key, rather than NA — a new dataset shows up looking unpolished
+#      instead of vanishing (cf. the provider.csv lesson).
+# Nothing here decides WHICH datasets the app offers; that is measured from
+# bio_obs / env_obs below. This only decides what they are called.
 dataset_label <- function(key) {
+  if (length(key) == 0) return(character(0))
   lbl <- unname(DATASET_LABELS[key])
-  ifelse(is.na(lbl), key, lbl)
+  lbl <- ifelse(
+    is.na(lbl), d_dataset$dataset_name[match(key, d_dataset$dataset_key)], lbl)
+  ifelse(is.na(lbl) | lbl == "", key, lbl)
 }
 
 # the registry stores units ASCII-safe ("umol/L", "degC", "kg/m3"); render them
@@ -405,16 +428,29 @@ ENV_HEADLINE_TYPES <- c(
   # cce-lter_picoplankton-bacteria
   "prochlorococcus", "synechococcus", "het_bacteria", "picoeukaryotes")
 
-# A dataset with no headline variable would appear in the Dataset filter with an
-# empty Variable list — a dead end that looks like a bug. Fail loudly at startup
-# instead, so adding a dataset forces a decision about what it leads with.
-local({
-  missing <- setdiff(
+# Every dataset has to LEAD with something: one with no headline variable would
+# appear under its own heading in the Variable picker with an empty list — a
+# dead end that looks like a bug.
+#
+# This used to `stop()`, on the reasoning that adding a dataset should force a
+# decision about what it leads with. It forced that decision by taking the whole
+# app down for everyone until someone edited this file, which is not a price a
+# newly ingested dataset should exact. So an uncurated dataset now leads with
+# EVERY variable it has — exactly what "Show all" would have shown, so nothing
+# is hidden and nothing is invented — and says so in the startup log. Curating
+# it here only ever shortens the list.
+ENV_HEADLINE_SHOWN <- local({
+  uncurated <- setdiff(
     unique(d_env_vars$dataset_key),
     unique(d_env_vars$dataset_key[d_env_vars$measurement_type %in% ENV_HEADLINE_TYPES]))
-  if (length(missing) > 0)
-    stop("no headline env variable for: ", paste(missing, collapse = ", "),
-         " — add one to ENV_HEADLINE_TYPES in global.R")
+  if (length(uncurated) > 0)
+    message(
+      "no headline env variable curated for: ", paste(uncurated, collapse = ", "),
+      " — leading with all of their variables; add to ENV_HEADLINE_TYPES in ",
+      "global.R to shorten")
+  union(
+    ENV_HEADLINE_TYPES,
+    d_env_vars$measurement_type[d_env_vars$dataset_key %in% uncurated])
 })
 
 # Datasets are listed ALPHABETICALLY by display name, not by volume: these are
@@ -445,6 +481,16 @@ d_bio_datasets <- dbGetQuery(
   mutate(label = sprintf("%s — %s obs, %d taxa",
                          ds_name, format(n_obs, big.mark = ","), n_taxa))
 
+# Both pickers are MEASURED from the release, never listed here: a dataset with
+# `realm = 'bio'` observations reaches the Taxa tab and one with `realm = 'env'`
+# reaches the Environmental tab by having been ingested, with no app-side edit.
+# Logged at startup so a deploy can confirm a new dataset actually landed —
+# which is otherwise only visible by opening the filter modal and counting.
+message("taxa datasets (", nrow(d_bio_datasets), "): ",
+        paste(d_bio_datasets$dataset_key, collapse = ", "))
+message("env datasets (",  nrow(d_env_datasets), "): ",
+        paste(d_env_datasets$dataset_key, collapse = ", "))
+
 #' Grouped choices for the Environmental Variable picker
 #'
 #' @param datasets character vector of dataset_key to include (NULL = all)
@@ -455,7 +501,7 @@ env_var_choices <- function(datasets = NULL, show_all = FALSE) {
   if (!is.null(datasets) && length(datasets) > 0)
     d <- d[d$dataset_key %in% datasets, ]
   if (!isTRUE(show_all))
-    d <- d[d$measurement_type %in% ENV_HEADLINE_TYPES, ]
+    d <- d[d$measurement_type %in% ENV_HEADLINE_SHOWN, ]
   if (nrow(d) == 0) return(list())
 
   # keep dataset groups in the same order as the Dataset checkboxes
