@@ -553,6 +553,18 @@ dbExecute(con, "DROP TABLE IF EXISTS hex_base")
 # summary ----
 final_tables <- dbListTables(con) |> sort()
 cat("\nfinal tables:", paste(final_tables, collapse = ", "), "\n")
+
+# FORCE the WAL into the main file before disconnecting. `dbDisconnect(shutdown =
+# TRUE)` is documented to checkpoint, but it does not reliably do so for a
+# connection obtained from cc_get_db() — which owns its own driver handle — and
+# the guard below then (correctly) refused to publish the build:
+#   build left a WAL beside calcofi_v2026.08.07.duckdb — shutdown did not
+#   checkpoint; refusing to swap an unflushed database
+# after the full ~25 min build had succeeded. An explicit CHECKPOINT is
+# deterministic and does not depend on driver ownership. We are the only writer,
+# so FORCE has nothing to abort.
+tryCatch(dbExecute(con, "FORCE CHECKPOINT"),
+         error = function(e) message("  checkpoint: ", conditionMessage(e)))
 dbDisconnect(con, shutdown = TRUE)
 
 # swap the finished build into place ----
@@ -561,6 +573,26 @@ dbDisconnect(con, shutdown = TRUE)
 # did not checkpoint, so refuse rather than publish a database that recovers on
 # first open (in a read-only worker, that fails).
 build_wal <- paste0(build_file, ".wal")
+
+# If a WAL survived the disconnect, flush it rather than failing outright: reopen
+# the file with a fresh driver and shut that driver down. Opening a database with
+# a WAL replays it, and shutting the DRIVER down (not just the connection) is what
+# forces the checkpoint — the distinction that makes this different from the
+# dbDisconnect() above, which trusts a driver handle it does not own.
+#
+# The guard stays: if a WAL is STILL there afterwards, something is genuinely
+# wrong and publishing would hand the app a database that recovers on first open,
+# which fails in a read-only worker.
+if (file.exists(build_wal)) {
+  message("  WAL present after disconnect — reopening to force a checkpoint")
+  flush_drv <- duckdb::duckdb(dbdir = build_file)
+  flush_con <- DBI::dbConnect(flush_drv)
+  tryCatch(DBI::dbExecute(flush_con, "FORCE CHECKPOINT"),
+           error = function(e) message("  checkpoint: ", conditionMessage(e)))
+  DBI::dbDisconnect(flush_con)
+  duckdb::duckdb_shutdown(flush_drv)
+}
+
 if (file.exists(build_wal))
   stop("build left a WAL beside ", basename(build_file),
        " — shutdown did not checkpoint; refusing to swap an unflushed database")
