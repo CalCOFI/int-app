@@ -542,7 +542,10 @@ if (sub_n$mx > MAX_VERTS)
 
 dbExecute(con, "
   CREATE OR REPLACE TEMP TABLE _poly AS
-  SELECT spatial_key, layer, name, geom,
+  -- PARTITION BY layer: the batch loop's offsets run 0..n-1 WITHIN a layer, so
+  -- a globally-numbered piece_id would select the wrong rows entirely.
+  SELECT ROW_NUMBER() OVER (PARTITION BY layer) AS piece_id,
+         spatial_key, layer, name, geom,
          ST_XMin(geom) AS xmin, ST_XMax(geom) AS xmax,
          ST_YMin(geom) AS ymin, ST_YMax(geom) AS ymax
   FROM _part")
@@ -562,11 +565,29 @@ for (i in seq_len(nrow(sp_layers))) {
     for (k in seq_len(SPATIAL_BUCKETS) - 1L) {
       # DISTINCT guards against a source layer whose multipolygon parts overlap;
       # valid ones do not, and a duplicated membership would double-count in the app.
+      # Page on piece_id, NOT `ORDER BY spatial_key LIMIT/OFFSET`.
+      #
+      # spatial_key is NOT unique in _poly — ST_Dump already yields many parts
+      # per key and the subdivision above yields more — so ORDER BY spatial_key
+      # is not a TOTAL order and DuckDB may return tied rows in any order per
+      # query. With LIMIT/OFFSET the pages then overlap and, worse, SKIP: a piece
+      # that lands in no page contributes no memberships and nothing reports it.
+      #
+      # This silently cost CDFW Regions 18,700 of 58,269 memberships (-32%) the
+      # first time subdivision multiplied its ties. It is a latent bug in the
+      # pagination, not in the subdivision — any layer with more parts than
+      # SPATIAL_BATCH and duplicate spatial_keys could always have been affected,
+      # and BOEM (9,833 parts over 20 pages) is the obvious candidate to re-check.
+      # It hid because the count that changes is a total nobody had a baseline
+      # for.
+      #
+      # piece_id is a row number assigned once, so the ranges are disjoint and
+      # cover every row exactly once by construction — no ordering required.
       dbExecute(con, glue("
         INSERT INTO sample_spatial
         SELECT DISTINCT s.sample_key, p.spatial_key, p.layer, p.name
         FROM (SELECT * FROM _poly WHERE layer = {dbQuoteString(con, lyr)}
-              ORDER BY spatial_key LIMIT {SPATIAL_BATCH} OFFSET {off}) p
+              AND piece_id > {off} AND piece_id <= {off + SPATIAL_BATCH}) p
         JOIN _sample_ok s
           ON s.bkt = {k}
          AND s.longitude BETWEEN p.xmin AND p.xmax
