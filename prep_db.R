@@ -138,7 +138,15 @@ dbExecute(con, "INSTALL spatial; LOAD spatial;")
 # on /ssd (where db_dir lives) rather than the 40 GB boot disk regardless, since
 # other operators here DO spill.
 dbExecute(con, "SET memory_limit = '8GB'")
-dbExecute(con, "SET threads = 3")  # leave a core for the other containers
+# 3 -> 2 on 2026-08-10. Building v2026.08.10 was OOM-KILLED at 10.8 GB anon-RSS
+# (`exit 137`, kernel `Out of memory: Killed process … (R)`), dying in the CDFW
+# Regions layer — the hotspot the batching notes below already name. Nothing
+# regressed; the release simply grew (obs 25.4M -> 26.3M rows) and ate the margin
+# that let the previous build finish at 9.6 GB. Peak memory in the non-spillable
+# spatial join scales with threads, so this is the cheapest lever that does not
+# change what is computed. ERDDAP's java holds ~4.8 GB of the 16 GB throughout,
+# which is most of why the margin is this thin.
+dbExecute(con, "SET threads = 2")  # leave cores for the other containers
 dbExecute(con, glue("SET temp_directory = '{file.path(db_dir, 'duckdb_tmp')}'"))
 
 # step A2: legacy taxon shims from the unified refs ----
@@ -404,8 +412,17 @@ cat("  env_obs:", format(env_n, big.mark = ","), "rows\n")
 # Remaining hotspot: CDFW Regions is ~70% of the runtime. If that ever matters,
 # the fix is true subdivision — clip each oversized part against a coarse grid so
 # no piece exceeds N vertices — not a bigger machine.
-SPATIAL_BATCH   <- as.integer(Sys.getenv("CC_SPATIAL_BATCH", "500"))
-SPATIAL_BUCKETS <- as.integer(Sys.getenv("CC_SPATIAL_BUCKETS", "8"))
+# Defaults raised on 2026-08-10 after v2026.08.10 was OOM-killed inside CDFW
+# Regions — the "remaining hotspot" named above, reached for the first time with
+# no headroom left. Splitting the POINT side is the only thing that bounds a
+# single huge part (a bbox that covers nearly every sample cannot be filtered),
+# so buckets is the knob that matters here: 8 -> 24. Batch 500 -> 250 halves the
+# polygon side of each piece too. Both stay env-overridable for a machine with
+# more room: CC_SPATIAL_BUCKETS=8 CC_SPATIAL_BATCH=500 restores the old shape.
+# More, smaller pieces cost wall-clock, not correctness — the loop is a UNION of
+# disjoint work and the DISTINCT below already guards overlap.
+SPATIAL_BATCH   <- as.integer(Sys.getenv("CC_SPATIAL_BATCH", "250"))
+SPATIAL_BUCKETS <- as.integer(Sys.getenv("CC_SPATIAL_BUCKETS", "24"))
 dbExecute(con, "SET preserve_insertion_order = false")
 
 # Sample side, filtered ONCE and bucketed. Keeping raw lon/lat makes the bbox
