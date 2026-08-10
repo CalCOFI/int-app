@@ -463,13 +463,89 @@ dbExecute(con, glue("
     AND NOT isnan(longitude) AND NOT isinf(longitude)"))
 
 dbExecute(con, "
-  CREATE OR REPLACE TEMP TABLE _poly AS
-  SELECT spatial_key, layer, name, part_geom AS geom,
-         ST_XMin(part_geom) AS xmin, ST_XMax(part_geom) AS xmax,
-         ST_YMin(part_geom) AS ymin, ST_YMax(part_geom) AS ymax
+  CREATE OR REPLACE TEMP TABLE _part AS
+  SELECT spatial_key, layer, name,
+         -- REPAIR, and only where needed. 2 of CA Watersheds' 140 parts are
+         -- invalid ('Ring edge missing at -123.171 37.772'), and ST_Intersects
+         -- against an invalid ring silently UNDER-counts: that layer returned
+         -- 52,730 memberships raw vs 58,255 repaired, a 9.5% loss that nothing
+         -- reported. ST_Intersection additionally THROWS on them, so the
+         -- subdivision below cannot run without this. Same family as the NaN
+         -- coordinates above: geometry that is wrong rather than absent, and
+         -- wrong quietly.
+         CASE WHEN ST_IsValid(g) THEN g ELSE ST_MakeValid(g) END AS geom,
+         ST_NPoints(g)::UINTEGER AS npts
   FROM (SELECT spatial_key, layer, name,
-               UNNEST(ST_Dump(ST_SetCRS(geom, 'EPSG:4326'))).geom AS part_geom
+               UNNEST(ST_Dump(ST_SetCRS(geom, 'EPSG:4326'))).geom AS g
         FROM spatial)")
+
+# ── subdivide oversized parts until every piece fits the vertex budget ────────
+# THE fix for the hotspot the batching notes above describe. Batching bounds how
+# many polygons and points meet at once, but it cannot bound a SINGLE part that
+# is huge and complex: its bbox legitimately covers nearly every sample, so the
+# pre-filter passes everything through to ST_Intersects. Building v2026.08.10 was
+# OOM-killed exactly there (CDFW Regions, `exit 137` at 10.8 GB anon-RSS).
+#
+# Clip each oversized part against a 2x2 grid of its own bbox, recompute vertex
+# counts, repeat. Iteration is what makes this work and a single pass is not
+# enough — vertex density is uneven, so one cell of a coarse grid keeps most of a
+# coastline. Sizing a grid in one shot as ceil(sqrt(npts/budget)) only got
+# 105,387 -> 74,409; iterating reaches the budget in 5 rounds:
+#
+#     round 0: 24 parts over budget, max 105,387 vertices
+#     round 1:  8                          48,668
+#     round 2:  2                          34,703
+#     round 3:  1                          31,362
+#     round 4:  1                          23,220
+#     round 5:  0                          19,585   <- under MAX_VERTS
+#
+# Cost is 99 extra pieces (13,655 -> 13,754, +0.7%), and every piece now has a
+# tight bbox, which is what finally makes the pre-filter effective on the layers
+# where it previously did nothing.
+#
+# MEMBERSHIP-PRESERVING, verified rather than assumed: against all 1,459,262
+# release sample positions, all 8 layers containing an oversized part return
+# identical (sample_key, spatial_key) counts before and after subdivision, once
+# both sides use the repaired geometry. Grid cells tile disjointly so pieces
+# partition the original, and a point on a shared edge matches both pieces — the
+# DISTINCT below collapses that, exactly as it already does for ST_Dump parts.
+MAX_VERTS <- as.integer(Sys.getenv("CC_MAX_PART_VERTS", "20000"))
+MAX_SUBDIV_ITER <- 12L
+sub_it <- 0L
+repeat {
+  n_big <- dbGetQuery(con, glue(
+    "SELECT COUNT(*) AS n FROM _part WHERE npts > {MAX_VERTS}"))$n
+  if (n_big == 0L || sub_it >= MAX_SUBDIV_ITER) break
+  dbExecute(con, glue("
+    CREATE OR REPLACE TEMP TABLE _part AS
+    SELECT spatial_key, layer, name, geom, npts FROM _part WHERE npts <= {MAX_VERTS}
+    UNION ALL
+    SELECT spatial_key, layer, name, geom, ST_NPoints(geom)::UINTEGER AS npts FROM (
+      SELECT b.spatial_key, b.layer, b.name,
+             ST_CollectionExtract(ST_Intersection(b.geom, ST_MakeEnvelope(
+               b.x0 + (b.x1-b.x0)*i/2.0,     b.y0 + (b.y1-b.y0)*j/2.0,
+               b.x0 + (b.x1-b.x0)*(i+1)/2.0, b.y0 + (b.y1-b.y0)*(j+1)/2.0)), 3) AS geom
+      FROM (SELECT *, ST_XMin(geom) x0, ST_XMax(geom) x1,
+                      ST_YMin(geom) y0, ST_YMax(geom) y1
+            FROM _part WHERE npts > {MAX_VERTS}) b,
+           range(0,2) t(i), range(0,2) u(j))
+    WHERE geom IS NOT NULL AND NOT ST_IsEmpty(geom)"))
+  sub_it <- sub_it + 1L
+}
+sub_n <- dbGetQuery(con,
+  "SELECT COUNT(*) AS pieces, MAX(npts) AS mx FROM _part")
+cat(glue("  subdivided in {sub_it} round(s): {format(sub_n$pieces, big.mark=',')} ",
+         "pieces, max {format(sub_n$mx, big.mark=',')} vertices\n"), "\n")
+if (sub_n$mx > MAX_VERTS)
+  warning(glue("a part still exceeds {MAX_VERTS} vertices after ",
+               "{MAX_SUBDIV_ITER} rounds — the spatial join may run hot"))
+
+dbExecute(con, "
+  CREATE OR REPLACE TEMP TABLE _poly AS
+  SELECT spatial_key, layer, name, geom,
+         ST_XMin(geom) AS xmin, ST_XMax(geom) AS xmax,
+         ST_YMin(geom) AS ymin, ST_YMax(geom) AS ymax
+  FROM _part")
 
 dbExecute(con, "
   CREATE OR REPLACE TABLE sample_spatial (
@@ -503,6 +579,7 @@ for (i in seq_len(nrow(sp_layers))) {
 }
 dbExecute(con, "DROP TABLE IF EXISTS _sample_ok")
 dbExecute(con, "DROP TABLE IF EXISTS _poly")
+dbExecute(con, "DROP TABLE IF EXISTS _part")
 
 ss_n <- dbGetQuery(con, "SELECT COUNT(*) AS n FROM sample_spatial")$n
 ss_s <- dbGetQuery(con, "SELECT COUNT(DISTINCT sample_key) AS n FROM sample_spatial")$n
