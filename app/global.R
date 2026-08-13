@@ -336,7 +336,8 @@ DATASET_LABELS <- c(
   "cce-lter_zoodb"                 = "CCE-LTER: ZooDB",
   "farallon_bird-mammal"           = "Farallon: Seabirds & mammals",
   "calcofi_phyllosoma"             = "CalCOFI: Phyllosoma",
-  "sio_mesopelagic-fish"           = "SIO: Mesopelagic fish")
+  "sio_mesopelagic-fish"           = "SIO: Mesopelagic fish",
+  "cdfw_dungeness-crab"            = "CDFW: Dungeness crab megalopae")
 
 # The release's own dataset registry — provider + dataset + dataset_name — so a
 # dataset the map above has never heard of still names itself. prep_db.R keeps
