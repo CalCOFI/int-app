@@ -343,30 +343,44 @@ DATASET_LABELS <- c(
 # dataset the map above has never heard of still names itself. prep_db.R keeps
 # it in the local DuckDB; a database built before it did simply has no such
 # table, and the curated map plus the raw key still cover every case.
+# `dataset_name_short` is authored in each ingest's `calcofi.dataset_meta`
+# front-matter and carried here by calcofi4db >= 3.15.0, so a dataset names
+# itself without anyone editing DATASET_LABELS above. Selected defensively:
+# a database built before 3.15.0 has the table but not the column, and losing
+# the whole registry over one missing field would take the formal names with it.
 d_dataset <- if ("dataset" %in% dbListTables(con)) {
+  cols <- colnames(tbl(con, "dataset"))
   tbl(con, "dataset") |>
-    select(provider, dataset, dataset_name) |>
+    select(any_of(c("provider", "dataset", "dataset_name", "dataset_name_short"))) |>
     collect() |>
-    mutate(dataset_key = paste(provider, dataset, sep = "_"))
+    mutate(
+      dataset_key        = paste(provider, dataset, sep = "_"),
+      dataset_name_short = if ("dataset_name_short" %in% cols) dataset_name_short else NA_character_)
 } else {
-  tibble(dataset_key = character(), dataset_name = character())
+  tibble(dataset_key = character(), dataset_name = character(),
+         dataset_name_short = character(), provider = character())
 }
 
-# Three sources, in this order, and the order is the point:
-#   1. the curated short forms above — "CalCOFI: Bottle" reads better in a
-#      pick-list than the release's formal "CalCOFI Bottle Database";
-#   2. `dataset_name` from the release, so a newly ingested dataset arrives
-#      with a real name instead of waiting on someone to edit this file;
-#   3. the raw key, rather than NA — a new dataset shows up looking unpolished
+# Four sources, in this order, and the order is the point — it inverted in
+# calcofi4db 3.15.0, which is the whole change:
+#   1. `dataset_name_short` from the release, authored in the ingest's
+#      `calcofi.dataset_meta`. The database now knows what a dataset is called,
+#      so a rename or a new dataset needs no edit here;
+#   2. the curated map above, for a release built before 3.15.0 or a dataset
+#      that declares no short form. It is now a fallback, not the authority —
+#      do NOT add rows for new datasets, declare them in the ingest instead;
+#   3. `dataset_name` from the release, the formal long form;
+#   4. the raw key, rather than NA — a new dataset shows up looking unpolished
 #      instead of vanishing (cf. the provider.csv lesson).
 # Nothing here decides WHICH datasets the app offers; that is measured from
 # bio_obs / env_obs below. This only decides what they are called.
 dataset_label <- function(key) {
   if (length(key) == 0) return(character(0))
-  lbl <- unname(DATASET_LABELS[key])
-  lbl <- ifelse(
-    is.na(lbl), d_dataset$dataset_name[match(key, d_dataset$dataset_key)], lbl)
-  ifelse(is.na(lbl) | lbl == "", key, lbl)
+  i   <- match(key, d_dataset$dataset_key)
+  lbl <- d_dataset$dataset_name_short[i]                       # 1. release short form
+  lbl <- ifelse(is.na(lbl) | lbl == "", unname(DATASET_LABELS[key]), lbl)  # 2. curated
+  lbl <- ifelse(is.na(lbl) | lbl == "", d_dataset$dataset_name[i], lbl)    # 3. formal
+  ifelse(is.na(lbl) | lbl == "", key, lbl)                     # 4. raw key
 }
 
 # the registry stores units ASCII-safe ("umol/L", "degC", "kg/m3"); render them
