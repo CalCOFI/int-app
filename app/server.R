@@ -255,6 +255,9 @@ server <- function(input, output, session) {
 
       # store shared data (both paths)
       rx$df_sp       <- df_sp
+      # unit breakdown alongside the data it describes, so the legend and the
+      # sidebar note can never disagree with what is mapped
+      rx$sp_units    <- sp_unit_summary(df_sp)
       rx$df_env      <- df_env
       rx$env_var     <- sel_env_var
       rx$lbl_env_var <- env_var_label(sel_env_var)
@@ -388,10 +391,13 @@ server <- function(input, output, session) {
 
     # Name the legend from what the data actually holds. "(density)" was false
     # for anything not gear-standardized; a bare "CPUE" was still wrong for a raw
-    # occurrence count, since nothing was divided by effort. sp_unit_summary()
-    # asks the rows, and the breakdown goes in the sidebar note — a legend title
-    # cannot carry this and should not try.
-    rx$sp_units     <- sp_unit_summary(df_sp)
+    # occurrence count, since nothing was divided by effort. The breakdown goes in
+    # the sidebar note — a legend title cannot carry it and should not try.
+    #
+    # Reads rx$sp_units, set beside rx$df_sp in BOTH observers that load a
+    # selection. It is not computed here: `df_sp` is a local of the startup
+    # observer above, out of scope in this render block, and computing it here
+    # silently produced the empty-summary label on every render.
     rx$lbl_sp_value <- sp_value_label(rx$sp_units)
 
     if (USE_H3T) {
@@ -1280,6 +1286,7 @@ server <- function(input, output, session) {
 
     # store shared data (still lazy tables)
     rx$df_sp       <- df_sp
+    rx$sp_units    <- sp_unit_summary(df_sp)
     rx$df_env      <- df_env
     rx$env_var     <- sel_env_var
     rx$lbl_env_var <- env_var_label(sel_env_var)

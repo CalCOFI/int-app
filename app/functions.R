@@ -3059,18 +3059,26 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
 #'   `n` descending; zero rows if nothing is summarizable
 #' @export
 sp_unit_summary <- function(df_sp) {
+  # WARN, never swallow. An earlier version returned an empty tibble on any
+  # error, which turned a scope bug (`df_sp` not visible in the render block)
+  # into a plausible-looking "Avg. value" legend with no note — indistinguishable
+  # from a genuinely empty selection, and invisible in the log. If this cannot
+  # summarize, the reason belongs in the log.
   out <- tryCatch(
     df_sp |>
       dplyr::filter(!is.na(std_tally), !is.na(cpue_unit)) |>
-      # Standardized iff the gear is known AND some effort measure exists to
-      # divide by. Both of prep_db.R's branches are covered without naming a gear
-      # code: oblique/vertical supply std_haul_factor, manta supplies
-      # volume_sampled. A future gear that supplies either is classified right.
-      dplyr::mutate(standardized =
-        !is.na(tow_type) & (!is.na(std_haul_factor) | !is.na(volume_sampled))) |>
+      # `cpue_standardized` comes from prep_db.R, computed in the same CASE that
+      # produces cpue_unit. Do NOT re-derive it here from tow_type/effort columns:
+      # an earlier version did, and drifted immediately — it treated any tow
+      # carrying a volume as standardized, though prep_db only standardizes by
+      # volume for manta. One rule, one place.
+      dplyr::mutate(standardized = as.logical(cpue_standardized)) |>
       dplyr::count(cpue_unit, standardized) |>
       dplyr::collect(),
-    error = function(e) NULL)
+    error = function(e) {
+      warning("sp_unit_summary(): ", conditionMessage(e), call. = FALSE)
+      NULL
+    })
   if (is.null(out) || !nrow(out))
     return(tibble::tibble(cpue_unit = character(), standardized = logical(), n = integer()))
   dplyr::arrange(out, dplyr::desc(n))

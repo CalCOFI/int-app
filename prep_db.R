@@ -287,6 +287,20 @@ dbExecute(
         THEN 'count/10m2'
       ELSE COALESCE(mt.units, o.measurement_type)
     END                 AS cpue_unit,
+    -- Did we actually standardize, or is this the source's own published value?
+    -- Emitted here rather than re-derived in the app, because the app cannot
+    -- restate these branches without drifting from them: a first attempt keyed
+    -- on tow_type AND (std_haul_factor OR volume_sampled), which silently
+    -- misclassifies a non-manta tow that happens to carry a volume. One rule,
+    -- one place. The app reads this flag to say whether a value is
+    -- catch-per-unit-effort at all — for cdfw_dungeness-crab it is not: those are
+    -- occurrence counts in a lab-examined aliquot, tow_type is present but no
+    -- haul factor exists, so this is FALSE and the legend must not claim CPUE.
+    CASE
+      WHEN smp.tow_type = 'MT' THEN TRUE
+      WHEN smp.tow_type IS NOT NULL AND shf.measurement_value IS NOT NULL THEN TRUE
+      ELSE FALSE
+    END                 AS cpue_standardized,
     o.dataset_key,
     o.measurement_type,
     o.datetime          AS time_start,
