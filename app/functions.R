@@ -477,7 +477,9 @@ agg_sp_hex <- function(df_sp, res_range) {
       !is.na(sp.value)) |>
     mutate(
       hex_id  = sql("HEX(hex_int)"),
-      tooltip = paste0("Avg. CPUE (density): ", round(sp.value, 2),
+      # unit-free: the hex average spans cpue_units, and std_tally is a
+      # gear-standardized density only where a net tow supports it (see prep_db.R)
+      tooltip = paste0("Avg. CPUE: ", round(sp.value, 2),
                  "</br>Num. Samples: ", n,
                  "</br>Date Range: ", min_dtime, " to ", max_dtime)) |>
     select(resolution, hexid = hex_id, sp.value, n, min_dtime, max_dtime, tooltip) |>

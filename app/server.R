@@ -387,8 +387,15 @@ server <- function(input, output, session) {
     rx$agg_unit <- isolate(input$sel_agg_unit) %||% "hex"
 
     # the map averages across net types, so the legend names the measure without
-    # committing to a single unit (the polygon path picks one and names it)
-    rx$lbl_sp_value <- "Avg. CPUE (density)"
+    # committing to a single unit (the polygon path picks one and names it).
+    # NOT "(density)": std_tally is a gear-standardized density only where a net
+    # tow supports it. Where it does not — cdfw_dungeness-crab is occurrence in a
+    # lab-examined aliquot with no tow volume, and euphausiids/zooscan publish
+    # their own per-area units — prep_db.R deliberately falls back to the raw
+    # published value precisely "so the map never shows a quantity labelled as
+    # something it is not". Hardcoding "density" here defeated that: a Dungeness
+    # megalopae count rendered under a legend asserting density.
+    rx$lbl_sp_value <- "Avg. CPUE"
 
     if (USE_H3T) {
       # h3t path: reuse the tile_url + scale from the preload while the filters
@@ -652,7 +659,9 @@ server <- function(input, output, session) {
   # rather than hiding them, for the reason given on clear_hex_layers().
   restore_hex <- function() {
     clear_poly_layers()
-    rx$lbl_sp_value <- "Avg. CPUE (density)"
+    # unit-free on return to hexagons, same reason as the initial render above:
+    # the hex value averages across units, and only some of them are densities
+    rx$lbl_sp_value <- "Avg. CPUE"
     rx$agg_unit <- "hex"
     map_rebuild(map_rebuild() + 1)
   }
@@ -817,7 +826,7 @@ server <- function(input, output, session) {
     if (!is.null(sp_scale)) {
       maplibre_compare_proxy("map", map_side = "before") |>
         add_legend(
-          legend_title = rx$lbl_sp_value %||% "Avg. CPUE (density)",
+          legend_title = rx$lbl_sp_value %||% "Avg. CPUE",
           values       = round(sp_scale$breaks, 2),
           colors       = sp_scale$colors,
           type         = "continuous",
@@ -915,7 +924,7 @@ server <- function(input, output, session) {
           "<b>Date:</b> ", sp_dtime,
           "<br><b>Species:</b> ", sp_name,
           "<br><b>", rx$lbl_env_var, ":</b> ", round(env_qty, 2),
-          "<br><b>CPUE (density):</b> ", round(sp_tally, 2) ))
+          "<br><b>CPUE:</b> ", round(sp_tally, 2) ))
 
     # create ggplot (thematic will apply bslib theme automatically)
     p <- ggplot(
@@ -1330,7 +1339,7 @@ server <- function(input, output, session) {
             "<b>Date:</b> ", clicked_point$sp_dtime,
             "<br><b>Species:</b> ", clicked_point$sp_name,
             "<br><b>", rx$lbl_env_var, ":</b> ", round(clicked_point$env_qty, 2),
-            "<b>CPUE (density):</b> ", round(clicked_point$sp_tally, 2)
+            "<b>CPUE:</b> ", round(clicked_point$sp_tally, 2)
           )
         )
     })
@@ -1369,7 +1378,7 @@ server <- function(input, output, session) {
             "<b>Date:</b> ", selected_points$sp_dtime,
             "<br><b>Species:</b> ", selected_points$sp_name,
             "<br><b>", rx$lbl_env_var, ":</b> ", round(selected_points$env_qty, 2),
-            "<br><b>CPUE (density):</b> ", round(selected_points$sp_tally, 2)
+            "<br><b>CPUE:</b> ", round(selected_points$sp_tally, 2)
           )
         )
     })
@@ -1841,7 +1850,12 @@ server <- function(input, output, session) {
           "density) with its `cpue_unit`: **count/10m²** for oblique & vertical",
           "tows (C1, CB, CV, PV; cpue = tally × std_haul_factor / prop_sorted) and",
           "**count/100m³** for manta surface tows (MT; cpue = tally / prop_sorted /",
-          "volume_sampled × 100)."),
+          "volume_sampled × 100). Where the gear does not support standardization",
+          "— no `tow_type` or no `std_haul_factor` — `cpue` is the value the source",
+          "published, in its own `cpue_unit`, and is NOT a density: cdfw_dungeness-crab",
+          "is occurrence in a lab-examined aliquot of an archived catch, and the",
+          "euphausiid / ZooScan series publish their own per-area units. Read",
+          "`cpue_unit` before comparing rows."),
         "- `data/summarized/` — aggregated map / time-series / scatterplot / depth-profile data",
         "- `data/integrated/` — species matched to environment in time + space",
         "- `query/` — the **exact, portable SQL** behind each file, plus",
