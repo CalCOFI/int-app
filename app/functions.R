@@ -122,8 +122,12 @@ get_taxon_parentage <- function(taxonID, con, authority = "WoRMS"){
 #'     \item \code{tally} - raw larval count
 #'     \item \code{tow_type} - net gear code (C1/CB/CV/PV oblique/vertical; MT manta)
 #'     \item \code{std_haul_factor}, \code{prop_sorted}, \code{volume_sampled} - tow effort
-#'     \item \code{std_tally} - CPUE (density); net-type-aware, see details
-#'     \item \code{cpue_unit} - \code{count/10m2} (oblique/vertical) or \code{count/100m3} (manta)
+#'     \item \code{std_tally} - CPUE where the gear supports it, else the value
+#'       the source published; net-type-aware, see details
+#'     \item \code{cpue_unit} - \code{count/10m2} (oblique/vertical),
+#'       \code{count/100m3} (manta), or the source's own unit where neither
+#'       formula applies (e.g. cdfw_dungeness-crab, an occurrence count in a
+#'       lab-examined aliquot, which is NOT a density)
 #'     \item \code{time_start} - tow start datetime
 #'     \item \code{longitude}, \code{latitude} - spatial coordinates
 #'     \item \code{quarter} - quarter (1-4)
