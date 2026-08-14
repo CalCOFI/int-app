@@ -386,16 +386,13 @@ server <- function(input, output, session) {
     # comment on apply_poly() for why re-rendering is not an option.
     rx$agg_unit <- isolate(input$sel_agg_unit) %||% "hex"
 
-    # the map averages across net types, so the legend names the measure without
-    # committing to a single unit (the polygon path picks one and names it).
-    # NOT "(density)": std_tally is a gear-standardized density only where a net
-    # tow supports it. Where it does not — cdfw_dungeness-crab is occurrence in a
-    # lab-examined aliquot with no tow volume, and euphausiids/zooscan publish
-    # their own per-area units — prep_db.R deliberately falls back to the raw
-    # published value precisely "so the map never shows a quantity labelled as
-    # something it is not". Hardcoding "density" here defeated that: a Dungeness
-    # megalopae count rendered under a legend asserting density.
-    rx$lbl_sp_value <- "Avg. CPUE"
+    # Name the legend from what the data actually holds. "(density)" was false
+    # for anything not gear-standardized; a bare "CPUE" was still wrong for a raw
+    # occurrence count, since nothing was divided by effort. sp_unit_summary()
+    # asks the rows, and the breakdown goes in the sidebar note — a legend title
+    # cannot carry this and should not try.
+    rx$sp_units     <- sp_unit_summary(df_sp)
+    rx$lbl_sp_value <- sp_value_label(rx$sp_units)
 
     if (USE_H3T) {
       # h3t path: reuse the tile_url + scale from the preload while the filters
@@ -659,9 +656,10 @@ server <- function(input, output, session) {
   # rather than hiding them, for the reason given on clear_hex_layers().
   restore_hex <- function() {
     clear_poly_layers()
-    # unit-free on return to hexagons, same reason as the initial render above:
-    # the hex value averages across units, and only some of them are densities
-    rx$lbl_sp_value <- "Avg. CPUE"
+    # reuse the breakdown computed for the current selection rather than a fixed
+    # string — the polygon path may have narrowed the label to its one chosen unit
+    rx$lbl_sp_value <- sp_value_label(rx$sp_units %||%
+                                        sp_unit_summary(req(rx$df_sp)))
     rx$agg_unit <- "hex"
     map_rebuild(map_rebuild() + 1)
   }
@@ -863,7 +861,41 @@ server <- function(input, output, session) {
   # in the sidebar rather than left to be inferred from the legend.
   output$poly_note <- renderUI({
     agg_unit <- input$sel_agg_unit %||% "hex"
-    if (agg_unit == "hex") return(NULL)
+
+    # HEX MODE: the legend can only name the quantity; it cannot say that two
+    # rows under it were measured differently. `std_tally` is a gear-standardized
+    # density only where a net tow supports it — Pacific sardine from an oblique
+    # tow is count/10m2, computed as tally x std_haul_factor / prop_sorted —
+    # whereas Dungeness megalopae are an occurrence count in a lab-examined
+    # aliquot of an archived catch, with no tow volume to divide by. Both used to
+    # render under one legend reading "Avg. CPUE (density)", which was false for
+    # the second and unverifiable for the first. So state it here, from the data.
+    if (agg_unit == "hex") {
+      u <- rx$sp_units
+      if (is.null(u) || !nrow(u)) return(NULL)
+      n_tot <- sum(u$n)
+      return(div(
+        class = "small text-muted mb-3",
+        if (nrow(u) > 1) div(
+          class = "fw-semibold",
+          sprintf("Heads up: this selection mixes %d units, and the hexagon value averages across them.",
+                  nrow(u))),
+        div(
+          class = "mt-1",
+          lapply(seq_len(nrow(u)), function(i) div(
+            sprintf("%s — %s obs (%.0f%%), %s",
+                    u$cpue_unit[i], format(u$n[i], big.mark = ","),
+                    100 * u$n[i] / n_tot,
+                    if (isTRUE(u$standardized[i]))
+                      "standardized by tow effort"
+                    else "as published by the source, not effort-standardized")))),
+        if (any(!u$standardized)) div(
+          class = "mt-1 fst-italic",
+          "Rows that are not effort-standardized are not catch-per-unit-effort: ",
+          "no tow volume or haul factor exists for them, so the published value ",
+          "is shown as-is. Compare those only with each other.")))
+    }
+
     req(rx$df_sp_poly)
 
     sp_poly <- rx$df_sp_poly

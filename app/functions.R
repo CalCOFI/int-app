@@ -3033,3 +3033,61 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
 
   paths
 }
+
+
+#' Which quantities a species selection actually contains
+#'
+#' `std_tally` is not one quantity. Where a net tow supports standardization it is
+#' a gear-standardized density (`count/10m2` for oblique/vertical, `count/100m3`
+#' for manta); everywhere else it is the value the source published, in that
+#' source's own unit — an areal density for the euphausiid and ZooScan series, a
+#' bare occurrence count for `cdfw_dungeness-crab`, which is a lab-examined
+#' aliquot of an archived catch with no tow volume to divide by.
+#'
+#' Calling all of that "CPUE" is wrong in the last case: nothing was divided by
+#' effort. Calling it "density" is wrong too — that was the bug this replaced. So
+#' the app asks the data what it is holding, and says so.
+#'
+#' Deliberately keyed on `tow_type`/`std_haul_factor` presence rather than on
+#' dataset or unit names: those are the same columns `prep_db.R` branches on to
+#' compute `cpue_unit`, so a dataset added later is classified correctly without
+#' anything here knowing its name.
+#'
+#' @param df_sp species table (lazy or collected) carrying `cpue_unit`,
+#'   `tow_type`, `std_haul_factor`
+#' @return a tibble with `cpue_unit`, `standardized` (logical), `n`, ordered by
+#'   `n` descending; zero rows if nothing is summarizable
+#' @export
+sp_unit_summary <- function(df_sp) {
+  out <- tryCatch(
+    df_sp |>
+      dplyr::filter(!is.na(std_tally), !is.na(cpue_unit)) |>
+      # Standardized iff the gear is known AND some effort measure exists to
+      # divide by. Both of prep_db.R's branches are covered without naming a gear
+      # code: oblique/vertical supply std_haul_factor, manta supplies
+      # volume_sampled. A future gear that supplies either is classified right.
+      dplyr::mutate(standardized =
+        !is.na(tow_type) & (!is.na(std_haul_factor) | !is.na(volume_sampled))) |>
+      dplyr::count(cpue_unit, standardized) |>
+      dplyr::collect(),
+    error = function(e) NULL)
+  if (is.null(out) || !nrow(out))
+    return(tibble::tibble(cpue_unit = character(), standardized = logical(), n = integer()))
+  dplyr::arrange(out, dplyr::desc(n))
+}
+
+#' Legend title for a species layer, named by what the values actually are
+#'
+#' One unit: name it (`"Avg. count/10m2"`). Several: say so rather than picking a
+#' label that is true of only some rows — the hexagon value averages across them,
+#' and a mean over a mix of units is not a quantity. The sidebar note carries the
+#' breakdown; see [sp_unit_summary()].
+#'
+#' @param u a [sp_unit_summary()] tibble
+#' @return a character legend title
+#' @export
+sp_value_label <- function(u) {
+  if (!nrow(u))        return("Avg. value")
+  if (nrow(u) == 1L)   return(paste0("Avg. ", u$cpue_unit[1]))
+  paste0("Avg. value (", nrow(u), " mixed units)")
+}
