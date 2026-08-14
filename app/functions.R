@@ -995,6 +995,22 @@ prep_ts_sp <- function(df_sp, ts_res) {
             time = time + 366))
   }
 
+  # Break the line where nothing was sampled. Highcharts connects consecutive
+  # points and a species series is mostly zeros, so an unsampled stretch drew a
+  # flat line along zero — which reads as "we looked and found none" when the
+  # truth is "nobody looked".
+  #
+  # Metacarcinus magister is the case that surfaced it: its sorted-archive effort
+  # exists in nine years only (1984, 1988, 1998, 2004-2009), because the sorting
+  # log records which archived jars have been examined and most have not, yet the
+  # chart drew a continuous zero from 1984 to 2008.
+  #
+  # Calls calcofi4r rather than reimplementing: this file carries its own copy of
+  # prep_ts_sp() which SHADOWS the package's, so fixing only the package left the
+  # app unchanged and the fix silently inert (2026-08-14). One implementation,
+  # two callers. Needs calcofi4r >= 1.7.0.
+  sp_ts_data <- calcofi4r::cc_ts_gaps(sp_ts_data, ts_res)
+
   return(sp_ts_data)
 }
 
