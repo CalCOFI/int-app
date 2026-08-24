@@ -2742,6 +2742,7 @@ build_bio_match_sql <- function(
   LEFT JOIN read_parquet('{base}/sample_measurement.parquet') ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type = 'prop_sorted'
   WHERE o.realm = 'bio' AND o.dataset_key = 'swfsc_ichthyo' AND o.measurement_type = 'abundance'
     AND o.measurement_value IS NOT NULL
+    AND {calcofi4r::cc_qual_ok_sql('o')}
     AND o.datetime IS NOT NULL
     AND o.longitude IS NOT NULL
     AND o.latitude IS NOT NULL
@@ -2792,6 +2793,7 @@ build_env_match_sql <- function(
   FROM read_parquet('{base}/obs.parquet') o
   WHERE o.realm = 'env' AND o.dataset_key = 'calcofi_bottle' AND o.measurement_type = '{env_var}'
     AND o.measurement_value IS NOT NULL
+    AND {calcofi4r::cc_qual_ok_sql('o')}
     AND o.datetime IS NOT NULL
     AND o.longitude IS NOT NULL
     AND o.latitude IS NOT NULL

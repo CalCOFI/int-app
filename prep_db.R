@@ -334,6 +334,11 @@ dbExecute(
   -- the only restriction that is actually about what this table means.
   WHERE o.realm = 'bio'
     AND o.measurement_value IS NOT NULL
+    -- quality flags (bottle/CTD 8, 9; DIC 3, 4, 9) — see the env_obs note below
+    AND COALESCE(NOT (
+          (o.dataset_key IN ('calcofi_bottle', 'calcofi_ctd-cast')
+             AND regexp_replace(o.measurement_qual, '\\.0+$', '') IN ('8', '9'))
+       OR (o.dataset_key = 'calcofi_dic' AND o.measurement_qual IN ('3', '4', '9'))), TRUE)
   ORDER BY sp.scientific_name, o.datetime"
 )
 
@@ -374,6 +379,17 @@ dbExecute(
   WHERE o.realm = 'env'
     AND o.measurement_value IS NOT NULL
     AND COALESCE(mt.is_canonical, TRUE)
+    -- QUALITY FLAGS. measurement_qual carries each dataset's own vocabulary
+    -- (bottle/CTD: 8 = suspect/questionable, 9 = missing/bad; DIC WOCE: 3 =
+    -- questionable, 4 = bad, 9 = missing) and nothing here applied it, so a
+    -- flagged value summarised into every hex like a good one (the 1955 bottle
+    -- oxygen spike Ralf Goericke reported in Aug 2026 carried O_qual = 8).
+    -- NULL-safe; bottle codes were '8.0' through v2026.08.14. Same predicate as
+    -- calcofi4r::cc_qual_ok_sql(); vocabulary in workflows/metadata/measurement_qual.csv.
+    AND COALESCE(NOT (
+          (o.dataset_key IN ('calcofi_bottle', 'calcofi_ctd-cast')
+             AND regexp_replace(o.measurement_qual, '\\.0+$', '') IN ('8', '9'))
+       OR (o.dataset_key = 'calcofi_dic' AND o.measurement_qual IN ('3', '4', '9'))), TRUE)
   ORDER BY o.measurement_type, o.datetime"
 )
 
