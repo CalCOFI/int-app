@@ -2431,15 +2431,79 @@ release_version <- function(path = db_path) {
     error = function(e) "latest")
 }
 
-#' Public GCS parquet base URL for a release
+#' A release catalog, fetched once per version
 #'
 #' @param version Release version string from \code{\link{release_version}}.
-#' @return Base URL (no trailing slash) for the release's single-file parquet.
+#' @return The catalog as a nested list (\code{calcofi4r::cc_catalog()}).
 #' @export
-gcs_parquet_base <- function(version) {
-  glue(
-    "https://storage.googleapis.com/calcofi-db/ducklake/releases/{version}/parquet")
+release_catalog <- local({
+  cache <- new.env(parent = emptyenv())
+  function(version) {
+    version <- as.character(version)
+    if (is.null(cache[[version]]))
+      cache[[version]] <- calcofi4r::cc_catalog(version)
+    cache[[version]]
+  }
+})
+
+#' Per-table \code{read_parquet()} SQL for a release
+#'
+#' Every release table is resolved through the catalog by
+#' \code{calcofi4r::cc_release_sources()} — the one sanctioned map from a table
+#' to its parquet bytes: content-addressed objects
+#' (\code{ducklake/tables/{table}/{hash}/…}) since the v2026.09 releases, the
+#' per-release \code{releases/{version}/parquet/…} path before that (an
+#' \code{s3://} glob for a legacy partitioned table such as \code{obs}, which
+#' needs the anonymous-S3 settings of \code{\link{gcs_s3_settings_sql}}). Never
+#' build that path by hand. Same shape as \code{calcofi4r:::.cc_read_parquet()}.
+#'
+#' @param version Release version string from \code{\link{release_version}}.
+#' @return A function \code{table -> "read_parquet(...)"} SQL fragment.
+#' @export
+release_read_parquet <- function(version) {
+  cat_ <- release_catalog(version)
+  function(table)
+    calcofi4r::cc_read_parquet_sql(calcofi4r::cc_release_sources(cat_, table))
 }
+
+#' Resolved parquet sources of release tables, for manifest provenance
+#'
+#' @param version Release version string.
+#' @param tables Character vector of release table names.
+#' @return Named list (one per table) of \code{urls}, \code{hive_partitioning}
+#'   and, on a content-addressed release, \code{content_hash} per object.
+#' @export
+release_table_sources <- function(version, tables) {
+  cat_ <- release_catalog(version)
+  setNames(lapply(tables, function(tb) {
+    s   <- calcofi4r::cc_release_sources(cat_, tb)
+    out <- list(urls = as.list(as.character(s$urls)), hive_partitioning = isTRUE(s$hive))
+    if (any(!is.na(s$hashes))) out$content_hash <- as.list(unname(s$hashes))
+    out
+  }), tables)
+}
+
+#' DuckDB settings that let an \code{s3://} release glob read GCS anonymously
+#'
+#' Only a legacy (pre-v2026.09) partitioned table resolves to one; the five
+#' \code{SET}s are those of \code{calcofi4r:::.cc_setup_gcs_httpfs()}.
+#'
+#' @param sql SQL string(s); the settings are emitted only if one reads \code{s3://}.
+#' @return A SQL string (possibly empty).
+#' @export
+gcs_s3_settings_sql <- function(sql) {
+  if (!any(startsWith(extract_source_urls(sql), "s3://"))) return("")
+  paste(
+    "SET s3_region = 'auto';",
+    "SET s3_endpoint = 'storage.googleapis.com';",
+    "SET s3_url_style = 'path';",
+    "SET s3_access_key_id = '';",
+    "SET s3_secret_access_key = '';",
+    sep = "\n")
+}
+
+# the release tables the portable bio + env match queries read
+MATCH_TABLES <- c("obs", "taxon", "sample_measurement")
 
 #' Extract a scientific name from a UI species label
 #'
@@ -2461,13 +2525,18 @@ extract_scientific_name <- function(label) {
 
 #' Distinct read_parquet() source URLs referenced in a SQL string
 #'
+#' Handles both \code{read_parquet('url')} and the explicit file-list form
+#' \code{read_parquet(['url', 'url'], hive_partitioning = true)} of a
+#' content-addressed partitioned table.
+#'
 #' @param sql One or more SQL strings.
-#' @return Sorted unique character vector of GCS parquet URLs.
+#' @return Sorted unique character vector of parquet URLs.
 #' @export
 extract_source_urls <- function(sql) {
   one  <- paste(sql, collapse = "\n")
-  hits <- regmatches(one, gregexpr("read_parquet\\('[^']+'", one))[[1]]
-  sort(unique(gsub("read_parquet\\('|'$", "", hits)))
+  hits <- regmatches(one, gregexpr("read_parquet\\(\\[?\\s*'[^']+'(\\s*,\\s*'[^']+')*", one))[[1]]
+  urls <- unlist(regmatches(hits, gregexpr("'[^']+'", hits)))
+  sort(unique(gsub("^'|'$", "", urls)))
 }
 
 #' Build the biological (ichthyoplankton) match subquery
@@ -2488,7 +2557,7 @@ extract_source_urls <- function(sql) {
 build_bio_match_sql <- function(
     sci_names, qtr, date_range, version, include_children = TRUE) {
 
-  base <- gcs_parquet_base(version)
+  rp   <- release_read_parquet(version)
   nm   <- paste0("'", gsub("'", "''", sci_names), "'", collapse = ", ")
   qtrs <- paste(as.integer(qtr), collapse = ", ")
   d1   <- as.character(date_range[1])
@@ -2501,11 +2570,11 @@ build_bio_match_sql <- function(
     prefix <- glue(
       "WITH RECURSIVE taxon_tree AS (
       SELECT taxon_key
-      FROM read_parquet('{base}/taxon.parquet')
+      FROM {rp('taxon')}
       WHERE scientific_name IN ({nm})
     UNION ALL
       SELECT t.taxon_key
-      FROM read_parquet('{base}/taxon.parquet') t
+      FROM {rp('taxon')} t
       JOIN taxon_tree tt ON t.parent_taxon_key = tt.taxon_key
   )
   ")
@@ -2528,10 +2597,10 @@ build_bio_match_sql <- function(
     o.life_stage,
     o.measurement_value AS tally,
     extract(quarter FROM o.datetime)::INTEGER AS quarter
-  FROM read_parquet('{base}/obs.parquet') o
-  JOIN read_parquet('{base}/taxon.parquet') t ON t.taxon_key = o.taxon_key
-  LEFT JOIN read_parquet('{base}/sample_measurement.parquet') shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
-  LEFT JOIN read_parquet('{base}/sample_measurement.parquet') ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type = 'prop_sorted'
+  FROM {rp('obs')} o
+  JOIN {rp('taxon')} t ON t.taxon_key = o.taxon_key
+  LEFT JOIN {rp('sample_measurement')} shf ON shf.sample_key = o.sample_key AND shf.measurement_type = 'std_haul_factor'
+  LEFT JOIN {rp('sample_measurement')} ps  ON ps.sample_key  = o.sample_key AND ps.measurement_type = 'prop_sorted'
   WHERE o.realm = 'bio' AND o.dataset_key = 'swfsc_ichthyo' AND o.measurement_type = 'abundance'
     AND o.measurement_value IS NOT NULL
     AND {calcofi4r::cc_qual_ok_sql('o')}
@@ -2563,7 +2632,7 @@ build_bio_match_sql <- function(
 build_env_match_sql <- function(
     env_var, qtr, date_range, depth_range, version, pad_hours = 6) {
 
-  base <- gcs_parquet_base(version)
+  rp   <- release_read_parquet(version)
   qtrs <- paste(as.integer(qtr), collapse = ", ")
   d1   <- as.character(date_range[1])
   d2   <- as.character(date_range[2])
@@ -2582,7 +2651,7 @@ build_env_match_sql <- function(
     o.measurement_value  AS env_value,
     o.depth_min_m        AS env_depth_m,
     o.measurement_type   AS measurement_type
-  FROM read_parquet('{base}/obs.parquet') o
+  FROM {rp('obs')} o
   WHERE o.realm = 'env' AND o.dataset_key = 'calcofi_bottle' AND o.measurement_type = '{env_var}'
     AND o.measurement_value IS NOT NULL
     AND {calcofi4r::cc_qual_ok_sql('o')}
@@ -2634,7 +2703,8 @@ reproduce_md <- function(manifest) {
     "duckdb < query/integrated_nearest_time.sql",
     "```",
     "",
-    "(each `.sql` file is prefixed with the `INSTALL`/`LOAD` of `httpfs` + `spatial`)",
+    "(each `.sql` file is prefixed with the `INSTALL`/`LOAD` of `httpfs` + `spatial`,",
+    "plus the anonymous-S3 `SET`s when a release table is read as an `s3://` glob)",
     "",
     "### Python",
     "",
@@ -2691,9 +2761,10 @@ reproduce_md <- function(manifest) {
 #' @export
 build_download_bundle <- function(zip_root, params, version = NULL) {
 
-  if (utils::packageVersion("calcofi4r") < "1.2.0")
+  if (utils::packageVersion("calcofi4r") < "1.11.0")
     stop(
-      "build_download_bundle() needs calcofi4r >= 1.2.0 (cc_match_bio_env). ",
+      "build_download_bundle() needs calcofi4r >= 1.11.0 ",
+      "(cc_match_bio_env + cc_release_sources). ",
       "Update with: remotes::install_github('calcofi/calcofi4r')")
 
   version <- version %||% release_version()
@@ -2722,6 +2793,11 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
   on.exit(dbDisconnect(con_gcs, shutdown = TRUE), add = TRUE)
   dbExecute(con_gcs, "INSTALL httpfs; LOAD httpfs;")
   dbExecute(con_gcs, "INSTALL spatial; LOAD spatial;")
+  # a legacy (pre-v2026.09) partitioned table resolves to an s3:// glob, which
+  # DuckDB expands through its S3 client pointed anonymously at GCS; the same
+  # settings go into the bundle's .sql files so they stay copy-paste runnable
+  s3_sql <- gcs_s3_settings_sql(c(bio_sql, env_sql))
+  if (nzchar(s3_sql)) dbExecute(con_gcs, s3_sql)
 
   # writer helpers ---------------------------------------------------------
   paths      <- character()
@@ -2744,6 +2820,7 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
     "-- parquet. See REPRODUCE.md. No credentials or API required.",
     "INSTALL httpfs; LOAD httpfs;",
     "INSTALL spatial; LOAD spatial;",
+    if (nzchar(s3_sql)) s3_sql,
     "", "", sep = "\n")
   write_sql <- function(rel, sql) write_file(rel, paste0(sql_header, sql, "\n"))
   add_meta <- function(rel_csv, rel_sql, df, extra = list()) {
@@ -2801,7 +2878,9 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
     generated_at      = format(Sys.time(), tz = "UTC", usetz = TRUE),
     release_version   = version,
     calcofi4r_version = as.character(utils::packageVersion("calcofi4r")),
-    gcs_parquet_base  = gcs_parquet_base(version),
+    # per release table: the parquet object(s) the catalog resolved it to, with
+    # content_hash on a content-addressed (v2026.09+) release
+    release_sources   = release_table_sources(version, MATCH_TABLES),
     filters = list(
       taxa             = as.list(taxa),
       scientific_names = as.list(sci_names),

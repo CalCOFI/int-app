@@ -5,7 +5,8 @@
 # remotes::install_github("bbest/mapgl@fix-compare-widget-parity", force=T) # https://github.com/walkerke/mapgl/pull/187
 # remotes::install_github("calcofi/calcofi4r", force = T)
 #   NOTE: the reproducible-download bundle (functions.R::build_download_bundle)
-#   needs calcofi4r >= 1.2.0 for cc_match_bio_env(); build_download_bundle()
+#   needs calcofi4r >= 1.11.0 for cc_match_bio_env() + cc_release_sources()
+#   (release tables resolved through the catalog); build_download_bundle()
 #   errors clearly if an older version is installed.
 # remotes::install_github("bbest/mapgl@feat/add-h3t-source", force=T)       # https://github.com/walkerke/mapgl/pull/199
 #
