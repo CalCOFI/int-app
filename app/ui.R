@@ -25,15 +25,11 @@ ui <- function(req) page_sidebar(
             class = "cc-logo-light", .noWS = "after"),
         href = "https://calcofi.io", `aria-label` = "CalCOFI.io home"),
       "Hexagon Explorer",
-      # Which frozen database release everything on screen came from. In the
-      # TITLE rather than the sidebar or the About tab because it has to survive
-      # a collapsed sidebar and every tab switch: a figure someone screenshots
-      # out of here is only reproducible if the release travelled with it.
-      span(class = "intapp-release",
-           title = paste0(
-             "CalCOFI database release ", DB_RELEASE,
-             " — every value shown comes from this frozen release"),
-           DB_RELEASE))),
+      # which frozen database release everything on screen came from — the brand
+      # chip (calcofi4r::cc_release_chip), in the TITLE so it survives a collapsed
+      # sidebar and every tab switch: a figure screenshotted out of here is only
+      # reproducible if the release travelled with it
+      calcofi4r::cc_release_chip(DB_RELEASE))),
 
   tags$head(
     # the calcofi.io brand contract (title, favicon set, theme.css/js) plus
@@ -46,21 +42,6 @@ ui <- function(req) page_sidebar(
       "CalCOFI Hexagon Explorer", ga_app = "db-viz-hex",
       app_version = APP_VERSION, ip = calcofi4r::cc_client_ip(req)),
     tags$style(HTML("
-    /* release tag in the title: present, never competing with it. Sized off
-       the title's own font so it tracks the responsive header, and set in the
-       tabular figures the version string deserves. */
-    .intapp-release {
-      font-size: 0.55em;
-      font-weight: 400;
-      opacity: 0.5;
-      margin-left: 0.45rem;
-      vertical-align: 0.35em;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 0.01em;
-      cursor: help;
-    }
-    .intapp-release:hover { opacity: 0.8; }
     .treeview {
       list-style: none;
       padding-left: 0.1rem;
