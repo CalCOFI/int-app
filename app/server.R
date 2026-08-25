@@ -202,7 +202,10 @@ server <- function(input, output, session) {
         # side (from /h3t/stats) for the legend.
         if (debug) message("USE_H3T: fetching stats instead of preloading hex lists")
 
-        spec <- sp_map_spec(df_sp, sel_name, sel_qtr, sel_date_range, ck_children)
+        # the theme the page opened in (?theme= / cookie); isolated so a later toggle
+        # restyles via the dark_toggle observer instead of rebuilding the map
+        spec <- sp_map_spec(df_sp, sel_name, sel_qtr, sel_date_range, ck_children,
+                            is_dark = isolate(calcofi4r::cc_is_dark(input)))
         rx$map_sp       <- spec$map
         rx$sp_layer_ids <- spec$layer_ids
         rx$sp_scale     <- spec$scales
@@ -420,7 +423,8 @@ server <- function(input, output, session) {
         rx$env_tile_key     <- key
       }
       map_env_obj <- map_env_h3t(rx$env_tile_url, rx$env_scale_single,
-                                 env_stat_label, rx$lbl_env_var)
+                                 env_stat_label, rx$lbl_env_var,
+                                 is_dark = isolate(calcofi4r::cc_is_dark(input)))
       rx$params$map_params$env_stat <- env_stat
       rx$env_stat <- env_stat
       # the hex layer IDs actually on the map, so the polygon switch can hide
@@ -447,7 +451,8 @@ server <- function(input, output, session) {
       env_hex_list,
       env_scale_list,
       env_stat_label,
-      rx$lbl_env_var)
+      rx$lbl_env_var,
+      is_dark = isolate(calcofi4r::cc_is_dark(input)))
 
     rx$env_scale <- env_scale_list
     rx$params$map_params$env_stat <- env_stat
