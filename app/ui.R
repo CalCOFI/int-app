@@ -10,7 +10,7 @@ about_html <- HTML(mark(here("app/about.md"), output = NA))
 # carries the real address, so it is captured here and baked into the analytics
 # snippet.
 ui <- function(req) page_sidebar(
-  window_title = "CalCOFI.io Integrated Database Application",
+  window_title = "CalCOFI Hexagon Explorer",
   title = tagList(
     span(
       a(
@@ -19,7 +19,7 @@ ui <- function(req) page_sidebar(
         img(src = "./logo_calcofi_light.svg", height="50px",
             class = "intapp-logo-light", .noWS = "after"),
         href = "https://calcofi.io"),
-      "Integrated App",
+      "Hexagon Explorer",
       # Which frozen database release everything on screen came from. In the
       # TITLE rather than the sidebar or the About tab because it has to survive
       # a collapsed sidebar and every tab switch: a figure someone screenshots
