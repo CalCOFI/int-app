@@ -10,15 +10,20 @@ about_html <- HTML(mark(here("app/about.md"), output = NA))
 # carries the real address, so it is captured here and baked into the analytics
 # snippet.
 ui <- function(req) page_sidebar(
-  window_title = "CalCOFI Hexagon Explorer",
+  # no window_title: cc_brand_head() below owns the page's one <title>
+  window_title = NULL,
+  # page_sidebar owns the top bar, so the calcofi.io logo pair (theme.css
+  # shows one per theme) sits in its title slot rather than a second bar
   title = tagList(
     span(
       a(
-        img(src = "./logo_calcofi.svg",       height="50px",
-            class = "intapp-logo-dark",  .noWS = "after"),
-        img(src = "./logo_calcofi_light.svg", height="50px",
-            class = "intapp-logo-light", .noWS = "after"),
-        href = "https://calcofi.io"),
+        img(src = "https://calcofi.io/brand/v1/logo_calcofi.svg",
+            height = "50px", alt = "CalCOFI",
+            class = "cc-logo-dark",  .noWS = "after"),
+        img(src = "https://calcofi.io/brand/v1/logo_calcofi_light.svg",
+            height = "50px", alt = "CalCOFI",
+            class = "cc-logo-light", .noWS = "after"),
+        href = "https://calcofi.io", `aria-label` = "CalCOFI.io home"),
       "Hexagon Explorer",
       # Which frozen database release everything on screen came from. In the
       # TITLE rather than the sidebar or the About tab because it has to survive
@@ -31,20 +36,16 @@ ui <- function(req) page_sidebar(
            DB_RELEASE))),
 
   tags$head(
-    tags$link(rel = "icon", type = "image/svg+xml", href = "logo_calcofi.svg"),
+    # the calcofi.io brand contract (title, favicon set, theme.css/js) plus
     # usage tracking: GA4 (aggregate) + a batched beacon to the usage-log Sheet
     # (per-query detail). Both legs are sent by the BROWSER, so no reactive ever
     # performs network I/O — server-side facts reach it via calcofi4r::cc_track()
     # over the websocket the session already has open. The Sheet leg is a silent
     # no-op unless CALCOFI_LOG_URL is set (global.R), so local dev writes nothing.
-    calcofi4r::cc_ga_head("db-viz-hex", app_version = APP_VERSION,
-                          ip = calcofi4r::cc_client_ip(req)),
+    calcofi4r::cc_brand_head(
+      "CalCOFI Hexagon Explorer", ga_app = "db-viz-hex",
+      app_version = APP_VERSION, ip = calcofi4r::cc_client_ip(req)),
     tags$style(HTML("
-    /* swap the logo variant based on the page's bslib theme — the
-       original SVG has WHITE 'CalCOFI.io' text, hidden on light bg. */
-    [data-bs-theme='light'] .intapp-logo-dark  { display: none; }
-    [data-bs-theme='dark']  .intapp-logo-light { display: none; }
-
     /* release tag in the title: present, never competing with it. Sized off
        the title's own font so it tracks the responsive header, and set in the
        tabular figures the version string deserves. */
@@ -493,7 +494,8 @@ ui <- function(req) page_sidebar(
     nav_spacer(),
 
     nav_item(
-      input_dark_mode(id = "dark_toggle", mode = "dark") ),
+      # starts in the theme the request asks for (?theme= / cc_theme cookie)
+      input_dark_mode(id = "dark_toggle", mode = calcofi4r::cc_theme(req)) ),
 
     nav_panel(
       "Download",

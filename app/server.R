@@ -52,13 +52,12 @@ server <- function(input, output, session) {
 
   # tour ----
   # launch the guided tour on load, unless suppressed with ?tour=off in the URL
-  # (also accepts false/0/no) — handy for clean screenshots; see the db-viz-hex
-  # recipe in CalCOFI.github.io/shots.yml
+  # (also accepts false/0/no; the brand contract's rule, cc_tour_enabled()) —
+  # handy for clean screenshots; see the db-viz-hex recipe in
+  # CalCOFI.github.io/shots.yml
   if (is_tour_on) {
     observeEvent(TRUE, {
-      tour_q   <- getQueryString()[["tour"]]
-      tour_off <- !is.null(tour_q) && tolower(tour_q) %in% c("off", "false", "0", "no")
-      if (!tour_off) {
+      if (calcofi4r::cc_tour_enabled()) {
         trk("start_tour")
         tour$init()$start()
       }
@@ -933,7 +932,12 @@ server <- function(input, output, session) {
 
     rx$params$ts_params$ts_res <- ts_res
 
-    plot_ts(sp_ts, env_ts, ts_res, rx$env_var, input$dark_toggle == "dark")
+    # the package's plot_ts (calcofi4r >= 1.10.0), which no longer reaches for
+    # the app-global env_var_choices: hand it the label
+    calcofi4r::plot_ts(
+      sp_ts, env_ts, ts_res, rx$env_var,
+      is_dark   = calcofi4r::cc_is_dark(input),
+      env_label = env_var_label(rx$env_var))
   })
 
   # splot ----
