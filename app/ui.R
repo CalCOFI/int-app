@@ -12,16 +12,16 @@ about_html <- HTML(mark(here("app/about.md"), output = NA))
 ui <- function(req) page_sidebar(
   # no window_title: cc_brand_head() below owns the page's one <title>
   window_title = NULL,
-  # page_sidebar owns the top bar, so the calcofi.io logo pair (theme.css
+  # page_sidebar owns the top bar, so the calcofi.io lockup pair (brand v2; theme.css
   # shows one per theme) sits in its title slot rather than a second bar
   title = tagList(
     span(
       a(
-        img(src = "https://calcofi.io/brand/v1/logo_calcofi.svg",
-            height = "50px", alt = "CalCOFI",
+        img(src = "https://calcofi.io/brand/v2/logo_calcofi_h.svg",
+            height = "32px", alt = "CalCOFI",
             class = "cc-logo-dark",  .noWS = "after"),
-        img(src = "https://calcofi.io/brand/v1/logo_calcofi_light.svg",
-            height = "50px", alt = "CalCOFI",
+        img(src = "https://calcofi.io/brand/v2/logo_calcofi_h_light.svg",
+            height = "32px", alt = "CalCOFI",
             class = "cc-logo-light", .noWS = "after"),
         href = "https://calcofi.io", `aria-label` = "CalCOFI.io home"),
       "Hexagon Explorer",
