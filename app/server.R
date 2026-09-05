@@ -66,6 +66,10 @@ server <- function(input, output, session) {
 
   # rx ----
   rx <- reactiveValues(
+    # ?datasets=a,b from the URL, parsed once on connect and used until the user
+    # opens the filter modal and chooses for themselves (see the url_datasets
+    # observer below)
+    url_datasets   = NULL,
     df_sp          = NULL,
     df_env         = NULL,
     env_hex_list   = NULL,  # cached env hex list for first map render
@@ -176,6 +180,46 @@ server <- function(input, output, session) {
     rx$env_var, rx$params$sel_qtr, rx$params$date_range,
     rx$params$depth_range, env_stat, rx$spatial_wkt))
 
+  # ── ?datasets= : open on one dataset (or several) ------------------------
+  # A calcofi.io dataset page links here, and the link could only open the app
+  # at its own start (UI plan D-6, Decision 10). `?datasets=calcofi_bottle` — a
+  # comma-separated list of release dataset_keys, the same values the Taxa
+  # datasets checkbox group carries — now selects them for the opening view and
+  # for the filter modal when it is first opened.
+  #
+  # The URL is the source of truth at load, parsed ONCE; after that the user's
+  # own choice is, and the observer below writes it back. Unknown keys are
+  # dropped and an all-unknown list is ignored, because in this app an empty
+  # dataset selection already means "all of them" — a stale link must not look
+  # like a deliberate empty filter.
+  bio_ds_selected <- reactive(input$sel_bio_ds %||% rx$url_datasets)
+
+  observeEvent(session$clientData$url_search, once = TRUE, {
+    q    <- getQueryString(session)
+    keep <- parse_datasets_param(q$datasets, d_bio_datasets$dataset_key)
+    if (is.null(keep)) {
+      if (!is.null(q$datasets) && nzchar(q$datasets))
+        message("?datasets=", q$datasets, " names no dataset in this release — ignored")
+      return()
+    }
+    rx$url_datasets        <- keep
+    rx$params$bio_datasets <- keep
+  }, ignoreNULL = FALSE)
+
+  # keep the URL in sync with the dataset selection, the way db-viz-cruise does.
+  # Every OTHER parameter is carried through untouched — ?theme= and ?tour= are
+  # the brand contract (brand/v2/README items 5 and 9) and a screenshot URL that
+  # loses its theme is a broken screenshot.
+  observe({
+    sel <- input$sel_bio_ds
+    q   <- isolate(getQueryString(session))
+    q$datasets <- if (length(sel)) paste(sel, collapse = ",") else NULL
+    q <- q[!vapply(q, function(v) is.null(v) || !nzchar(v), logical(1))]
+    updateQueryString(
+      if (length(q)) paste0("?", paste0(names(q), "=", unname(q), collapse = "&")) else "?",
+      mode = "replace")
+  })
+
   # session.once -> ... ----
   observeEvent(session$clientData, once = TRUE, {
     tryCatch({
@@ -193,7 +237,11 @@ server <- function(input, output, session) {
       if (debug) message("Loading default species: ", sel_name)
 
       # retrieve data (lazy tables from database) -- always needed for ts, splot, etc.
-      df_sp  <- get_sp(sel_name, sel_qtr, sel_date_range, ck_children)
+      # isolate(): read once for this default load — the observer above has
+      # already run (url_search fires before clientData completes), and the
+      # opening view should not rebuild when the user later changes the filter
+      sel_bio_ds     <- isolate(rx$url_datasets)
+      df_sp  <- get_sp(sel_name, sel_qtr, sel_date_range, ck_children, datasets = sel_bio_ds)
       df_env <- get_env(sel_env_var, sel_qtr, sel_date_range, sel_depth_range[1], sel_depth_range[2])
 
       if (USE_H3T) {
@@ -205,6 +253,7 @@ server <- function(input, output, session) {
         # the theme the page opened in (?theme= / cookie); isolated so a later toggle
         # restyles via the dark_toggle observer instead of rebuilding the map
         spec <- sp_map_spec(df_sp, sel_name, sel_qtr, sel_date_range, ck_children,
+                            datasets = sel_bio_ds,
                             is_dark = isolate(calcofi4r::cc_is_dark(input)))
         rx$map_sp       <- spec$map
         rx$sp_layer_ids <- spec$layer_ids
@@ -1016,10 +1065,10 @@ server <- function(input, output, session) {
     # resets to its default the next time the user opens the filters
     showModal(modal_data(
       env_var = rx$env_var %||% "temperature",
-      bio_ds  = isolate(input$sel_bio_ds)))
+      bio_ds  = isolate(bio_ds_selected())))
     updateSelectizeInput(
       session, "sel_name",
-      choices  = sp_names_for(isolate(input$sel_bio_ds)),
+      choices  = sp_names_for(isolate(bio_ds_selected())),
       selected = isolate(rx$params$taxa),
       server   = TRUE)
 
