@@ -3019,3 +3019,28 @@ sp_value_label <- function(u) {
   if (nrow(u) == 1L)   return(paste0("Avg. ", u$cpue_unit[1]))
   paste0("Avg. value (", nrow(u), " mixed units)")
 }
+
+# ---- ?datasets= : the taxa-dataset selection carried in the URL --------------
+# A calcofi.io dataset page links here and wants to open on one dataset (UI plan
+# D-6, Decision 10). The rule is small but it has two ways to be wrong, so it
+# lives here as a pure function with tests (tests/test_url_datasets.R) rather
+# than inline in an observer that needs a running app and a release DB to reach.
+#
+#   · a key that names no dataset in THIS release is dropped — a link outlives
+#     a release, and the app should open rather than error
+#   · a list with none left over is NULL, not character(0): in this app an empty
+#     dataset selection already means "all of them" (see the modal's own note),
+#     so a stale link must not read as a deliberate empty filter
+#
+# @param param  the raw ?datasets= value ("a,b"), or NULL
+# @param known  the dataset_keys this release actually carries
+# @return the keys to select, in the URL's order, or NULL for "the URL asks for
+#         nothing" — which is also what an all-unknown list returns
+parse_datasets_param <- function(param, known) {
+  if (is.null(param) || !length(param) || !nzchar(param[1])) return(NULL)
+  want <- trimws(strsplit(param[1], ",")[[1]])
+  want <- want[nzchar(want)]
+  keep <- want[want %in% known]
+  if (!length(keep)) return(NULL)
+  unique(keep)
+}
