@@ -2,8 +2,8 @@ The CalCOFI Integrated Application is using the
 [integrated database](https://calcofi.io/docs/db.html#integrated-database-ingestion-strategy) 
 constructed from the following datasets:
 
-- [Bottle Database – CalCOFI](https://calcofi.org/data/oceanographic-data/bottle-database/)
-- [Fish Eggs & Larvae – CalCOFI](https://calcofi.org/data/marine-ecosystem-data/fish-eggs-larvae/)
+- [Bottle Database – CalCOFI](https://calcofi.org/data/oceanographic-data/bottle-database/) ([dataset page ↗](https://calcofi.io/datasets/calcofi_bottle/))
+- [Fish Eggs & Larvae – CalCOFI](https://calcofi.org/data/marine-ecosystem-data/fish-eggs-larvae/) ([dataset page ↗](https://calcofi.io/datasets/swfsc_ichthyo/))
 
 This app is open-source with code found here:
 

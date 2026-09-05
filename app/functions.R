@@ -2665,6 +2665,49 @@ build_env_match_sql <- function(
     AND o.datetime <= TIMESTAMP '{d2}' + INTERVAL '{pad_hours} hours'")
 }
 
+#' Render the CITATION.md for a download bundle
+#'
+#' One dataset per file this app draws from (the ichthyoplankton bio side, the
+#' bottle env side — see \code{\link{build_download_bundle}}), plus the
+#' integrated release's own citation, via \code{calcofi4r::cc_cite()} (>=
+#' 1.19.0) so this bundle's citations, licences, DOIs and dataset-page links
+#' can never disagree with the app's other citation surfaces (the About page,
+#' \code{cc_cite()} elsewhere). With an older calcofi4r installed (no
+#' \code{cc_cite()} page line yet), degrades to the release/dataset page URLs
+#' alone rather than erroring — a bundle must always ship a CITATION.md.
+#'
+#' @param version Release version the bundle was built against.
+#' @param datasets `dataset_key`s this bundle draws from.
+#' @return Character vector of markdown lines.
+#' @export
+citation_md <- function(version, datasets = c("calcofi_bottle", "swfsc_ichthyo")) {
+  page_url <- function(key) sprintf("https://calcofi.io/datasets/%s/", key)
+  if (!requireNamespace("calcofi4r", quietly = TRUE) ||
+      utils::packageVersion("calcofi4r") < "1.19.0") {
+    return(c(
+      "# Citing this data",
+      "",
+      "Cite the CalCOFI integrated database and each dataset in this bundle:",
+      "",
+      sprintf("- **%s**: %s", datasets, page_url(datasets)),
+      "",
+      sprintf("The integrated database, release %s: https://calcofi.io/db-schema/?v=%s",
+             version, version),
+      "",
+      "(calcofi4r >= 1.19.0 is not installed here, so the formatted citation,",
+      "licence and DOI from calcofi4r::cc_cite() are not available — the",
+      "dataset pages above carry them.)"))
+  }
+  lines <- calcofi4r::cc_cite(datasets, version = version, format = "text")
+  c("# Citing this data",
+    "",
+    "Cite the CalCOFI integrated database AND every dataset in this bundle.",
+    "",
+    "## The integrated database", "", lines[1], "",
+    unlist(lapply(seq_along(datasets), function(i)
+      c(sprintf("## %s", datasets[i]), "", lines[i + 1], ""))))
+}
+
 #' Render the REPRODUCE.md walk-through for a download bundle
 #'
 #' @param manifest The manifest list assembled by \code{\link{build_download_bundle}}.
@@ -2903,6 +2946,10 @@ build_download_bundle <- function(zip_root, params, version = NULL) {
 
   # REPRODUCE.md -----------------------------------------------------------
   write_file("query/REPRODUCE.md", reproduce_md(manifest))
+
+  # CITATION.md (plan 2026-09-05 D-4/D-6: every dataset the bundle draws
+  # from — bio via ichthyo, env via bottle — gets its own citation + page) --
+  write_file("query/CITATION.md", citation_md(version))
 
   paths
 }
