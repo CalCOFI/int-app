@@ -212,6 +212,10 @@ server <- function(input, output, session) {
   # loses its theme is a broken screenshot.
   observe({
     sel <- input$sel_bio_ds
+    # until the user has chosen in the modal, the URL IS the selection: rewriting
+    # it from a NULL input at startup turned ?datasets=cce-lter_zooscan into "?"
+    # the moment the app opened (measured live, 2026-09-06)
+    req(!is.null(sel))
     q   <- isolate(getQueryString(session))
     q$datasets <- if (length(sel)) paste(sel, collapse = ",") else NULL
     q <- q[!vapply(q, function(v) is.null(v) || !nzchar(v), logical(1))]
