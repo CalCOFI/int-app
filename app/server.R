@@ -323,9 +323,14 @@ server <- function(input, output, session) {
       # output$map reuses the tile URL just fetched instead of fetching it again
       if (USE_H3T) rx$env_tile_key <- env_tile_key(env_stat)
 
+      # the summary must say which datasets the opening view was cut from — the
+      # URL's selection (sel_bio_ds) — or a ?datasets= link reads as "all 10"
+      # while the map underneath it is already one dataset (measured live,
+      # 2026-09-06, after the UI-E deploy)
       rx$filter_summary <- prep_filter_summary(
         sel_name, sel_env_var, sel_qtr, sel_date_range,
-        sel_depth_range, drawn_polygon = NULL, rx$sel_zones, ck_children)
+        sel_depth_range, drawn_polygon = NULL, rx$sel_zones, ck_children,
+        bio_datasets = sel_bio_ds)
 
       rx$plot_depth <- NULL
 
@@ -1371,7 +1376,7 @@ server <- function(input, output, session) {
       drawn_polygon,
       rx$sel_zones,
       ck_children,
-      bio_datasets = input$sel_bio_ds)
+      bio_datasets = bio_ds_selected())
 
     # build summary stats
     rx$summary_stats <- prep_summary_stats(
